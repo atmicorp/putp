@@ -18,7 +18,8 @@ class UserController extends Controller
 
     public function create()
     {
-        return view('user::form');
+        $roles = $this->roles();
+        return view('user::form', compact('roles'));
     }
 
     public function store(Request $request)
@@ -47,30 +48,47 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $user = User::findOrFail($id);
-        return view('user::form', compact('user'));
+        $user  = User::findOrFail($id);
+        $roles = $this->roles();
+
+        return view('user::form', compact('user', 'roles'));
     }
 
     public function update(Request $request, $id)
     {
-        $user = User::findOrFail($id);
+        $user  = User::findOrFail($id);
+        $roles = array_keys($this->roles());
 
         $request->validate([
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'unique:users,email,' . $user->id],
+            'role'     => ['required', 'in:' . implode(',', $roles)],
             'password' => ['nullable', 'confirmed', Password::min(8)],
         ]);
 
-        $user->update([
+        $data = [
             'name'  => $request->name,
             'email' => $request->email,
-            ...($request->filled('password')
-                ? ['password' => Hash::make($request->password)]
-                : []),
-        ]);
+            'role'  => $request->role,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $user->update($data);
 
         return redirect()->route('users.index')
             ->with('success', 'User berhasil diupdate.');
+    }
+
+    private function roles(): array
+    {
+        return [
+            'admin'    => 'Admin',
+            'operator' => 'Operator',
+            'staff'    => 'Staff',
+        ];
     }
 
     public function destroy($id)

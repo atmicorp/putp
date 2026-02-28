@@ -270,6 +270,7 @@
                     <th style="width:48px">#</th>
                     <th>User</th>
                     <th>Status</th>
+                    <th>Role</th>
                     <th>Joined</th>
                     <th style="width:140px">Actions</th>
                 </tr>
@@ -306,6 +307,7 @@
                             </span>
                         @endif
                     </td>
+                    <td class="date-text">{{ $user->role }}</td>
                     <td class="date-text">{{ $user->created_at->format('d M Y') }}</td>
                     <td>
                         <div class="actions">

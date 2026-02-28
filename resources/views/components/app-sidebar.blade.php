@@ -1,3 +1,8 @@
+@php
+    $palette       = ['#ea580c','#f97316','#06b6d4','#10b981','#f59e0b','#ef4444'];
+    $avatarColor   = $palette[auth()->id() % count($palette)];
+    $avatarInitial = strtoupper(substr(auth()->user()->name ?? 'U', 0, 1));
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -16,6 +21,7 @@
     <style>
         :root {
             --sidebar-w: 240px;
+            --sidebar-collapsed-w: 64px;
             --accent: #ea580c;
             --accent-light: #fff7ed;
             --accent-hover: #c2410c;
@@ -40,6 +46,7 @@
             min-height: 100vh;
         }
 
+        /* ── SIDEBAR ─────────────────────────────────────── */
         .sidebar {
             width: var(--sidebar-w);
             background: var(--surface);
@@ -49,10 +56,23 @@
             display: flex;
             flex-direction: column;
             z-index: 50;
+            transition: width 0.25s ease;
+            overflow: hidden;
         }
 
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-w);
+        }
+
+        /* Sidebar Header */
         .sidebar-header {
+            height: 60px;
+            flex-shrink: 0;
             border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
         }
 
         .sidebar-logo {
@@ -60,12 +80,51 @@
             align-items: center;
             gap: 10px;
             text-decoration: none;
+            overflow: hidden;
+            transition: opacity 0.2s, width 0.25s;
+            white-space: nowrap;
         }
 
+        .sidebar.collapsed .sidebar-logo {
+            opacity: 0;
+            width: 0;
+            pointer-events: none;
+        }
+
+        .sidebar.collapsed .sidebar-header {
+            justify-content: center;
+        }
+
+        /* Toggle Button */
+        .sidebar-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            padding: 6px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .sidebar-toggle-btn:hover {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-toggle-btn { display: none; }
+        }
+
+        /* Nav */
         .sidebar-nav {
             flex: 1;
-            padding: 16px 12px;
+            padding: 16px 10px;
             overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .nav-section-label {
@@ -76,6 +135,13 @@
             color: var(--muted);
             padding: 0 8px;
             margin: 16px 0 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.2s;
+        }
+
+        .sidebar.collapsed .nav-section-label {
+            opacity: 0;
         }
 
         .nav-item {
@@ -90,6 +156,12 @@
             font-weight: 500;
             transition: all 0.15s;
             margin-bottom: 2px;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding: 9px 0;
         }
 
         .nav-item:hover {
@@ -109,9 +181,56 @@
             flex-shrink: 0;
         }
 
+        .nav-item .nav-label {
+            overflow: hidden;
+            transition: opacity 0.2s, width 0.25s;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .nav-label {
+            opacity: 0;
+            width: 0;
+        }
+
+        /* Tooltip on collapsed */
+        .nav-item {
+            position: relative;
+        }
+
+        .sidebar.collapsed .nav-item:hover::after {
+            content: attr(data-label);
+            position: absolute;
+            left: calc(100% + 12px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1c1917;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .sidebar.collapsed .nav-item:hover::before {
+            content: '';
+            position: absolute;
+            left: calc(100% + 6px);
+            top: 50%;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-right-color: #1c1917;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        /* Footer */
         .sidebar-footer {
-            padding: 16px 12px;
+            padding: 12px 10px;
             border-top: 1px solid var(--border);
+            position: relative;
         }
 
         .user-card {
@@ -121,6 +240,18 @@
             padding: 10px;
             border-radius: 8px;
             background: var(--bg);
+            cursor: pointer;
+            transition: background 0.15s;
+            overflow: hidden;
+        }
+
+        .user-card:hover {
+            background: var(--accent-light);
+        }
+
+        .sidebar.collapsed .user-card {
+            justify-content: center;
+            padding: 10px 0;
         }
 
         .user-avatar {
@@ -137,28 +268,56 @@
             flex-shrink: 0;
         }
 
-        .user-info { flex: 1; min-width: 0; }
-        .user-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .user-role { font-size: 11px; color: var(--muted); }
-
-        .logout-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--muted);
-            padding: 4px;
-            border-radius: 4px;
-            transition: color 0.15s;
-            display: flex;
+        .user-info {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            transition: opacity 0.2s, width 0.25s;
+            white-space: nowrap;
         }
 
-        .logout-btn:hover { color: #ef4444; }
+        .sidebar.collapsed .user-info {
+            opacity: 0;
+            width: 0;
+        }
 
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; }
+        .user-role { font-size: 11px; color: var(--muted); }
+
+        .user-chevron-wrap {
+            transition: opacity 0.2s;
+        }
+
+        .sidebar.collapsed .user-chevron-wrap {
+            display: none;
+        }
+
+        /* Popup */
+        #user-popup {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 8px;
+            right: 8px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            overflow: hidden;
+            z-index: 100;
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+
+        /* ── MAIN ────────────────────────────────────────── */
         .main-wrapper {
             margin-left: var(--sidebar-w);
             flex: 1;
             display: flex;
             flex-direction: column;
+            transition: margin-left 0.25s ease;
+        }
+
+        .main-wrapper.collapsed {
+            margin-left: var(--sidebar-collapsed-w);
         }
 
         .topbar {
@@ -208,74 +367,168 @@
         }
 
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+            .sidebar { transform: translateX(-100%); transition: transform 0.25s; width: var(--sidebar-w) !important; }
             .sidebar.open { transform: translateX(0); }
-            .main-wrapper { margin-left: 0; }
+            .main-wrapper { margin-left: 0 !important; }
             .mobile-toggle { display: flex; }
             .page-content { padding: 20px; }
+            .sidebar-toggle-btn { display: none; }
         }
     </style>
 </head>
 <body>
 <div class="layout">
 
+    {{-- ── SIDEBAR ───────────────────────────────────────── --}}
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header" style="display:flex; justify-content:center; align-items:center; padding: 20px 16px;">
-            <a href="{{ route('dashboard') }}" class="sidebar-logo" style="justify-content:center;">
+
+        {{-- Header --}}
+        <div class="sidebar-header" style="justify-content: center;">
+            <a href="{{ route('dashboard') }}" class="sidebar-logo" id="sidebar-logo-full">
                 <img src="{{ asset('storage/logo.jpg') }}" alt="{{ config('app.name') }}"
-                    style="height:48px; width:auto; object-fit:contain;">
+                    style="height:36px; width:auto; object-fit:contain;">
             </a>
         </div>
 
+        {{-- Nav --}}
         <nav class="sidebar-nav">
             <div class="nav-section-label">Main</div>
 
             <a href="{{ route('dashboard') }}"
+               data-label="Dashboard"
                class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
-                Dashboard
+                <span class="nav-label">Dashboard</span>
             </a>
 
             <div class="nav-section-label">Management</div>
 
             <a href="{{ route('users.index') }}"
+               data-label="Users"
                class="nav-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
-                Users
-            </a>
-
-            <div class="nav-section-label">System</div>
-
-            <a href="#" class="nav-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                Settings
+                <span class="nav-label">Users</span>
             </a>
         </nav>
 
+        {{-- Footer (user card + popup) --}}
         <div class="sidebar-footer">
-            <div class="user-card">
-                <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}</div>
+
+            {{-- Popup (muncul di atas user card) --}}
+            <div id="user-popup">
+                {{-- User Info Header --}}
+                <div style="
+                    display:flex; flex-direction:column; align-items:center;
+                    padding:20px 16px 16px; background:#eef4ff; gap:8px;
+                ">
+                    <div style="
+                        width:56px; height:56px; border-radius:50%;
+                        background:{{ $avatarColor }}; color:#fff;
+                        display:flex; align-items:center; justify-content:center;
+                        font-size:1.4rem; font-weight:600;
+                        box-shadow:0 0 0 4px rgba(234,88,12,.15);
+                    ">
+                        {{ $avatarInitial }}
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-weight:600; color:#1a1a2e; font-size:.9rem;">
+                            {{ auth()->user()->name ?? 'User' }}
+                        </div>
+                        <div style="font-size:.75rem; color:#666; margin-top:2px;">
+                            {{ auth()->user()->email ?? '' }}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="height:1px; background:#f0f0f0;"></div>
+
+                {{-- Menu Items --}}
+                <div style="padding:6px;">
+                    <a href="{{ route('profile') }}" style="
+                        display:flex; align-items:center; gap:10px;
+                        padding:10px 12px; border-radius:8px;
+                        color:#333; text-decoration:none; font-size:.875rem;
+                        transition:background .15s;
+                    "
+                    onmouseover="this.style.background='#f5f5f5'"
+                    onmouseout="this.style.background='transparent'">
+                        <svg width="17" height="17" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor" stroke-width="1.8" style="color:#555">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Profile
+                    </a>
+
+                    <div style="height:1px; background:#f0f0f0; margin:4px 0;"></div>
+
+                    <form method="POST" action="/logout">
+                        @csrf
+                        <button type="submit" style="
+                                width:100%; display:flex; align-items:center; gap:10px;
+                                padding:10px 12px; border-radius:8px; border:none; background:transparent;
+                                color:#e03131; font-size:.875rem; cursor:pointer; text-align:left;
+                                transition:background .15s; font-family: inherit;
+                            "
+                            onmouseover="this.style.background='#fff5f5'"
+                            onmouseout="this.style.background='transparent'">
+                            <svg width="17" height="17" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            Sign Out
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- User Card (trigger) --}}
+            <div class="user-card" id="user-card-trigger">
+                <div class="user-avatar" style="background:{{ $avatarColor }}">
+                    {{ $avatarInitial }}
+                </div>
                 <div class="user-info">
                     <div class="user-name">{{ auth()->user()->name ?? 'User' }}</div>
                     <div class="user-role">Administrator</div>
                 </div>
+                <span class="user-chevron-wrap">
+                    <svg id="user-chevron" style="transition:transform 0.2s;" width="14" height="14"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+                    </svg>
+                </span>
             </div>
         </div>
     </aside>
 
-    <div class="main-wrapper">
+    {{-- ── MAIN WRAPPER ─────────────────────────────────── --}}
+    <div class="main-wrapper" id="main-wrapper">
+
+        {{-- Topbar --}}
         <div class="topbar">
             <div class="topbar-breadcrumb">
-                <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">
-                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                {{-- Sidebar toggle (desktop) --}}
+                <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle sidebar">
+                    <svg id="toggle-icon" width="18" height="18" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M11 19l-7-7 7-7M18 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                {{-- Mobile hamburger --}}
+                <button class="mobile-toggle"
+                        onclick="document.getElementById('sidebar').classList.toggle('open')">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
                 {{ $breadcrumb ?? '' }}
@@ -285,11 +538,69 @@
             </div>
         </div>
 
+        {{-- Page Content --}}
         <div class="page-content">
             {{ $slot }}
         </div>
     </div>
 
 </div>
+
+<script>
+    // ── Sidebar Collapse ─────────────────────────────────────────
+    const sidebar     = document.getElementById('sidebar');
+    const mainWrapper = document.getElementById('main-wrapper');
+    const toggleIcon  = document.getElementById('toggle-icon');
+
+    const ICON_COLLAPSE = `<path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7M18 19l-7-7 7-7"/>`;
+    const ICON_EXPAND   = `<path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M6 5l7 7-7 7"/>`;
+
+    let isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+
+    function applySidebarState() {
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+            mainWrapper.classList.add('collapsed');
+            toggleIcon.innerHTML = ICON_EXPAND;
+        } else {
+            sidebar.classList.remove('collapsed');
+            mainWrapper.classList.remove('collapsed');
+            toggleIcon.innerHTML = ICON_COLLAPSE;
+        }
+    }
+
+    function toggleSidebar() {
+        isCollapsed = !isCollapsed;
+        localStorage.setItem('sidebar-collapsed', isCollapsed);
+        applySidebarState();
+    }
+
+    // Apply saved state on load (no transition flash)
+    sidebar.style.transition = 'none';
+    mainWrapper.style.transition = 'none';
+    applySidebarState();
+    requestAnimationFrame(() => {
+        sidebar.style.transition = '';
+        mainWrapper.style.transition = '';
+    });
+
+    // ── User Popup ───────────────────────────────────────────────
+    const trigger = document.getElementById('user-card-trigger');
+    const popup   = document.getElementById('user-popup');
+    const chevron = document.getElementById('user-chevron');
+
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = popup.style.display === 'block';
+        popup.style.display = isOpen ? 'none' : 'block';
+        chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+    });
+
+    document.addEventListener('click', () => {
+        popup.style.display = 'none';
+        chevron.style.transform = 'rotate(0deg)';
+    });
+</script>
+
 </body>
 </html>

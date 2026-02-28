@@ -11,18 +11,12 @@ new class extends Component
     public string $name = '';
     public string $email = '';
 
-    /**
-     * Mount the component.
-     */
     public function mount(): void
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
     }
 
-    /**
-     * Update the profile information for the currently authenticated user.
-     */
     public function updateProfileInformation(): void
     {
         $user = Auth::user();
@@ -43,60 +37,105 @@ new class extends Component
         $this->dispatch('profile-updated', name: $user->name);
     }
 
-    /**
-     * Send an email verification notification to the current user.
-     */
     public function sendVerification(): void
     {
         $user = Auth::user();
 
         if ($user->hasVerifiedEmail()) {
             $this->redirectIntended(default: route('dashboard', absolute: false));
-
             return;
         }
 
         $user->sendEmailVerificationNotification();
-
         Session::flash('status', 'verification-link-sent');
     }
 }; ?>
 
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <h2 style="font-size: 1rem; font-weight: 600; color: #1c1917; margin: 0;">
             {{ __('Profile Information') }}
         </h2>
-
-        <p class="mt-1 text-sm text-gray-600">
+        <p style="margin-top: 4px; font-size: 0.8rem; color: #6b7280;">
             {{ __("Update your account's profile information and email address.") }}
         </p>
     </header>
 
-    <form wire:submit="updateProfileInformation" class="mt-6 space-y-6">
+    <form wire:submit="updateProfileInformation" style="margin-top: 24px; display: flex; flex-direction: column; gap: 20px;">
+
+        <!-- Name -->
         <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input wire:model="name" id="name" name="name" type="text" class="mt-1 block w-full" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+            <label for="name" style="display: block; font-size: 0.8rem; font-weight: 500; color: #1c1917; margin-bottom: 6px;">
+                {{ __('Name') }}
+            </label>
+            <input
+                wire:model="name"
+                id="name"
+                name="name"
+                type="text"
+                required
+                autofocus
+                autocomplete="name"
+                style="
+                    width: 100%; padding: 9px 12px;
+                    border: 1px solid #e5e7eb; border-radius: 8px;
+                    font-size: 0.875rem; font-family: 'Sora', sans-serif;
+                    color: #1c1917; background: #fffaf5;
+                    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+                "
+                onfocus="this.style.borderColor='#ea580c'; this.style.boxShadow='0 0 0 3px rgba(234,88,12,0.12)'"
+                onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
+            />
+            @error('name')
+                <p style="margin-top: 4px; font-size: 0.75rem; color: #ef4444;">{{ $message }}</p>
+            @enderror
         </div>
 
+        <!-- Email -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" name="email" type="email" class="mt-1 block w-full" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+            <label for="email" style="display: block; font-size: 0.8rem; font-weight: 500; color: #1c1917; margin-bottom: 6px;">
+                {{ __('Email') }}
+            </label>
+            <input
+                wire:model="email"
+                id="email"
+                name="email"
+                type="email"
+                required
+                autocomplete="username"
+                style="
+                    width: 100%; padding: 9px 12px;
+                    border: 1px solid #e5e7eb; border-radius: 8px;
+                    font-size: 0.875rem; font-family: 'Sora', sans-serif;
+                    color: #1c1917; background: #fffaf5;
+                    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+                "
+                onfocus="this.style.borderColor='#ea580c'; this.style.boxShadow='0 0 0 3px rgba(234,88,12,0.12)'"
+                onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
+            />
+            @error('email')
+                <p style="margin-top: 4px; font-size: 0.75rem; color: #ef4444;">{{ $message }}</p>
+            @enderror
 
             @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800">
+                <div style="margin-top: 8px;">
+                    <p style="font-size: 0.8rem; color: #1c1917;">
                         {{ __('Your email address is unverified.') }}
-
-                        <button wire:click.prevent="sendVerification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button
+                            wire:click.prevent="sendVerification"
+                            style="
+                                background: none; border: none; padding: 0;
+                                font-size: 0.8rem; color: #ea580c; font-weight: 500;
+                                cursor: pointer; text-decoration: underline;
+                                font-family: 'Sora', sans-serif;
+                            "
+                        >
                             {{ __('Click here to re-send the verification email.') }}
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
+                        <p style="margin-top: 6px; font-size: 0.78rem; font-weight: 500; color: #16a34a;">
                             {{ __('A new verification link has been sent to your email address.') }}
                         </p>
                     @endif
@@ -104,12 +143,39 @@ new class extends Component
             @endif
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        <!-- Actions -->
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button
+                type="submit"
+                style="
+                    padding: 9px 20px;
+                    background: #ea580c; color: #fff;
+                    border: none; border-radius: 8px;
+                    font-size: 0.875rem; font-weight: 600;
+                    font-family: 'Sora', sans-serif;
+                    cursor: pointer; transition: background 0.15s;
+                "
+                onmouseover="this.style.background='#c2410c'"
+                onmouseout="this.style.background='#ea580c'"
+            >
+                {{ __('Save') }}
+            </button>
 
-            <x-action-message class="me-3" on="profile-updated">
+            <span
+                x-data="{ show: false }"
+                x-on:profile-updated.window="show = true; setTimeout(() => show = false, 2000)"
+                x-show="show"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-y-1"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                style="font-size: 0.8rem; color: #ea580c; font-weight: 500;"
+            >
                 {{ __('Saved.') }}
-            </x-action-message>
+            </span>
         </div>
+
     </form>
 </section>

@@ -167,6 +167,54 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 14px rgba(234,88,12,0.25);
         }
+
+        /* Samakan style input & select */
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #fff;
+            transition: all 0.2s ease;
+        }
+
+        /* Focus style */
+        .field input:focus,
+        .field select:focus {
+            border-color: #6366f1; /* sesuaikan warna primary kamu */
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+            outline: none;
+        }
+
+        /* Invalid */
+        .field .is-invalid {
+            border-color: #ef4444;
+        }
+
+        /* Custom arrow biar lebih modern */
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding-right: 35px;
+        }
+
+        .select-wrapper::after {
+            content: "▾";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            font-size: 14px;
+            color: #666;
+        }
     </style>
 
     <div class="form-page">
@@ -236,6 +284,34 @@
                             </div>
                         @enderror
                     </div>
+
+                    <div class="field">
+                        <label for="role">Role <span class="required">*</span></label>
+
+                        <div class="select-wrapper">
+                            <select
+                                id="role"
+                                name="role"
+                                class="{{ $errors->has('role') ? 'is-invalid' : '' }}"
+                                required
+                            >
+                                @foreach($roles as $roleValue => $roleLabel)
+                                    <option value="{{ $roleValue }}"
+                                        @selected(old('role', $user->role ?? 'staff') === $roleValue)
+                                    >
+                                        {{ $roleLabel }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        @error('role')
+                            <div class="error-msg">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
                 </div>
 
                 {{-- Password --}}
