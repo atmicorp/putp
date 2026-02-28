@@ -2,5 +2,6 @@
     "User": true,
     "Order": true,
     "Machine": true,
-    "Package": true
+    "Package": true,
+    "Test": true
 }
