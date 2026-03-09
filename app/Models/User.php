@@ -60,4 +60,6 @@ class User extends Authenticatable
         // Pastikan nanti tabel orders punya kolom created_by
         return $this->hasMany(Order::class, 'created_by');
     }
+
+    
 }

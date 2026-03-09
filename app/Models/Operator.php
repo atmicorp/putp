@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Operator extends Model
 {
@@ -28,5 +29,16 @@ class Operator extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function packages()
+    {
+        return $this->hasMany(Package::class, 'pic_operator_id');
+    }
+
+    public function machines(): BelongsToMany
+    {
+        return $this->belongsToMany(Machine::class, 'machine_operator')
+            ->withTimestamps();
     }
 }
