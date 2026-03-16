@@ -15,15 +15,25 @@ class OfferLinkMail extends Mailable
 
     public function build()
     {
+        // Load ulang di sini agar tidak bergantung pada eager load dari controller,
+        // karena SerializesModels akan me-resolve ulang model dari database.
+        $this->order->loadMissing(['offer.details.package']);
+
+        $order   = $this->order;
+        $offer   = $order->offer;
+        $details = $offer->details;
+
         $link = route('orders.guest.show', [
-            'slug'  => $this->order->customer_slug,
-            'token' => $this->order->access_token,
+            'slug'  => $order->customer_slug,
+            'token' => $order->access_token,
         ]);
 
-        return $this->subject('Penawaran Order ' . $this->order->order_code)
-            ->view('order::emails.offer-link', [
-                'order' => $this->order,
-                'link'  => $link,
-            ]);
+        return $this->subject('Penawaran Order ' . $order->order_code)
+            ->view('order::emails.offer-link', compact(
+                'order',
+                'offer',
+                'details',
+                'link',
+            ));
     }
 }

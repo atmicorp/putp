@@ -41,7 +41,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: visible;
         }
 
         .hero::before {
@@ -56,14 +56,30 @@
         }
 
         .hero::after {
+            display: none;
+        }
+
+        .stats-strip {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            border-top: 1px solid rgba(255,255,255,.07);
+            animation: fadeDown .6s .4s ease both;
+            flex-wrap: wrap;
+        }
+
+        .stats-strip::after {
             content: '';
             position: absolute;
-            bottom: -2px;
+            bottom: -60px;
             left: 0;
             right: 0;
-            height: 100px;
+            height: 60px;
             background: var(--cream);
-            clip-path: polygon(0 100%, 100% 100%, 100% 40%, 0 100%);
+            clip-path: ellipse(55% 100% at 50% 0%);
+            z-index: 10;
         }
 
         /* ── NAV ── */

@@ -22,4 +22,20 @@ class OrderController extends Controller
 
         return view('order::guest.orders.show', compact('order'));
     }
+
+    public function approve(string $slug, string $token)
+    {
+        $order = Order::where('access_token', $token)->firstOrFail();
+        $order->update(['status' => Order::STATUS_APPROVED]);
+        return redirect()->route('orders.guest.show', ['slug' => $slug, 'token' => $token])
+            ->with('success', 'Penawaran berhasil disetujui.');
+    }
+
+    public function reject(string $slug, string $token)
+    {
+        $order = Order::where('access_token', $token)->firstOrFail();
+        $order->update(['status' => Order::STATUS_REJECTED]);
+        return redirect()->route('orders.guest.show', ['slug' => $slug, 'token' => $token])
+            ->with('success', 'Penawaran telah ditolak.');
+    }
 }

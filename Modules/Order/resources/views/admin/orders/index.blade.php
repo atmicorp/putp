@@ -1,23 +1,23 @@
 <x-app-sidebar>
-    <x-slot name="title">Machine</x-slot>
+    <x-slot name="title">Order</x-slot>
 
     <x-slot name="breadcrumb">
-        <span>Machine</span>
+        <span>Order</span>
         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-        <span class="current">Machine List</span>
+        <span class="current">Order List</span>
     </x-slot>
 
     <x-slot name="topbarActions">
-        <a href="{{ route('machine.create') }}" class="btn-primary-sm">
+        <a href="{{ route('admin.orders.create') }}" class="btn-primary-sm">
             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            Add Machine
+            Add Order
         </a>
     </x-slot>
 
     <style>
-        
         .dash-title    { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; color: #1c1917; }
         .dash-subtitle { font-size: 13px; color: #6b7280; margin-top: 4px; margin-bottom: 28px; }
+        
         .btn-primary-sm {
             display: inline-flex; align-items: center; gap: 6px;
             padding: 8px 16px; background: #ea580c; color: #fff;
@@ -25,6 +25,10 @@
             text-decoration: none; transition: all 0.15s; font-family: 'Sora', sans-serif;
         }
         .btn-primary-sm:hover { background: #c2410c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(234,88,12,0.25); }
+
+        .page-header { margin-bottom: 28px; }
+        .page-title  { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; color: #1c1917; }
+        .page-subtitle { font-size: 13px; color: #6b7280; margin-top: 4px; }
 
         .alert { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; font-weight: 500; }
         .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
@@ -52,10 +56,8 @@
 
         .table-toolbar {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 16px 20px; border-bottom: 1px solid #f3f4f6; gap: 12px; flex-wrap: wrap;
+            padding: 16px 20px; border-bottom: 1px solid #f3f4f6;
         }
-
-        .toolbar-left { display: flex; align-items: center; gap: 8px; }
 
         .search-wrap {
             display: flex; align-items: center; gap: 8px;
@@ -64,15 +66,6 @@
         }
         .search-wrap input { background: transparent; border: none; outline: none; font-size: 13px; font-family: 'Sora', sans-serif; color: #1c1917; width: 100%; }
         .search-wrap input::placeholder { color: #9ca3af; }
-
-        .filter-select {
-            appearance: none;
-            background: #f9fafb url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") no-repeat right 10px center/12px 9px;
-            border: 1px solid #e5e7eb; border-radius: 8px;
-            padding: 8px 32px 8px 12px; font-size: 13px; font-family: 'Sora', sans-serif;
-            color: #1c1917; cursor: pointer; outline: none;
-        }
-        .filter-select:focus { border-color: #ea580c; }
 
         .record-count { font-size: 12px; color: #9ca3af; font-weight: 500; }
 
@@ -87,20 +80,21 @@
         tbody tr:hover { background: #fff7ed; }
         td { padding: 14px 20px; font-size: 13.5px; vertical-align: middle; }
 
-        .machine-code { font-weight: 700; font-size: 12.5px; color: #1c1917; font-family: monospace; letter-spacing: 0.3px; background: #f3f4f6; padding: 2px 8px; border-radius: 4px; border: 1px solid #e5e7eb; }
-        .machine-name  { font-weight: 600; font-size: 13.5px; color: #1c1917; }
-        .machine-desc { font-size: 12px; color: #9ca3af; margin-top: 2px; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .order-code { font-weight: 700; font-size: 13px; color: #1c1917; font-family: monospace; letter-spacing: 0.3px; }
+        .customer-name  { font-weight: 600; font-size: 13.5px; color: #1c1917; }
+        .customer-email { font-size: 12px; color: #9ca3af; margin-top: 1px; }
 
         .badge {
             display: inline-flex; align-items: center; gap: 4px;
             padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
         }
-        .badge-active   { background: #f0fdf4; color: #16a34a; }
-        .badge-inactive { background: #f3f4f6; color: #6b7280; }
-
-        .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-        .dot-active   { background: #16a34a; }
-        .dot-inactive { background: #9ca3af; }
+        .badge-draft      { background: #f3f4f6; color: #6b7280; }
+        .badge-offered    { background: #eff6ff; color: #2563eb; }
+        .badge-approved   { background: #f0fdf4; color: #16a34a; }
+        .badge-rejected   { background: #fef2f2; color: #dc2626; }
+        .badge-processing { background: #fff7ed; color: #ea580c; }
+        .badge-done       { background: #f0fdf4; color: #15803d; }
+        .badge-form_required { background: #fefce8; color: #ca8a04; }
 
         .date-text { font-size: 12.5px; color: #6b7280; }
 
@@ -110,10 +104,8 @@
             cursor: pointer; text-decoration: none; border: none;
             font-family: 'Sora', sans-serif; transition: all 0.15s;
         }
-        .act-view         { background: #fff7ed; color: #ea580c; }
-        .act-view:hover   { background: #ffedd5; }
-        .act-edit         { background: #eff6ff; color: #2563eb; }
-        .act-edit:hover   { background: #dbeafe; }
+        .act-view       { background: #fff7ed; color: #ea580c; }
+        .act-view:hover { background: #ffedd5; }
         .act-delete       { background: transparent; color: #9ca3af; }
         .act-delete:hover { background: #fef2f2; color: #dc2626; }
 
@@ -134,10 +126,19 @@
         .empty-icon  { font-size: 40px; margin-bottom: 12px; }
         .empty-title { font-size: 15px; font-weight: 600; color: #1c1917; }
         .empty-sub   { font-size: 13px; color: #9ca3af; margin-top: 4px; }
+
+        .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+        .dot-draft      { background: #9ca3af; }
+        .dot-offered    { background: #3b82f6; }
+        .dot-approved   { background: #16a34a; }
+        .dot-rejected   { background: #dc2626; }
+        .dot-processing { background: #ea580c; }
+        .dot-done       { background: #15803d; }
+        .dot-form_required { background: #ca8a04; }
     </style>
 
-    <div class="dash-title">Machine</div>
-    <p class="dash-subtitle">Data Machine</p>
+    <div class="dash-title">Order</div>
+    <p class="dash-subtitle">Data Order</p>
 
     @if(session('success'))
         <div class="alert alert-success">
@@ -156,97 +157,86 @@
     {{-- Stats --}}
     <div class="stats-row">
         <div class="stat-card">
-            <div class="stat-label">Total Machine</div>
-            <div class="stat-value">{{ $machines->total() }}</div>
-            <div class="stat-desc">Semua mesin</div>
+            <div class="stat-label">Total Order</div>
+            <div class="stat-value">{{ $orders->total() }}</div>
+            <div class="stat-desc">Semua order</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Active</div>
-            <div class="stat-value">{{ \App\Models\Machine::where('is_active', true)->count() }}</div>
-            <div class="stat-desc">Mesin aktif</div>
+            <div class="stat-label">Draft</div>
+            <div class="stat-value">{{ \App\Models\Order::where('status', 'draft')->count() }}</div>
+            <div class="stat-desc">Belum dikirim</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Inactive</div>
-            <div class="stat-value">{{ \App\Models\Machine::where('is_active', false)->count() }}</div>
-            <div class="stat-desc">Mesin nonaktif</div>
+            <div class="stat-label">Offered</div>
+            <div class="stat-value">{{ \App\Models\Order::where('status', 'offered')->count() }}</div>
+            <div class="stat-desc">Penawaran terkirim</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">With Operators</div>
-            <div class="stat-value">{{ \App\Models\Machine::has('operators')->count() }}</div>
-            <div class="stat-desc">Ada operator</div>
+            <div class="stat-label">Done</div>
+            <div class="stat-value">{{ \App\Models\Order::where('status', 'done')->count() }}</div>
+            <div class="stat-desc">Selesai</div>
         </div>
     </div>
 
     {{-- Table --}}
     <div class="table-card">
         <div class="table-toolbar">
-            <div class="toolbar-left">
-                <div class="search-wrap">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-                    <input type="text" placeholder="Cari nama atau kode mesin..." id="searchInput">
-                </div>
-                <select class="filter-select" id="statusFilter">
-                    <option value="">Semua Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
+            <div class="search-wrap">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" placeholder="Cari order atau customer..." id="searchInput">
             </div>
-            <span class="record-count">{{ $machines->total() }} records</span>
+            <span class="record-count">{{ $orders->total() }} records</span>
         </div>
 
-        @if($machines->isEmpty())
+        @if($orders->isEmpty())
             <div class="empty-state">
-                <div class="empty-icon">⚙️</div>
-                <div class="empty-title">Belum ada mesin</div>
-                <div class="empty-sub">Tambahkan mesin pertama dengan klik "Add Machine"</div>
+                <div class="empty-icon">📋</div>
+                <div class="empty-title">Belum ada order</div>
+                <div class="empty-sub">Buat order pertama dengan klik "Add Order"</div>
             </div>
         @else
             <table>
                 <thead>
                     <tr>
-                        <th>Code</th>
-                        <th>Nama Mesin</th>
+                        <th>Order Code</th>
+                        <th>Customer</th>
                         <th>Status</th>
-                        <th>Operators</th>
-                        <th>Tanggal Dibuat</th>
+                        <th>Dibuat oleh</th>
+                        <th>Tanggal</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($machines as $machine)
+                    @foreach($orders as $order)
                         <tr>
                             <td>
-                                <span class="machine-code">{{ $machine->code }}</span>
+                                <span class="order-code">{{ $order->order_code }}</span>
                             </td>
                             <td>
-                                <div class="machine-name">{{ $machine->name }}</div>
-                                @if($machine->description)
-                                    <div class="machine-desc">{{ $machine->description }}</div>
-                                @endif
+                                <div class="customer-name">{{ $order->customer_name }}</div>
+                                <div class="customer-email">{{ $order->customer_email }}</div>
                             </td>
                             <td>
-                                @php $status = $machine->is_active ? 'active' : 'inactive'; @endphp
-                                <span class="badge badge-{{ $status }}">
-                                    <span class="dot dot-{{ $status }}"></span>
-                                    {{ $machine->is_active ? 'Active' : 'Inactive' }}
+                                <span class="badge badge-{{ $order->status }}">
+                                    <span class="dot dot-{{ $order->status }}"></span>
+                                    {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                                 </span>
                             </td>
                             <td>
-                                <span class="date-text">{{ $machine->operators_count ?? $machine->operators->count() }} operator</span>
+                                <span class="date-text">{{ $order->creator?->name ?? '-' }}</span>
                             </td>
                             <td>
-                                <span class="date-text">{{ $machine->created_at->format('d M Y') }}</span>
+                                <span class="date-text">{{ $order->created_at->format('d M Y') }}</span>
                             </td>
                             <td>
                                 <div class="actions">
-                                    <a href="{{ route('machine.show', $machine) }}" class="act-btn act-view">Detail</a>
-                                    <a href="{{ route('machine.edit', $machine) }}" class="act-btn act-edit">Edit</a>
-                                    <form action="{{ route('machine.destroy', $machine) }}" method="POST" class="delete-form">
+                                    <a href="{{ route('admin.orders.show', $order) }}" class="act-btn act-view">Detail</a>
+                                    {{-- <form action="{{ route('admin.orders.destroy', $order) }}" method="POST" onsubmit="return confirm('Hapus order ini?')">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="act-btn act-delete">
                                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
                                         </button>
-                                    </form>
+                                    </form> --}}
                                 </div>
                             </td>
                         </tr>
@@ -254,19 +244,20 @@
                 </tbody>
             </table>
 
-            @if($machines->hasPages())
+            {{-- Pagination --}}
+            @if($orders->hasPages())
                 <div class="pagination">
                     <span class="page-info">
-                        Menampilkan {{ $machines->firstItem() }}–{{ $machines->lastItem() }} dari {{ $machines->total() }} data
+                        Menampilkan {{ $orders->firstItem() }}–{{ $orders->lastItem() }} dari {{ $orders->total() }} data
                     </span>
                     <div class="page-btns">
-                        <a href="{{ $machines->previousPageUrl() ?? '#' }}" class="page-btn {{ $machines->onFirstPage() ? 'disabled' : '' }}">
+                        <a href="{{ $orders->previousPageUrl() ?? '#' }}" class="page-btn {{ $orders->onFirstPage() ? 'disabled' : '' }}">
                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                         </a>
-                        @foreach($machines->getUrlRange(1, $machines->lastPage()) as $page => $url)
-                            <a href="{{ $url }}" class="page-btn {{ $page == $machines->currentPage() ? 'active' : '' }}">{{ $page }}</a>
+                        @foreach($orders->getUrlRange(1, $orders->lastPage()) as $page => $url)
+                            <a href="{{ $url }}" class="page-btn {{ $page == $orders->currentPage() ? 'active' : '' }}">{{ $page }}</a>
                         @endforeach
-                        <a href="{{ $machines->nextPageUrl() ?? '#' }}" class="page-btn {{ !$machines->hasMorePages() ? 'disabled' : '' }}">
+                        <a href="{{ $orders->nextPageUrl() ?? '#' }}" class="page-btn {{ !$orders->hasMorePages() ? 'disabled' : '' }}">
                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </a>
                     </div>
@@ -276,25 +267,10 @@
     </div>
 
     <script>
-        // Client-side search + filter
-        function filterTable() {
-            const q      = document.getElementById('searchInput').value.toLowerCase();
-            const status = document.getElementById('statusFilter').value.toLowerCase();
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const q = this.value.toLowerCase();
             document.querySelectorAll('tbody tr').forEach(row => {
-                const text       = row.textContent.toLowerCase();
-                const badgeText  = row.querySelector('.badge')?.textContent.trim().toLowerCase() ?? '';
-                const matchQ      = text.includes(q);
-                const matchStatus = !status || badgeText.includes(status);
-                row.style.display = (matchQ && matchStatus) ? '' : 'none';
-            });
-        }
-        document.getElementById('searchInput').addEventListener('input', filterTable);
-        document.getElementById('statusFilter').addEventListener('change', filterTable);
-
-        document.querySelectorAll('.delete-form').forEach(form => {
-            form.addEventListener('submit', e => {
-                e.preventDefault();
-                if (confirm('Hapus mesin ini?')) form.submit();
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
             });
         });
     </script>

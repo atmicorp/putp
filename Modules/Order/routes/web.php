@@ -13,6 +13,13 @@ Route::middleware(['web', 'auth'])->prefix('admin')->group(function () {
 });
 
 // Guest route (tanpa login)
-Route::get('/orders/{slug}/{token}', [GuestOrderController::class, 'show'])
-    ->middleware(['web', 'throttle:30,1'])
-    ->name('orders.guest.show');
+Route::middleware(['web', 'throttle:30,1'])->group(function () {
+    Route::get('/orders/{slug}/{token}',
+        [GuestOrderController::class, 'show'])->name('orders.guest.show');
+
+    Route::post('/orders/{slug}/{token}/approve',
+        [GuestOrderController::class, 'approve'])->name('orders.guest.approve');
+
+    Route::post('/orders/{slug}/{token}/reject',
+        [GuestOrderController::class, 'reject'])->name('orders.guest.reject');
+});
