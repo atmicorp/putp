@@ -15,6 +15,7 @@ class Package extends Model
     protected $fillable = [
         'machine_id',
         'pic_operator_id',
+        'category_id', 
         'name',
         'description',
         'base_price',
@@ -43,6 +44,11 @@ class Package extends Model
     public function picOperator(): BelongsTo
     {
         return $this->belongsTo(Operator::class, 'pic_operator_id');
+    }
+
+    public function category(): BelongsTo // tambahan
+    {
+        return $this->belongsTo(Category::class, 'category_id', 'category_id');
     }
 
     public function offerDetails(): HasMany

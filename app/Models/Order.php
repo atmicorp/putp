@@ -16,6 +16,8 @@ class Order extends Model
     protected $fillable = [
         'order_code',
         'access_token',
+        'customer_name',
+        'customer_slug',
         'customer_email',
         'status',
         'sent_at',
@@ -36,6 +38,7 @@ class Order extends Model
     */
 
     public const STATUS_DRAFT        = 'draft';
+    public const STATUS_SUBMIT        = 'submit';
     public const STATUS_OFFERED      = 'offered';
     public const STATUS_REJECTED     = 'rejected';
     public const STATUS_FORM_REQUIRED = 'form_required';

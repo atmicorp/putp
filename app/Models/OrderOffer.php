@@ -16,6 +16,8 @@ class OrderOffer extends Model
         'order_id',
         'notes',
         'terms',
+        'offer_file_path',
+        'invoice_file_path',
     ];
 
     public function order(): BelongsTo

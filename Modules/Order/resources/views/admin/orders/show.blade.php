@@ -243,6 +243,10 @@
                                 <div class="card-subtitle">{{ $order->offer->details->count() }} paket dipilih</div>
                             </div>
                         </div>
+                        <a href="{{ route('admin.orders.edit', $order) }}" class="btn-open" style="margin:0;">
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                            Edit Harga / Upload File
+                        </a>
                     </div>
                     <table class="items-table">
                         <thead>
@@ -325,6 +329,27 @@
         {{-- RIGHT SIDEBAR --}}
         <div style="position:sticky;top:20px;">
 
+            {{-- Internal Notification --}}
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    Notifikasi Internal
+                </div>
+                <div class="sidebar-card-body">
+                    <p style="font-size:12.5px;color:#6b7280;line-height:1.6;margin:0 0 14px;">
+                        Kirim notifikasi ke user internal (id=2) untuk memproses order ini (buat penawaran & invoice manual).
+                    </p>
+                    <form action="{{ route('admin.orders.notifyInternal', $order) }}" method="POST"
+                          onsubmit="return confirm('Kirim notifikasi internal untuk order {{ $order->order_code }}?')">
+                        @csrf
+                        <button type="submit" class="btn-send" style="background:#111827;" onmouseover="this.style.background='#000'" onmouseout="this.style.background='#111827'">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                            Kirim Notifikasi
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             {{-- Send Offer --}}
             <div class="sidebar-card">
                 <div class="sidebar-card-header">
@@ -332,7 +357,7 @@
                     Kirim Penawaran
                 </div>
                 <div class="sidebar-card-body">
-                    @if($order->status === 'draft')
+                    @if($order->status === 'submit')
                         <p style="font-size:12.5px;color:#6b7280;line-height:1.6;margin:0 0 14px;">
                             Kirim email ke <strong style="color:#1c1917;">{{ $order->customer_email }}</strong> berisi link penawaran.
                         </p>

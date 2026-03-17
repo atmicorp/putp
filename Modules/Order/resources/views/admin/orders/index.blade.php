@@ -89,6 +89,7 @@
             padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
         }
         .badge-draft      { background: #f3f4f6; color: #6b7280; }
+        .badege-submit { background: #f3f4f6; color: #27c03e; }
         .badge-offered    { background: #eff6ff; color: #2563eb; }
         .badge-approved   { background: #f0fdf4; color: #16a34a; }
         .badge-rejected   { background: #fef2f2; color: #dc2626; }
@@ -129,6 +130,7 @@
 
         .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
         .dot-draft      { background: #9ca3af; }
+        .dot-submit    { background: #27c03e; }
         .dot-offered    { background: #3b82f6; }
         .dot-approved   { background: #16a34a; }
         .dot-rejected   { background: #dc2626; }

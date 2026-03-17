@@ -189,9 +189,9 @@
                                 @enderror
                             </div>
                             <div class="form-group">
-                                <label>Email Customer <span class="req">*</span></label>
+                                <label>Email Customer</label>
                                 <input type="email" name="customer_email" value="{{ old('customer_email') }}"
-                                    placeholder="customer@email.com"
+                                    placeholder="(opsional) customer@email.com"
                                     class="{{ $errors->has('customer_email') ? 'input-error' : '' }}">
                                 @error('customer_email')
                                     <div class="err-msg">
@@ -200,101 +200,6 @@
                                     </div>
                                 @enderror
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Items --}}
-                <div class="card" style="margin-bottom: 20px;">
-                    <div class="card-header">
-                        <div class="card-icon">
-                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 3H8v4h8V3z"/></svg>
-                        </div>
-                        <div>
-                            <div class="card-title">Item Penawaran</div>
-                            <div class="card-subtitle">Pilih paket yang ditawarkan ke customer</div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        @error('items')
-                            <div class="err-msg" style="margin-bottom: 12px; font-size: 12.5px;">
-                                <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                                {{ $message }}
-                            </div>
-                        @enderror
-
-                        <div class="items-header">
-                            <span class="items-label">Daftar Item</span>
-                            <button type="button" class="btn-add-item" id="addItem">
-                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                                Tambah Item
-                            </button>
-                        </div>
-
-                        <table class="items-table">
-                            <thead>
-                                <tr>
-                                    <th style="width:40%">Paket</th>
-                                    <th style="width:15%">Qty</th>
-                                    <th style="width:30%">Harga (Rp)</th>
-                                    <th style="width:15%"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="itemsBody">
-                                {{-- Row awal --}}
-                                <tr class="item-row">
-                                    <td>
-                                        <select name="items[0][package_id]" class="package-select" onchange="fillPrice(this)">
-                                            <option value="">-- Pilih Paket --</option>
-                                            @foreach($packages as $pkg)
-                                                <option value="{{ $pkg->id }}" data-price="{{ $pkg->base_price }}" data-machine="{{ $pkg->machine->name ?? '-' }}">
-                                                    {{ $pkg->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <div class="pkg-meta" style="font-size:11px; color:#9ca3af; margin-top:4px;"></div>
-                                    </td>
-                                    <td><input type="number" name="items[0][qty]" value="1" min="1" class="qty-input" oninput="recalc()"></td>
-                                    <td><input type="number" name="items[0][price]" value="" min="0" step="0.01" class="price-input" placeholder="0" oninput="recalc()"></td>
-                                    <td>
-                                        <button type="button" class="btn-remove remove-item">
-                                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="4">
-                                        <div class="subtotal-row">
-                                            Total Estimasi: <span class="subtotal-val" id="grandTotal">Rp 0</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-
-                {{-- Notes & Terms --}}
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">
-                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        </div>
-                        <div>
-                            <div class="card-title">Catatan & Syarat</div>
-                            <div class="card-subtitle">Opsional — akan muncul di penawaran</div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>Catatan</label>
-                            <textarea name="notes" placeholder="Catatan khusus untuk customer...">{{ old('notes') }}</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Syarat & Ketentuan</label>
-                            <textarea name="terms" placeholder="Syarat berlaku, masa berlaku penawaran, dll..." style="min-height: 110px;">{{ old('terms') }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -315,7 +220,7 @@
                     <div class="card-body">
                         <div class="info-box">
                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                            Order dibuat dengan status <strong>Draft</strong>. Setelah disimpan, kamu bisa kirim link penawaran ke customer.
+                            Order dibuat dengan status <strong>Draft</strong> dan token otomatis dibuat. Item layanan masih kosong dan akan dipilih oleh customer (guest) saat membuka halaman keranjang menggunakan token tersebut.
                         </div>
 
                         <div class="summary-section">
@@ -333,9 +238,9 @@
                         <hr class="divider">
 
                         <div class="summary-section">
-                            <div class="summary-title">Item (<span id="sum-count">0</span>)</div>
-                            <div id="sum-items" style="font-size: 12.5px; color: #6b7280; line-height: 1.8;">
-                                <em>Belum ada item dipilih</em>
+                            <div class="summary-title">Item</div>
+                            <div style="font-size: 12.5px; color: #6b7280; line-height: 1.8;">
+                                <em>Akan diisi oleh customer melalui halaman keranjang (guest) setelah memasukkan token.</em>
                             </div>
                         </div>
 
@@ -343,7 +248,7 @@
 
                         <div class="total-row" style="margin-bottom: 20px;">
                             <span class="total-label">Total</span>
-                            <span class="total-val" id="sum-total">Rp 0</span>
+                            <span class="total-val">—</span>
                         </div>
 
                         <button type="submit" class="btn-submit">
@@ -359,66 +264,7 @@
         </div>
     </form>
 
-
-    {{-- Compute the array in PHP first, then pass to @json --}}
-    @php
-        $packageData = $packages->map(fn($p) => [
-            'id'      => $p->id,
-            'name'    => $p->name,
-            'price'   => (float) $p->base_price,
-            'machine' => $p->machine?->name ?? '-',
-        ])->values()->toArray();
-    @endphp
-
     <script>
-        const packages = @json($packageData);
-        let rowIndex = 1;
-
-        function formatRp(num) {
-            return 'Rp ' + Number(num).toLocaleString('id-ID');
-        }
-
-        function fillPrice(sel) {
-            const row = sel.closest('.item-row');
-            const opt = sel.options[sel.selectedIndex];
-            const pkgId = parseInt(sel.value);
-            const pkg = packages.find(p => p.id === pkgId);
-            if (pkg) {
-                row.querySelector('.price-input').value = pkg.price;
-                row.querySelector('.pkg-meta').textContent = 'Mesin: ' + pkg.machine;
-            } else {
-                row.querySelector('.price-input').value = '';
-                row.querySelector('.pkg-meta').textContent = '';
-            }
-            recalc();
-        }
-
-        function recalc() {
-            let total = 0;
-            let itemLines = [];
-            let count = 0;
-            document.querySelectorAll('.item-row').forEach(row => {
-                const sel   = row.querySelector('.package-select');
-                const qty   = parseFloat(row.querySelector('.qty-input').value) || 0;
-                const price = parseFloat(row.querySelector('.price-input').value) || 0;
-                const sub   = qty * price;
-                total += sub;
-                const pkgId = parseInt(sel.value);
-                const pkg = packages.find(p => p.id === pkgId);
-                if (pkg && qty > 0) {
-                    count++;
-                    itemLines.push(`${pkg.name} ×${qty} = ${formatRp(sub)}`);
-                }
-            });
-
-            document.getElementById('grandTotal').textContent = formatRp(total);
-            document.getElementById('sum-total').textContent  = formatRp(total);
-            document.getElementById('sum-count').textContent  = count;
-            document.getElementById('sum-items').innerHTML = count
-                ? itemLines.map(l => `<div>${l}</div>`).join('')
-                : '<em>Belum ada item dipilih</em>';
-        }
-
         function syncCustomer() {
             document.getElementById('sum-name').textContent  = document.querySelector('[name="customer_name"]').value  || '—';
             document.getElementById('sum-email').textContent = document.querySelector('[name="customer_email"]').value || '—';
@@ -426,44 +272,6 @@
 
         document.querySelector('[name="customer_name"]').addEventListener('input', syncCustomer);
         document.querySelector('[name="customer_email"]').addEventListener('input', syncCustomer);
-
-        function buildRow(idx) {
-            const opts = packages.map(p =>
-                `<option value="${p.id}" data-price="${p.price}" data-machine="${p.machine}">${p.name}</option>`
-            ).join('');
-            return `<tr class="item-row">
-                <td>
-                    <select name="items[${idx}][package_id]" class="package-select" onchange="fillPrice(this)">
-                        <option value="">-- Pilih Paket --</option>
-                        ${opts}
-                    </select>
-                    <div class="pkg-meta" style="font-size:11px;color:#9ca3af;margin-top:4px;"></div>
-                </td>
-                <td><input type="number" name="items[${idx}][qty]" value="1" min="1" class="qty-input" oninput="recalc()"></td>
-                <td><input type="number" name="items[${idx}][price]" value="" min="0" step="0.01" class="price-input" placeholder="0" oninput="recalc()"></td>
-                <td>
-                    <button type="button" class="btn-remove remove-item">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-                    </button>
-                </td>
-            </tr>`;
-        }
-
-        document.getElementById('addItem').addEventListener('click', function () {
-            document.getElementById('itemsBody').insertAdjacentHTML('beforeend', buildRow(rowIndex++));
-            recalc();
-        });
-
-        document.getElementById('itemsBody').addEventListener('click', function (e) {
-            if (e.target.closest('.remove-item')) {
-                const rows = document.querySelectorAll('.item-row');
-                if (rows.length > 1) {
-                    e.target.closest('.item-row').remove();
-                    recalc();
-                }
-            }
-        });
-
-        recalc();
+        syncCustomer();
     </script>
 </x-app-sidebar>

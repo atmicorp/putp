@@ -9,6 +9,9 @@ Route::middleware(['web', 'auth'])->prefix('admin')->group(function () {
     Route::get('/orders/create', [AdminOrderController::class, 'create'])->name('admin.orders.create');
     Route::post('/orders', [AdminOrderController::class, 'store'])->name('admin.orders.store');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
+    Route::get('/orders/{order}/edit', [AdminOrderController::class, 'edit'])->name('admin.orders.edit');
+    Route::put('/orders/{order}', [AdminOrderController::class, 'update'])->name('admin.orders.update');
+    Route::post('/orders/{order}/notify-internal', [AdminOrderController::class, 'notifyInternal'])->name('admin.orders.notifyInternal');
     Route::post('/orders/{order}/send-offer', [AdminOrderController::class, 'sendOffer'])->name('admin.orders.sendOffer');
 });
 
@@ -22,4 +25,26 @@ Route::middleware(['web', 'throttle:30,1'])->group(function () {
 
     Route::post('/orders/{slug}/{token}/reject',
         [GuestOrderController::class, 'reject'])->name('orders.guest.reject');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Guest Order Routes (tidak perlu login)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('order')->name('orders.guest.')->group(function () {
+ 
+    // Halaman keranjang utama
+    Route::get('/keranjang', [GuestOrderController::class, 'index'])
+        ->name('cart');
+ 
+    // API: validasi token & ambil data order
+    Route::post('/keranjang/validate-token', [GuestOrderController::class, 'validateToken'])
+        ->name('validate-token');
+ 
+    // API: submit pilihan package
+    Route::post('/keranjang/submit', [GuestOrderController::class, 'submit'])
+        ->name('submit');
+ 
 });

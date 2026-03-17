@@ -3,54 +3,44 @@
 namespace Modules\Order\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        return view('order::index');
+        return response()->json([
+            'message' => 'Not implemented.',
+        ], 501);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(Request $request)
     {
-        return view('order::create');
+        return response()->json([
+            'message' => 'Not implemented.',
+        ], 501);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function show(Order $order)
     {
-        return view('order::show');
+        return response()->json([
+            'message' => 'Not implemented.',
+        ], 501);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function update(Request $request, Order $order)
     {
-        return view('order::edit');
+        return response()->json([
+            'message' => 'Not implemented.',
+        ], 501);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
+    public function destroy(Order $order)
+    {
+        return response()->json([
+            'message' => 'Not implemented.',
+        ], 501);
+    }
 }
+

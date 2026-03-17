@@ -3,5 +3,6 @@
     "Order": true,
     "Machine": true,
     "Package": true,
-    "Test": true
+    "Test": true,
+    "Category": true
 }

@@ -3,16 +3,18 @@
 namespace Modules\Order\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\OrderOffer;
+use App\Models\OrderOfferDetail;
 use Modules\Order\Mail\OfferLinkMail;
 
 
 use App\Models\Order;
-use App\Models\OrderOffer;
-use App\Models\OrderOfferDetail;
-use App\Models\Package;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Modules\Order\Mail\CustomerSubmittedItemsMail;
 
 class OrderController extends Controller
 {
@@ -24,54 +26,26 @@ class OrderController extends Controller
 
     public function create()
     {
-        $packages = Package::query()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get();
-
-        return view('order::admin.orders.create', compact('packages'));
+        return view('order::admin.orders.create');
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'customer_name'  => ['required', 'string', 'max:255'],
-            'customer_email' => ['required', 'email', 'max:255'],
-
-            'items'              => ['required', 'array', 'min:1'],
-            'items.*.package_id' => ['required', 'integer', 'exists:packages,id'],
-            'items.*.qty'        => ['required', 'integer', 'min:1'],
-            'items.*.price'      => ['required', 'numeric', 'min:0'],
-
-            'notes' => ['nullable', 'string'],
-            'terms' => ['nullable', 'string'],
+            'customer_email' => ['nullable', 'email', 'max:255'],
         ]);
 
         $order = Order::create([
             'customer_name'  => $data['customer_name'],
             'customer_slug'  => Str::slug($data['customer_name']),
-            'customer_email' => $data['customer_email'],
+            'customer_email' => $data['customer_email'] ?? '',
             'created_by'     => auth()->id(),
             'status'         => Order::STATUS_DRAFT,
         ]);
 
-        $offer = OrderOffer::create([
-            'order_id' => $order->id,
-            'notes'    => $data['notes'] ?? null,
-            'terms'    => $data['terms'] ?? null,
-        ]);
-
-        foreach ($data['items'] as $item) {
-            OrderOfferDetail::create([
-                'order_offer_id' => $offer->id,
-                'package_id'     => $item['package_id'],
-                'qty'            => $item['qty'],
-                'price'          => $item['price'],
-            ]);
-        }
-
         return redirect()->route('admin.orders.show', $order)
-            ->with('success', 'Order + penawaran berhasil dibuat.');
+            ->with('success', 'Order berhasil dibuat. Item layanan akan dipilih oleh guest melalui token.');
     }
 
     public function show(Order $order)
@@ -86,15 +60,112 @@ class OrderController extends Controller
         return view('order::admin.orders.show', compact('order', 'guestLink'));
     }
 
+    public function edit(Order $order)
+    {
+        $order->load(['offer.details.package', 'creator']);
+
+        return view('order::admin.orders.edit', compact('order'));
+    }
+
+    public function update(Request $request, Order $order)
+    {
+        $data = $request->validate([
+            'customer_name'  => ['required', 'string', 'max:255'],
+            'customer_email' => ['nullable', 'email', 'max:255'],
+
+            'notes' => ['nullable', 'string'],
+            'terms' => ['nullable', 'string'],
+
+            'items'              => ['required', 'array', 'min:1'],
+            'items.*.id'         => ['required', 'integer', 'exists:order_offer_details,id'],
+            'items.*.qty'        => ['required', 'integer', 'min:1'],
+            'items.*.price'      => ['required', 'numeric', 'min:0'],
+
+            'offer_file'   => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'invoice_file' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
+
+        $order->load('offer.details');
+
+        $order->update([
+            'customer_name'  => $data['customer_name'],
+            'customer_slug'  => Str::slug($data['customer_name']),
+            'customer_email' => $data['customer_email'] ?? '',
+        ]);
+
+        $offer = $order->offer ?? $order->offer()->create([]);
+        $offer->update([
+            'notes' => $data['notes'] ?? null,
+            'terms' => $data['terms'] ?? null,
+        ]);
+
+        $allowedDetailIds = $offer->details->pluck('id')->all();
+        foreach ($data['items'] as $item) {
+            if (! in_array($item['id'], $allowedDetailIds, true)) {
+                continue;
+            }
+            OrderOfferDetail::where('id', $item['id'])
+                ->update([
+                    'qty'   => (int) $item['qty'],
+                    'price' => (float) $item['price'],
+                ]);
+        }
+
+        $dir = 'orders/' . $order->order_code;
+        if ($request->hasFile('offer_file')) {
+            $path = $request->file('offer_file')->storeAs($dir, 'penawaran.pdf', 'public');
+            $offer->update(['offer_file_path' => $path]);
+        }
+        if ($request->hasFile('invoice_file')) {
+            $path = $request->file('invoice_file')->storeAs($dir, 'invoice.pdf', 'public');
+            $offer->update(['invoice_file_path' => $path]);
+        }
+
+        return redirect()->route('admin.orders.show', $order)
+            ->with('success', 'Order berhasil diperbarui.');
+    }
+
+    public function notifyInternal(Order $order)
+    {
+        $order->load(['offer.details.package', 'creator']);
+
+        $internalUser = User::find(2);
+        if (! $internalUser || blank($internalUser->email)) {
+            return back()->with('error', 'User internal (id=2) tidak ditemukan atau email-nya kosong.');
+        }
+
+        Mail::to($internalUser->email)->send(new CustomerSubmittedItemsMail($order));
+
+        return back()->with('success', 'Notifikasi internal berhasil dikirim.');
+    }
+
     public function sendOffer(Order $order)
     {
         $order->load(['offer.details.package']);
+
+        if (blank($order->customer_email)) {
+            return back()->with('error', 'Email customer masih kosong. Lengkapi email terlebih dahulu sebelum mengirim penawaran.');
+        }
 
         if (!$order->offer || $order->offer->details->isEmpty()) {
             return back()->with('error', 'Penawaran belum ada / item masih kosong.');
         }
 
-        Mail::to($order->customer_email)->send(new OfferLinkMail($order));
+        if (blank($order->offer->offer_file_path) || blank($order->offer->invoice_file_path)) {
+            return back()->with('error', 'Upload file penawaran dan invoice terlebih dahulu sebelum mengirim penawaran ke customer.');
+        }
+
+        $mail = new OfferLinkMail($order);
+
+        // Attach PDF files if available (public disk)
+        if (filled($order->offer->offer_file_path) && Storage::disk('public')->exists($order->offer->offer_file_path)) {
+            $mail->attach(Storage::disk('public')->path($order->offer->offer_file_path));
+        }
+        if (filled($order->offer->invoice_file_path) && Storage::disk('public')->exists($order->offer->invoice_file_path)) {
+            $mail->attach(Storage::disk('public')->path($order->offer->invoice_file_path));
+        }
+
+        Mail::to($order->customer_email)->send($mail);
 
         $order->update([
             'status'  => Order::STATUS_OFFERED,
