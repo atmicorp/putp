@@ -109,6 +109,10 @@
         .act-view:hover { background: #ffedd5; }
         .act-delete       { background: transparent; color: #9ca3af; }
         .act-delete:hover { background: #fef2f2; color: #dc2626; }
+        .act-processing       { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+        .act-processing:hover { background: #ffedd5; }
+        .act-done       { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .act-done:hover { background: #dcfce7; }
 
         .pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid #f3f4f6; }
         .page-info { font-size: 12.5px; color: #9ca3af; }
@@ -233,12 +237,24 @@
                             <td>
                                 <div class="actions">
                                     <a href="{{ route('admin.orders.show', $order) }}" class="act-btn act-view">Detail</a>
-                                    {{-- <form action="{{ route('admin.orders.destroy', $order) }}" method="POST" onsubmit="return confirm('Hapus order ini?')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="act-btn act-delete">
-                                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-                                        </button>
-                                    </form> --}}
+
+                                    @if($order->status === 'approved')
+                                        <form action="{{ route('admin.orders.updateStatus', $order) }}" method="POST"
+                                            onsubmit="return confirm('Ubah status ke Processing?')">
+                                            @csrf @method('PATCH')
+                                            <input type="hidden" name="status" value="processing">
+                                            <button type="submit" class="act-btn act-processing">▶ Processing</button>
+                                        </form>
+                                    @endif
+
+                                    @if($order->status === 'processing')
+                                        <form action="{{ route('admin.orders.updateStatus', $order) }}" method="POST"
+                                            onsubmit="return confirm('Tandai order ini sebagai Done?')">
+                                            @csrf @method('PATCH')
+                                            <input type="hidden" name="status" value="done">
+                                            <button type="submit" class="act-btn act-done">✓ Done</button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

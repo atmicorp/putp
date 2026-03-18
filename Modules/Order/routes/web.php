@@ -13,6 +13,8 @@ Route::middleware(['web', 'auth'])->prefix('admin')->group(function () {
     Route::put('/orders/{order}', [AdminOrderController::class, 'update'])->name('admin.orders.update');
     Route::post('/orders/{order}/notify-internal', [AdminOrderController::class, 'notifyInternal'])->name('admin.orders.notifyInternal');
     Route::post('/orders/{order}/send-offer', [AdminOrderController::class, 'sendOffer'])->name('admin.orders.sendOffer');
+    Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
+     ->name('admin.orders.updateStatus');
 });
 
 // Guest route (tanpa login)
@@ -46,5 +48,12 @@ Route::prefix('order')->name('orders.guest.')->group(function () {
     // API: submit pilihan package
     Route::post('/keranjang/submit', [GuestOrderController::class, 'submit'])
         ->name('submit');
+ 
+    // Halaman status order (lihat progres)
+    Route::get('/status', [GuestOrderController::class, 'statusForm'])
+        ->name('status.form');
+
+    Route::post('/status/lookup', [GuestOrderController::class, 'statusLookup'])
+        ->name('status.lookup');
  
 });

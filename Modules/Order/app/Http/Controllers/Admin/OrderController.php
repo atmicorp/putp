@@ -3,18 +3,17 @@
 namespace Modules\Order\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\OrderOffer;
 use App\Models\OrderOfferDetail;
-use Modules\Order\Mail\OfferLinkMail;
-
-
-use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\Order\Mail\CustomerSubmittedItemsMail;
+use Modules\Order\Mail\OfferLinkMail;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class OrderController extends Controller
 {
@@ -123,6 +122,26 @@ class OrderController extends Controller
 
         return redirect()->route('admin.orders.show', $order)
             ->with('success', 'Order berhasil diperbarui.');
+    }
+
+    public function updateStatus(Request $request, Order $order): RedirectResponse
+    {
+        $allowed = [
+            'approved'   => 'processing',
+            'processing' => 'done',
+        ];
+
+        $currentStatus = $order->status;
+        $newStatus     = $request->input('status');
+
+        // Validasi: transisi harus sesuai peta yang diizinkan
+        if (!isset($allowed[$currentStatus]) || $allowed[$currentStatus] !== $newStatus) {
+            return back()->with('error', 'Transisi status tidak diizinkan.');
+        }
+
+        $order->update(['status' => $newStatus]);
+
+        return back()->with('success', 'Status order berhasil diubah ke ' . ucfirst($newStatus) . '.');
     }
 
     public function notifyInternal(Order $order)

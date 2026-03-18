@@ -1263,6 +1263,31 @@
             background: white;
             color: var(--teal);
         }
+
+        /* Floating Status Order — selalu terlihat, di dalam wrapper */
+        .floating-status-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            color: var(--navy);
+            border: none;
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(15,23,42,.2);
+            transition: all .2s;
+            text-decoration: none;
+        }
+
+        .floating-status-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(15,23,42,.32);
+            background: var(--cream);
+        }
         
         .floating-cart-hint {
             background: white;
@@ -1282,17 +1307,24 @@
         @media (max-width: 480px) {
             .floating-cart { bottom: 20px; right: 16px; }
             .floating-cart-btn { padding: 13px 18px; font-size: 14px; }
+            .floating-status-btn { padding: 10px 16px; font-size: 12px; }
             .scn-actions { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-<div class="floating-cart" id="floatingCart" style="display:none;">
+<div class="floating-cart" id="floatingCartWrapper">
     <div class="floating-cart-hint" id="floatingHint"></div>
-    <a href="{{ route('orders.guest.cart') }}" class="floating-cart-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-        Lanjut ke Keranjang
-        <span class="fct-count" id="fctCount">0</span>
+    <div id="floatingCart" style="display:none;">
+        <a href="{{ route('orders.guest.cart') }}" class="floating-cart-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            Lanjut ke Keranjang
+            <span class="fct-count" id="fctCount">0</span>
+        </a>
+    </div>
+    <a href="{{ route('orders.guest.status.form') }}" class="floating-status-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l3 3"/></svg>
+        Lihat Status Order
     </a>
 </div>
 {{-- ──────────────────── HERO ──────────────────── --}}
@@ -1475,8 +1507,8 @@
         <div class="steps">
             <div class="step">
                 <div class="step-num">01</div>
-                <h3 class="step-title">Buat Akun & Login</h3>
-                <p class="step-desc">Daftarkan diri Anda secara gratis. Cukup email dan password untuk memulai.</p>
+                <h3 class="step-title">Menghubungi Admin PUTP</h3>
+                <p class="step-desc">Anda bisa langsung chat admin kami di WhatsApp untuk sekedar bertanya maupun pembuatan kode akses untuk membuat pesanan</p>
             </div>
             <div class="step">
                 <div class="step-num">02</div>
@@ -1701,7 +1733,7 @@
         const fc    = document.getElementById('floatingCart');
         const badge = document.getElementById('fctCount');
         badge.textContent = count;
-        fc.style.display  = count > 0 ? 'flex' : 'none';
+        fc.style.display  = count > 0 ? 'block' : 'none';
     
         // Animate badge
         badge.style.transform = 'scale(1.4)';

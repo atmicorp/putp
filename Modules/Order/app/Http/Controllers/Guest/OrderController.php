@@ -187,4 +187,39 @@ class OrderController extends Controller
         return redirect()->route('orders.guest.show', ['slug' => $slug, 'token' => $token])
             ->with('success', 'Penawaran telah ditolak.');
     }
+
+    /**
+     * Form untuk melihat status order berdasarkan access token.
+     * GET /order/status
+     */
+    public function statusForm()
+    {
+        return view('order::guest.orders.status');
+    }
+
+    /**
+     * Proses lookup status order.
+     * POST /order/status/lookup
+     */
+    public function statusLookup(Request $request)
+    {
+        $data = $request->validate([
+            'token' => ['required', 'string'],
+        ]);
+
+        $order = Order::where('access_token', $data['token'])
+            ->with(['offer.details.package'])
+            ->first();
+
+        if (! $order) {
+            return back()
+                ->withErrors(['token' => 'Kode akses tidak ditemukan.'])
+                ->withInput();
+        }
+
+        return view('order::guest.orders.status', [
+            'order' => $order,
+            'token' => $data['token'],
+        ]);
+    }
 }
