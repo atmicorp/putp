@@ -15,9 +15,9 @@
     </x-slot>
 
     <style>
-
         .dash-title    { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; color: #1c1917; }
         .dash-subtitle { font-size: 13px; color: #6b7280; margin-top: 4px; margin-bottom: 28px; }
+
         .btn-primary-sm {
             display: inline-flex; align-items: center; gap: 6px;
             padding: 8px 16px; background: #ea580c; color: #fff;
@@ -35,10 +35,7 @@
             background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
             padding: 20px 24px; position: relative; overflow: hidden;
         }
-        .stat-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0;
-            height: 3px; background: #ea580c; border-radius: 3px 3px 0 0;
-        }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #ea580c; border-radius: 3px 3px 0 0; }
         .stat-card:nth-child(2)::before { background: #f59e0b; }
         .stat-card:nth-child(3)::before { background: #3b82f6; }
         .stat-card:nth-child(4)::before { background: #10b981; }
@@ -56,7 +53,7 @@
         .search-wrap {
             display: flex; align-items: center; gap: 8px;
             background: #f9fafb; border: 1px solid #e5e7eb;
-            border-radius: 8px; padding: 8px 14px; width: 240px;
+            border-radius: 8px; padding: 8px 14px; width: 220px;
         }
         .search-wrap input { background: transparent; border: none; outline: none; font-size: 13px; font-family: 'Sora', sans-serif; color: #1c1917; width: 100%; }
         .search-wrap input::placeholder { color: #9ca3af; }
@@ -69,6 +66,7 @@
             color: #1c1917; cursor: pointer; outline: none;
         }
         .filter-select:focus { border-color: #ea580c; }
+        .filter-select.has-value { border-color: #ea580c; background-color: #fff7ed; color: #ea580c; font-weight: 600; }
 
         .record-count { font-size: 12px; color: #9ca3af; font-weight: 500; white-space: nowrap; }
 
@@ -84,10 +82,15 @@
         td { padding: 14px 20px; font-size: 13.5px; vertical-align: middle; }
 
         .pkg-name    { font-weight: 600; font-size: 13.5px; color: #1c1917; }
-        .pkg-machine { font-size: 12px; color: #9ca3af; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+        .pkg-sub     { font-size: 12px; color: #9ca3af; margin-top: 2px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+
+        .cat-badge {
+            display: inline-flex; padding: 2px 8px;
+            background: #f3f4f6; border-radius: 20px;
+            font-size: 11px; font-weight: 600; color: #6b7280;
+        }
 
         .price-text { font-size: 13.5px; font-weight: 700; color: #1c1917; font-variant-numeric: tabular-nums; }
-        .price-sub  { font-size: 11px; color: #9ca3af; margin-top: 1px; }
 
         .badge {
             display: inline-flex; align-items: center; gap: 4px;
@@ -100,12 +103,14 @@
         .dot-inactive { background: #9ca3af; }
 
         .date-text { font-size: 12.5px; color: #6b7280; }
+        .machine-name { font-weight: 500; color: #374151; font-size: 13px; }
+        .machine-code { font-size: 11px; color: #9ca3af; display: flex; align-items: center; gap: 3px; margin-top: 2px; }
 
         .actions { display: flex; align-items: center; gap: 4px; }
         .act-btn {
             padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
             cursor: pointer; text-decoration: none; border: none;
-            font-family: 'Sora', sans-serif; transition: all 0.15s;
+            font-family: 'Sora', sans-serif; transition: all 0.15s; display: inline-flex; align-items: center;
         }
         .act-view         { background: #fff7ed; color: #ea580c; }
         .act-view:hover   { background: #ffedd5; }
@@ -175,38 +180,68 @@
 
     {{-- Table --}}
     <div class="table-card">
-        <div class="table-toolbar">
-            <div class="toolbar-left">
-                <div class="search-wrap">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-                    <input type="text" placeholder="Cari package atau mesin..." id="searchInput">
+        {{-- Filter form — server-side, bukan JS filter --}}
+        <form method="GET" action="{{ route('package.index') }}" id="filterForm">
+            <div class="table-toolbar">
+                <div class="toolbar-left">
+                    <div class="search-wrap">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+                        <input
+                            type="text"
+                            name="search"
+                            placeholder="Cari package atau mesin..."
+                            value="{{ request('search') }}"
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <select name="category_id" class="filter-select {{ request('category_id') ? 'has-value' : '' }}" onchange="this.form.submit()">
+                        <option value="">Semua Category</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->category_id }}" {{ request('category_id') == $cat->category_id ? 'selected' : '' }}>
+                                {{ $cat->nama_category }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="status" class="filter-select {{ request('status') !== null && request('status') !== '' ? 'has-value' : '' }}" onchange="this.form.submit()">
+                        <option value="">Semua Status</option>
+                        <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Active</option>
+                        <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+
+                    <select name="machine_id" class="filter-select {{ request('machine_id') ? 'has-value' : '' }}" onchange="this.form.submit()">
+                        <option value="">Semua Mesin</option>
+                        @foreach($machines as $machine)
+                            <option value="{{ $machine->id }}" {{ request('machine_id') == $machine->id ? 'selected' : '' }}>
+                                {{ $machine->name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    @if(request()->hasAny(['search', 'category_id', 'status', 'machine_id']))
+                        <a href="{{ route('package.index') }}" style="font-size:12px;color:#9ca3af;text-decoration:none;font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:4px;">
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            Reset
+                        </a>
+                    @endif
                 </div>
-                <select class="filter-select" id="statusFilter">
-                    <option value="">Semua Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
-                <select class="filter-select" id="machineFilter">
-                    <option value="">Semua Mesin</option>
-                    @foreach($machines as $machine)
-                        <option value="{{ $machine->id }}">{{ $machine->name }}</option>
-                    @endforeach
-                </select>
+                <span class="record-count">{{ $packages->total() }} records</span>
             </div>
-            <span class="record-count">{{ $packages->total() }} records</span>
-        </div>
+        </form>
 
         @if($packages->isEmpty())
             <div class="empty-state">
                 <div class="empty-icon">📦</div>
-                <div class="empty-title">Belum ada package</div>
-                <div class="empty-sub">Tambahkan package pertama dengan klik "Add Package"</div>
+                <div class="empty-title">Tidak ada package ditemukan</div>
+                <div class="empty-sub">Coba ubah filter atau <a href="{{ route('package.index') }}" style="color:#ea580c;">reset filter</a></div>
             </div>
         @else
             <table>
                 <thead>
                     <tr>
                         <th>Nama Package</th>
+                        <th>Category</th>
                         <th>Mesin</th>
                         <th>PIC Operator</th>
                         <th>Base Price</th>
@@ -217,20 +252,25 @@
                 </thead>
                 <tbody>
                     @foreach($packages as $package)
-                        <tr data-machine="{{ $package->machine_id }}">
+                        <tr>
                             <td>
                                 <div class="pkg-name">{{ $package->name }}</div>
                                 @if($package->description)
-                                    <div class="pkg-machine" style="margin-top:2px;">
-                                        <span style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;">{{ $package->description }}</span>
-                                    </div>
+                                    <span class="pkg-sub">{{ $package->description }}</span>
                                 @endif
                             </td>
                             <td>
-                                <div class="date-text" style="font-weight:500;color:#374151;">{{ $package->machine?->name ?? '-' }}</div>
+                                @if($package->category)
+                                    <span class="cat-badge">{{ $package->category->nama_category }}</span>
+                                @else
+                                    <span style="color:#d1d5db;font-size:12px;">—</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="machine-name">{{ $package->machine?->name ?? '-' }}</div>
                                 @if($package->machine)
-                                    <div class="pkg-machine">
-                                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    <div class="machine-code">
+                                        <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                         {{ $package->machine->code }}
                                     </div>
                                 @endif
@@ -242,10 +282,10 @@
                                 <div class="price-text">Rp {{ number_format($package->base_price, 0, ',', '.') }}</div>
                             </td>
                             <td>
-                                @php $status = $package->is_active ? 'active' : 'inactive'; @endphp
-                                <span class="badge badge-{{ $status }}">
-                                    <span class="dot dot-{{ $status }}"></span>
-                                    {{ $package->is_active ? 'Active' : 'Inactive' }}
+                                @php $isActive = $package->is_active; @endphp
+                                <span class="badge badge-{{ $isActive ? 'active' : 'inactive' }}">
+                                    <span class="dot dot-{{ $isActive ? 'active' : 'inactive' }}"></span>
+                                    {{ $isActive ? 'Active' : 'Inactive' }}
                                 </span>
                             </td>
                             <td>
@@ -255,9 +295,9 @@
                                 <div class="actions">
                                     <a href="{{ route('package.show', $package) }}" class="act-btn act-view">Detail</a>
                                     <a href="{{ route('package.edit', $package) }}" class="act-btn act-edit">Edit</a>
-                                    <form action="{{ route('package.destroy', $package) }}" method="POST" class="delete-form">
+                                    <form action="{{ route('package.destroy', $package) }}" method="POST" class="delete-form" style="display:inline;">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="act-btn act-delete">
+                                        <button type="submit" class="act-btn act-delete" title="Hapus">
                                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
                                         </button>
                                     </form>
@@ -290,24 +330,15 @@
     </div>
 
     <script>
-        function filterTable() {
-            const q       = document.getElementById('searchInput').value.toLowerCase();
-            const status  = document.getElementById('statusFilter').value.toLowerCase();
-            const machine = document.getElementById('machineFilter').value;
-            document.querySelectorAll('tbody tr').forEach(row => {
-                const text        = row.textContent.toLowerCase();
-                const badgeText   = row.querySelector('.badge')?.textContent.trim().toLowerCase() ?? '';
-                const rowMachine  = row.dataset.machine ?? '';
-                const matchQ       = text.includes(q);
-                const matchStatus  = !status  || badgeText.includes(status);
-                const matchMachine = !machine || rowMachine === machine;
-                row.style.display  = (matchQ && matchStatus && matchMachine) ? '' : 'none';
-            });
-        }
-        document.getElementById('searchInput').addEventListener('input', filterTable);
-        document.getElementById('statusFilter').addEventListener('change', filterTable);
-        document.getElementById('machineFilter').addEventListener('change', filterTable);
+        // Search input: submit form on Enter or after short delay
+        const searchInput = document.querySelector('input[name="search"]');
+        let searchTimer;
+        searchInput?.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => searchInput.closest('form').submit(), 500);
+        });
 
+        // Delete confirm
         document.querySelectorAll('.delete-form').forEach(form => {
             form.addEventListener('submit', e => {
                 e.preventDefault();

@@ -252,7 +252,7 @@
                         <thead>
                             <tr>
                                 <th>Paket</th>
-                                <th class="text-right">Qty</th>
+                                <th>Qty</th>
                                 <th class="text-right">Harga Satuan</th>
                                 <th class="text-right">Subtotal</th>
                             </tr>
@@ -271,9 +271,9 @@
                                             <div class="pkg-info">Mesin: {{ $detail->package->machine->name }}</div>
                                         @endif
                                     </td>
-                                    <td class="text-right">{{ $detail->qty }}</td>
-                                    <td class="text-right price-cell">Rp {{ number_format($detail->price, 0, ',', '.') }}</td>
-                                    <td class="text-right price-cell">Rp {{ number_format($sub, 0, ',', '.') }}</td>
+                                    <td>{{ $detail->qty }}</td>
+                                    <td class="price-cell">Rp {{ number_format($detail->price, 0, ',', '.') }}</td>
+                                    <td class="price-cell">Rp {{ number_format($sub, 0, ',', '.') }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -455,6 +455,14 @@
                                 <div>
                                     <div class="tl-key">Penawaran dikirim</div>
                                     <div class="tl-val">{{ $order->sent_at->format('d M Y, H:i') }}</div>
+                                </div>
+                            </div>
+                        @else
+                         <div class="tl-item">
+                                <div class="tl-dot"></div>
+                                <div>
+                                    <div class="tl-key">Penawaran dikirim</div>
+                                    <div class="tl-val">Menunggu...</div>
                                 </div>
                             </div>
                         @endif

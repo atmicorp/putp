@@ -9,6 +9,8 @@ Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth'])->name('dashboard');
+Route::get('/dashboard/filter', [DashboardController::class, 'filterData'])->middleware(['auth'])->name('admin.dashboard.filter');
+
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])

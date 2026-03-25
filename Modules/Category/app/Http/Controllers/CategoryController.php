@@ -3,6 +3,7 @@
 namespace Modules\Category\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -12,7 +13,11 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        return view('category::index');
+        $categories = Category::withCount('packages')
+            ->orderBy('category_id')
+            ->paginate(15);
+
+        return view('category::index', compact('categories'));
     }
 
     /**
@@ -26,31 +31,72 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {}
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'category_id'   => 'required|string|max:50|unique:category,category_id',
+            'nama_category' => 'required|string|max:255',
+        ], [
+            'category_id.required'   => 'Category ID wajib diisi.',
+            'category_id.unique'     => 'Category ID sudah digunakan.',
+            'nama_category.required' => 'Nama category wajib diisi.',
+        ]);
+
+        Category::create($validated);
+
+        return redirect()->route('category.index')
+            ->with('success', 'Category berhasil ditambahkan.');
+    }
 
     /**
      * Show the specified resource.
      */
-    public function show($id)
+    public function show(Category $category)
     {
-        return view('category::show');
+        $category->load('packages');
+
+        return view('category::show', compact('category'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit(Category $category)
     {
-        return view('category::edit');
+        return view('category::edit', compact('category'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id) {}
+    public function update(Request $request, Category $category)
+    {
+        $validated = $request->validate([
+            'nama_category' => 'required|string|max:255',
+        ], [
+            'nama_category.required' => 'Nama category wajib diisi.',
+        ]);
+
+        $category->update($validated);
+
+        return redirect()->route('category.index')
+            ->with('success', 'Category berhasil diperbarui.');
+    }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id) {}
+    public function destroy(Category $category)
+    {
+        // Optional: cek apakah masih ada package terkait
+        if ($category->packages()->exists()) {
+            return redirect()->route('category.index')
+                ->with('error', 'Category tidak dapat dihapus karena masih memiliki package terkait.');
+        }
+
+        $category->delete();
+
+        return redirect()->route('category.index')
+            ->with('success', 'Category berhasil dihapus.');
+    }
 }

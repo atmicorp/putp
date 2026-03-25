@@ -57,7 +57,7 @@ class Order extends Model
         static::creating(function (self $order) {
 
             if (blank($order->access_token)) {
-                $order->access_token = Str::random(64);
+                $order->access_token = Str::random(6);
             }
 
             if (blank($order->order_code)) {

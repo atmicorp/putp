@@ -829,6 +829,30 @@
                 <span class="nav-label">Order</span>
             </a>
 
+            <div class="nav-section-label">Item</div>
+
+            <a href="{{ route('category.index') }}"
+               data-label="Category"
+               class="nav-item {{ request()->routeIs('category.*') ? 'active' : '' }}"
+               aria-current="{{ request()->routeIs('category.*') ? 'page' : 'false' }}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/>
+                </svg>
+                <span class="nav-label">Category</span>
+            </a>
+
+            <a href="{{ route('package.index') }}"
+               data-label="Packages"
+               class="nav-item {{ request()->routeIs('package.*') ? 'active' : '' }}"
+               aria-current="{{ request()->routeIs('package.*') ? 'page' : 'false' }}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 7l9-4 9 4-9 4-9-4zm0 0v10l9 4m-9-14l9 4m9-4v10l-9 4"/>
+                </svg>
+                <span class="nav-label">Packages</span>
+            </a>
+
             <div class="nav-section-label">Machine</div>
 
             <a href="{{ route('machine.index') }}"
@@ -841,19 +865,6 @@
                     <circle cx="12" cy="12" r="3"/>
                 </svg>
                 <span class="nav-label">Machine</span>
-            </a>
-
-            <div class="nav-section-label">Packages</div>
-
-            <a href="{{ route('package.index') }}"
-               data-label="Packages"
-               class="nav-item {{ request()->routeIs('package.*') ? 'active' : '' }}"
-               aria-current="{{ request()->routeIs('package.*') ? 'page' : 'false' }}">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM16 3H8a1 1 0 00-1 1v3h10V4a1 1 0 00-1-1zM8 17v3a1 1 0 001 1h6a1 1 0 001-1v-3"/>
-                </svg>
-                <span class="nav-label">Packages</span>
             </a>
 
             <div class="nav-section-label">Management</div>

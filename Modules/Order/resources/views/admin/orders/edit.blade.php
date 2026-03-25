@@ -110,7 +110,7 @@
                                             @error("items.$i.qty")<div class="help" style="color:#dc2626;">{{ $message }}</div>@enderror
                                         </td>
                                         <td class="r">
-                                            <input type="number" min="0" step="0.01" name="items[{{ $i }}][price]" value="{{ old("items.$i.price", $d->price) }}">
+                                            <input type="text" inputmode="numeric" name="items[{{ $i }}][price]" value="{{ number_format(old("items.$i.price", $d->price), 0, ',', '.') }}">
                                             @error("items.$i.price")<div class="help" style="color:#dc2626;">{{ $message }}</div>@enderror
                                         </td>
                                     </tr>

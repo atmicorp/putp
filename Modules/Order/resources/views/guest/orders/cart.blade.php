@@ -9,7 +9,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-
+    <link rel="icon" type="image/jpeg" href="{{ asset('logopoltek.png') }}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --navy:    #1A0F00;
@@ -403,10 +404,7 @@
         }
 
         .pkg-row-price {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--teal);
-            white-space: nowrap;
+            display: none;
         }
 
         .add-btn {
@@ -540,7 +538,7 @@
 
         .ci-info { flex: 1; min-width: 0; }
         .ci-name { font-size: 13px; font-weight: 600; color: var(--navy); line-height: 1.4; }
-        .ci-price { font-size: 12px; color: var(--teal); font-weight: 600; margin-top: 2px; }
+        .ci-price { display: none; }
 
         .ci-remove {
             background: none;
@@ -664,30 +662,7 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── TOAST ── */
-        #toast {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%) translateY(80px);
-            background: var(--navy);
-            color: white;
-            padding: 12px 22px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 500;
-            z-index: 9998;
-            transition: transform .3s cubic-bezier(.34,1.56,.64,1);
-            white-space: nowrap;
-            box-shadow: 0 8px 32px rgba(0,0,0,.25);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        #toast.show { transform: translateX(-50%) translateY(0); }
-        #toast.success-toast { background: #065F46; }
-        #toast.error-toast { background: #991B1B; }
+        /* ── TOAST (diganti SweetAlert2) ── */
 
         /* ── RESPONSIVE ── */
         @media (max-width: 900px) {
@@ -727,9 +702,6 @@
     <div class="spinner"></div>
 </div>
 
-<div id="toast">
-    <span id="toastMsg"></span>
-</div>
 
 <div class="page-wrap" id="pageWrap">
 
@@ -838,10 +810,10 @@
             <div id="cartItemsWrap" style="display:none;">
                 <div class="cart-items" id="cartItems"></div>
                 <div class="cart-divider"></div>
-                <div class="cart-total">
-                    <span class="cart-total-label">Estimasi Total</span>
-                    <span class="cart-total-value" id="cartTotal">Rp 0</span>
-                </div>
+                    <div class="cart-total" style="display:none;">
+                        <span class="cart-total-label">Estimasi Total</span>
+                        <span class="cart-total-value" id="cartTotal">Rp 0</span>
+                    </div>
             </div>
 
             <div class="submit-area">
@@ -874,402 +846,437 @@
 </div>
 
 <script>
-// ── State
-let cart = JSON.parse(localStorage.getItem('putp_cart') || '[]');
-let allPackages = [];
-let currentToken = '';
-let activeCategory = 'all';
+    // ── State
+    let cart = JSON.parse(localStorage.getItem('putp_cart') || '[]');
+    let allPackages = [];
+    let currentToken = '';
+    let activeCategory = 'all';
 
-function normalizeCart() {
-    if (!Array.isArray(cart)) cart = [];
-    cart = cart
-        .map(c => {
-            if (!c || typeof c !== 'object') return null;
-            const pkgId = c.package_id ?? c.packageId ?? c.id ?? null;
-            const qty = Number(c.qty ?? 1);
-            const price = c.price ?? c.base_price ?? 0;
-            const name = c.name ?? c.package_name ?? '';
-            if (!pkgId) return null;
-            return {
-                package_id: Number(pkgId),
-                name,
-                price,
-                qty: qty >= 1 ? qty : 1,
-            };
-        })
-        .filter(Boolean);
-    saveCart();
-}
-
-// ── Helpers
-function showLoading(v) {
-    document.getElementById('loadingOverlay').classList.toggle('show', v);
-}
-
-let toastTimer;
-function showToast(msg, type = '') {
-    const t = document.getElementById('toast');
-    const m = document.getElementById('toastMsg');
-    m.textContent = msg;
-    t.className = 'show ' + (type ? type + '-toast' : '');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function fmtPrice(n) {
-    return 'Rp ' + Number(n).toLocaleString('id-ID');
-}
-
-function saveCart() {
-    localStorage.setItem('putp_cart', JSON.stringify(cart));
-}
-
-function isInCart(pkgId) {
-    return cart.some(c => c.package_id === pkgId);
-}
-
-// ── STEP UI
-function setStep(n) {
-    [1,2,3].forEach(i => {
-        const s = document.getElementById('s' + i);
-        const l = document.getElementById('sl' + i);
-        s.className = 'step-num' + (i < n ? ' done' : i === n ? ' active' : '');
-        if (l) l.className = 'step-label' + (i === n ? ' active' : '');
-        if (i < n) s.innerHTML = '✓';
-        else s.textContent = i;
-    });
-    [1,2].forEach(i => {
-        const line = document.getElementById('line' + i);
-        if (line) line.className = 'step-line' + (i < n ? ' done' : '');
-    });
-}
-
-// ── VALIDATE TOKEN
-async function validateToken() {
-    const token = document.getElementById('tokenInput').value.trim();
-    const errEl  = document.getElementById('tokenError');
-    const errMsg = document.getElementById('tokenErrorMsg');
-    const inp    = document.getElementById('tokenInput');
-
-    errEl.classList.remove('show');
-    inp.classList.remove('error');
-
-    if (!token) {
-        errMsg.textContent = 'Kode tidak boleh kosong.';
-        errEl.classList.add('show');
-        inp.classList.add('error');
-        return;
+    function normalizeCart() {
+        if (!Array.isArray(cart)) cart = [];
+        cart = cart
+            .map(c => {
+                if (!c || typeof c !== 'object') return null;
+                const pkgId = c.package_id ?? c.packageId ?? c.id ?? null;
+                const qty = Number(c.qty ?? 1);
+                const price = c.price ?? c.base_price ?? 0;
+                const name = c.name ?? c.package_name ?? '';
+                if (!pkgId) return null;
+                return {
+                    package_id: Number(pkgId),
+                    name,
+                    price,
+                    qty: qty >= 1 ? qty : 1,
+                };
+            })
+            .filter(Boolean);
+        saveCart();
     }
 
-    showLoading(true);
-    document.getElementById('validateBtn').disabled = true;
+    // ── Helpers
+    function showLoading(v) {
+        document.getElementById('loadingOverlay').classList.toggle('show', v);
+    }
 
-    try {
-        const res = await fetch('{{ route("orders.guest.validate-token") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            },
-            body: JSON.stringify({ token }),
+    const SwalToast = Swal.mixin({
+        toast: true,
+        position: 'bottom',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
+
+    function showToast(msg, type = '') {
+        const iconMap = { success: 'success', error: 'error' };
+        SwalToast.fire({
+            icon: iconMap[type] || 'info',
+            title: msg,
         });
+    }
 
-        const data = await res.json();
+    function fmtPrice(n) {
+        return 'Rp ' + Number(n).toLocaleString('id-ID');
+    }
 
-        if (!data.valid) {
-            errMsg.textContent = data.message || 'Kode tidak valid.';
+    function saveCart() {
+        localStorage.setItem('putp_cart', JSON.stringify(cart));
+    }
+
+    function isInCart(pkgId) {
+        return cart.some(c => c.package_id === pkgId);
+    }
+
+    // ── STEP UI
+    function setStep(n) {
+        [1,2,3].forEach(i => {
+            const s = document.getElementById('s' + i);
+            const l = document.getElementById('sl' + i);
+            s.className = 'step-num' + (i < n ? ' done' : i === n ? ' active' : '');
+            if (l) l.className = 'step-label' + (i === n ? ' active' : '');
+            if (i < n) s.innerHTML = '✓';
+            else s.textContent = i;
+        });
+        [1,2].forEach(i => {
+            const line = document.getElementById('line' + i);
+            if (line) line.className = 'step-line' + (i < n ? ' done' : '');
+        });
+    }
+
+    // ── VALIDATE TOKEN
+    async function validateToken() {
+        const token = document.getElementById('tokenInput').value.trim();
+        const errEl  = document.getElementById('tokenError');
+        const errMsg = document.getElementById('tokenErrorMsg');
+        const inp    = document.getElementById('tokenInput');
+
+        errEl.classList.remove('show');
+        inp.classList.remove('error');
+
+        if (!token) {
+            errMsg.textContent = 'Kode tidak boleh kosong.';
             errEl.classList.add('show');
             inp.classList.add('error');
             return;
         }
 
-        currentToken = token;
-        allPackages  = data.packages || [];
+        showLoading(true);
+        document.getElementById('validateBtn').disabled = true;
 
-        // Tampilkan info order di sidebar
-        document.getElementById('siName').textContent = data.customer_name || '—';
-        document.getElementById('siCode').textContent = data.order_code || '—';
-        renderStatusPill(data.status);
+        try {
+            const res = await fetch('{{ route("orders.guest.validate-token") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ token }),
+            });
 
-        // Pre-fill keranjang dari existing items jika ada
-        if (data.existing_items && data.existing_items.length > 0 && cart.length === 0) {
-            cart = data.existing_items.map(i => ({
-                package_id: i.package_id,
-                name: i.name,
-                price: i.price,
-                qty: i.qty,
-            }));
-            saveCart();
-            showToast('Pilihan sebelumnya dimuat ke keranjang.', 'success');
-        }
+            const data = await res.json();
 
-        normalizeCart();
-
-        // Switch ke step 2
-        document.getElementById('tokenPanel').style.display = 'none';
-        document.getElementById('browsePanel').style.display = 'block';
-        document.getElementById('sidebarPanel').style.display = 'block';
-        document.getElementById('stepsHeader').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        buildCategoryTabs();
-        renderPackages();
-        renderCart();
-        setStep(2);
-
-    } catch (e) {
-        errMsg.textContent = 'Terjadi kesalahan. Coba lagi.';
-        errEl.classList.add('show');
-        inp.classList.add('error');
-    } finally {
-        showLoading(false);
-        document.getElementById('validateBtn').disabled = false;
-    }
-}
-
-function renderStatusPill(status) {
-    const labels = {
-        draft: 'Draft',
-        offered: 'Penawaran Dikirim',
-        form_required: 'Menunggu Pengisian',
-        approved: 'Disetujui',
-        processing: 'Diproses',
-        done: 'Selesai',
-    };
-    const el = document.getElementById('siStatus');
-    el.innerHTML = `<span class="status-pill ${status}">${labels[status] || status}</span>`;
-}
-
-// ── CATEGORIES
-function buildCategoryTabs() {
-    const cats = [...new Set(allPackages.map(p => p.category_id).filter(Boolean))];
-    const container = document.getElementById('categoryTabs');
-    const catNames = {};
-    allPackages.forEach(p => {
-        if (p.category_id && p.category_name && !catNames[p.category_id]) {
-            catNames[p.category_id] = p.category_name;
-        }
-    });
-
-    let html = `<button class="tab-btn active" onclick="filterByCategory('all', this)">Semua</button>`;
-    cats.forEach(c => {
-        const name = catNames[c] || c;
-        html += `<button class="tab-btn" onclick="filterByCategory('${c}', this)">${name}</button>`;
-    });
-    container.innerHTML = html;
-}
-
-function filterByCategory(catId, btn) {
-    activeCategory = catId;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderPackages();
-}
-
-function filterPackages() { renderPackages(); }
-
-function renderPackages() {
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const list   = document.getElementById('packagesList');
-
-    let filtered = allPackages.filter(p => {
-        const matchCat = activeCategory === 'all' || p.category_id === activeCategory;
-        const matchSearch = !search || p.name.toLowerCase().includes(search);
-        return matchCat && matchSearch;
-    });
-
-    if (filtered.length === 0) {
-        list.innerHTML = `<div class="empty-state">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <div>Tidak ada layanan ditemukan.</div>
-        </div>`;
-        return;
-    }
-
-    list.innerHTML = filtered.map(p => {
-        const inCart = isInCart(p.id);
-        return `<div class="pkg-row ${inCart ? 'in-cart' : ''}" id="pkgrow-${p.id}">
-            <div class="pkg-row-left">
-                <div class="pkg-row-name">${p.name}</div>
-                <div class="pkg-row-cat">${p.description ? p.description.substring(0,60) + (p.description.length > 60 ? '…' : '') : '—'}</div>
-            </div>
-            <div class="pkg-row-price">${fmtPrice(p.base_price)}</div>
-            <button class="add-btn ${inCart ? 'remove' : ''}"
-                    onclick="toggleCart(${p.id})"
-                    title="${inCart ? 'Hapus dari keranjang' : 'Tambah ke keranjang'}">
-                ${inCart ? '✓' : '+'}
-            </button>
-        </div>`;
-    }).join('');
-}
-
-// ── CART ACTIONS
-function toggleCart(pkgId) {
-    if (isInCart(pkgId)) {
-        removeFromCart(pkgId);
-    } else {
-        addToCart(pkgId);
-    }
-}
-
-function addToCart(pkgId) {
-    const pkg = allPackages.find(p => p.id === pkgId);
-    if (!pkg) return;
-    if (isInCart(pkgId)) { showToast('Layanan sudah ada di keranjang.'); return; }
-
-    cart.push({ package_id: pkg.id, name: pkg.name, price: pkg.base_price, qty: 1 });
-    saveCart();
-
-    // Animate bubble
-    const bubble = document.getElementById('navCartCount');
-    bubble.style.transform = 'scale(1.4)';
-    setTimeout(() => bubble.style.transform = '', 200);
-
-    renderCart();
-    renderPackages();
-    showToast('Ditambahkan: ' + pkg.name, 'success');
-}
-
-function removeFromCart(pkgId) {
-    const pkg = cart.find(c => c.package_id === pkgId);
-    cart = cart.filter(c => c.package_id !== pkgId);
-    saveCart();
-    renderCart();
-    renderPackages();
-    if (pkg) showToast('Dihapus: ' + pkg.name);
-}
-
-function clearCart() {
-    if (cart.length === 0) return;
-    if (!confirm('Kosongkan keranjang?')) return;
-    cart = [];
-    saveCart();
-    renderCart();
-    renderPackages();
-}
-
-function renderCart() {
-    const emptyMsg  = document.getElementById('cartEmptyMsg');
-    const itemsWrap = document.getElementById('cartItemsWrap');
-    const itemsEl   = document.getElementById('cartItems');
-    const totalEl   = document.getElementById('cartTotal');
-    const submitBtn = document.getElementById('submitBtn');
-    const navCount  = document.getElementById('navCartCount');
-
-    navCount.textContent = cart.length;
-
-    if (cart.length === 0) {
-        emptyMsg.style.display = 'block';
-        itemsWrap.style.display = 'none';
-        submitBtn.disabled = true;
-        return;
-    }
-
-    emptyMsg.style.display = 'none';
-    itemsWrap.style.display = 'block';
-    submitBtn.disabled = false;
-
-    itemsEl.innerHTML = cart.map((c, i) => `
-        <div class="cart-item">
-            <div class="ci-num">${String(i + 1).padStart(2, '0')}</div>
-            <div class="ci-info">
-                <div class="ci-name">${c.name}</div>
-                <div class="ci-price">${fmtPrice(c.price)}</div>
-            </div>
-            <button class="ci-remove" onclick="removeFromCart(${c.package_id})" title="Hapus">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            </button>
-        </div>
-    `).join('');
-
-    const total = cart.reduce((s, c) => s + (c.price * c.qty), 0);
-    totalEl.textContent = fmtPrice(total);
-}
-
-// ── SUBMIT
-async function submitCart() {
-    if (cart.length === 0) { showToast('Keranjang masih kosong.', 'error'); return; }
-    if (!currentToken) { showToast('Token tidak valid.', 'error'); return; }
-
-    normalizeCart();
-    if (cart.length === 0) { showToast('Keranjang masih kosong.', 'error'); return; }
-
-    if (!confirm(`Konfirmasi ${cart.length} layanan? Setelah dikirim tidak bisa diubah lagi.`)) return;
-
-    showLoading(true);
-    document.getElementById('submitBtn').disabled = true;
-    setStep(3);
-
-    try {
-        const res = await fetch('{{ route("orders.guest.submit") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            },
-            body: JSON.stringify({
-                token: currentToken,
-                items: cart.map(c => ({ package_id: c.package_id, qty: c.qty })),
-            }),
-        });
-        const raw = await res.text();
-        let data;
-        try { data = JSON.parse(raw); } catch { data = null; }
-
-        if (!res.ok || !data || !data.success) {
-            let msg;
-            if (data && data.message) {
-                msg = data.message;
-            } else if (!data && raw) {
-                const snippet = raw.replace(/\s+/g, ' ').trim().slice(0, 140);
-                msg = `Gagal menyimpan. (HTTP ${res.status}) — ${snippet}`;
-            } else {
-                msg = `Gagal menyimpan. (HTTP ${res.status})`;
+            if (!data.valid) {
+                errMsg.textContent = data.message || 'Kode tidak valid.';
+                errEl.classList.add('show');
+                inp.classList.add('error');
+                return;
             }
-            showToast(msg, 'error');
+
+            currentToken = token;
+            allPackages  = data.packages || [];
+
+            // Tampilkan info order di sidebar
+            document.getElementById('siName').textContent = data.customer_name || '—';
+            document.getElementById('siCode').textContent = data.order_code || '—';
+            renderStatusPill(data.status);
+
+            // Pre-fill keranjang dari existing items jika ada
+            if (data.existing_items && data.existing_items.length > 0 && cart.length === 0) {
+                cart = data.existing_items.map(i => ({
+                    package_id: i.package_id,
+                    name: i.name,
+                    price: i.price,
+                    qty: i.qty,
+                }));
+                saveCart();
+                showToast('Pilihan sebelumnya dimuat ke keranjang.', 'success');
+            }
+
+            normalizeCart();
+
+            // Switch ke step 2
+            document.getElementById('tokenPanel').style.display = 'none';
+            document.getElementById('browsePanel').style.display = 'block';
+            document.getElementById('sidebarPanel').style.display = 'block';
+            document.getElementById('stepsHeader').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            buildCategoryTabs();
+            renderPackages();
+            renderCart();
             setStep(2);
-            document.getElementById('submitBtn').disabled = false;
+
+        } catch (e) {
+            errMsg.textContent = 'Terjadi kesalahan. Coba lagi.';
+            errEl.classList.add('show');
+            inp.classList.add('error');
+        } finally {
+            showLoading(false);
+            document.getElementById('validateBtn').disabled = false;
+        }
+    }
+
+    function renderStatusPill(status) {
+        const labels = {
+            draft: 'Draft',
+            offered: 'Penawaran Dikirim',
+            form_required: 'Menunggu Pengisian',
+            approved: 'Disetujui',
+            processing: 'Diproses',
+            done: 'Selesai',
+        };
+        const el = document.getElementById('siStatus');
+        el.innerHTML = `<span class="status-pill ${status}">${labels[status] || status}</span>`;
+    }
+
+    // ── CATEGORIES
+    function buildCategoryTabs() {
+        const cats = [...new Set(allPackages.map(p => p.category_id).filter(Boolean))];
+        const container = document.getElementById('categoryTabs');
+        const catNames = {};
+        allPackages.forEach(p => {
+            if (p.category_id && p.category_name && !catNames[p.category_id]) {
+                catNames[p.category_id] = p.category_name;
+            }
+        });
+
+        let html = `<button class="tab-btn active" onclick="filterByCategory('all', this)">Semua</button>`;
+        cats.forEach(c => {
+            const name = catNames[c] || c;
+            html += `<button class="tab-btn" onclick="filterByCategory('${c}', this)">${name}</button>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function filterByCategory(catId, btn) {
+        activeCategory = catId;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderPackages();
+    }
+
+    function filterPackages() { renderPackages(); }
+
+    function renderPackages() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const list   = document.getElementById('packagesList');
+
+        let filtered = allPackages.filter(p => {
+            const matchCat = activeCategory === 'all' || p.category_id === activeCategory;
+            const matchSearch = !search || p.name.toLowerCase().includes(search);
+            return matchCat && matchSearch;
+        });
+
+        if (filtered.length === 0) {
+            list.innerHTML = `<div class="empty-state">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <div>Tidak ada layanan ditemukan.</div>
+            </div>`;
             return;
         }
 
-        // Clear cart
-        cart = [];
+        list.innerHTML = filtered.map(p => {
+            const inCart = isInCart(p.id);
+            const showPrice = false;
+
+            return `<div class="pkg-row ${inCart ? 'in-cart' : ''}" id="pkgrow-${p.id}">
+                <div class="pkg-row-left">
+                    <div class="pkg-row-name">${p.name}</div>
+                    <div class="pkg-row-cat">${p.description ? p.description.substring(0,60) + (p.description.length > 60 ? '…' : '') : '—'}</div>
+                </div>
+                ${showPrice ? `<div class="pkg-row-price">${fmtPrice(p.base_price)}</div>` : ''}
+                <button class="add-btn ${inCart ? 'remove' : ''}"
+                        onclick="toggleCart(${p.id})"
+                        title="${inCart ? 'Hapus dari keranjang' : 'Tambah ke keranjang'}">
+                    ${inCart ? '✓' : '+'}
+                </button>
+            </div>`;
+        }).join('');
+    }
+
+    // ── CART ACTIONS
+    function toggleCart(pkgId) {
+        if (isInCart(pkgId)) {
+            removeFromCart(pkgId);
+        } else {
+            addToCart(pkgId);
+        }
+    }
+
+    function addToCart(pkgId) {
+        const pkg = allPackages.find(p => p.id === pkgId);
+        if (!pkg) return;
+        if (isInCart(pkgId)) { showToast('Layanan sudah ada di keranjang.'); return; }
+
+        cart.push({ package_id: pkg.id, name: pkg.name, price: pkg.base_price, qty: 1 });
         saveCart();
 
-        // Show success
-        document.getElementById('browsePanel').style.display = 'none';
-        document.getElementById('sidebarPanel').style.display = 'none';
-        document.getElementById('stepsHeader').style.display = 'none';
-        document.getElementById('successPanel').style.display = 'block';
-        document.getElementById('successCode').textContent = data.order_code || '—';
-        document.getElementById('navCartCount').textContent = '0';
+        // Animate bubble
+        const bubble = document.getElementById('navCartCount');
+        bubble.style.transform = 'scale(1.4)';
+        setTimeout(() => bubble.style.transform = '', 200);
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    } catch (e) {
-        showToast('Terjadi kesalahan. Coba lagi.', 'error');
-        setStep(2);
-        document.getElementById('submitBtn').disabled = false;
-    } finally {
-        showLoading(false);
+        renderCart();
+        renderPackages();
+        showToast('Ditambahkan: ' + pkg.name, 'success');
     }
-}
 
-function scrollToCart() {
-    document.getElementById('cartPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
+    function removeFromCart(pkgId) {
+        const pkg = cart.find(c => c.package_id === pkgId);
+        cart = cart.filter(c => c.package_id !== pkgId);
+        saveCart();
+        renderCart();
+        renderPackages();
+        if (pkg) showToast('Dihapus: ' + pkg.name);
+    }
 
-// ── Enter key on token input
-document.getElementById('tokenInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') validateToken();
-});
+    function clearCart() {
+        if (cart.length === 0) return;
+        Swal.fire({
+            title: 'Kosongkan keranjang?',
+            text: 'Semua layanan yang dipilih akan dihapus.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#EA580C',
+            cancelButtonColor: '#64748B',
+            confirmButtonText: 'Ya, kosongkan',
+            cancelButtonText: 'Batal',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                cart = [];
+                saveCart();
+                renderCart();
+                renderPackages();
+                showToast('Keranjang dikosongkan.', 'success');
+            }
+        });
+    }
 
-// ── Init
-normalizeCart();
-renderCart();
+    function renderCart() {
+        const emptyMsg  = document.getElementById('cartEmptyMsg');
+        const itemsWrap = document.getElementById('cartItemsWrap');
+        const itemsEl   = document.getElementById('cartItems');
+        const totalEl   = document.getElementById('cartTotal');
+        const submitBtn = document.getElementById('submitBtn');
+        const navCount  = document.getElementById('navCartCount');
+
+        navCount.textContent = cart.length;
+
+        if (cart.length === 0) {
+            emptyMsg.style.display = 'block';
+            itemsWrap.style.display = 'none';
+            submitBtn.disabled = true;
+            return;
+        }
+
+        emptyMsg.style.display = 'none';
+        itemsWrap.style.display = 'block';
+        submitBtn.disabled = false;
+
+        itemsEl.innerHTML = cart.map((c, i) => `
+            <div class="cart-item">
+                <div class="ci-num">${String(i + 1).padStart(2, '0')}</div>
+                <div class="ci-info">
+                    <div class="ci-name">${c.name}</div>
+                </div>
+                <button class="ci-remove" onclick="removeFromCart(${c.package_id})" title="Hapus">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+        `).join('');
+
+        const total = cart.reduce((s, c) => s + (c.price * c.qty), 0);
+        totalEl.textContent = fmtPrice(total);
+    }
+
+    // ── SUBMIT
+    async function submitCart() {
+        if (cart.length === 0) { showToast('Keranjang masih kosong.', 'error'); return; }
+        if (!currentToken) { showToast('Token tidak valid.', 'error'); return; }
+
+        normalizeCart();
+        if (cart.length === 0) { showToast('Keranjang masih kosong.', 'error'); return; }
+
+        const result = await Swal.fire({
+            title: 'Konfirmasi Pilihan',
+            html: `Anda akan mengirim <strong>${cart.length} layanan</strong>.<br>Setelah dikirim, pilihan <strong>tidak dapat diubah lagi</strong>.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#EA580C',
+            cancelButtonColor: '#64748B',
+            confirmButtonText: 'Ya, kirim sekarang',
+            cancelButtonText: 'Batal',
+        });
+
+        if (!result.isConfirmed) return;
+
+        showLoading(true);
+        document.getElementById('submitBtn').disabled = true;
+        setStep(3);
+
+        try {
+            const res = await fetch('{{ route("orders.guest.submit") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({
+                    token: currentToken,
+                    items: cart.map(c => ({ package_id: c.package_id, qty: c.qty })),
+                }),
+            });
+            const raw = await res.text();
+            let data;
+            try { data = JSON.parse(raw); } catch { data = null; }
+
+            if (!res.ok || !data || !data.success) {
+                let msg;
+                if (data && data.message) {
+                    msg = data.message;
+                } else if (!data && raw) {
+                    const snippet = raw.replace(/\s+/g, ' ').trim().slice(0, 140);
+                    msg = `Gagal menyimpan. (HTTP ${res.status}) — ${snippet}`;
+                } else {
+                    msg = `Gagal menyimpan. (HTTP ${res.status})`;
+                }
+                Swal.fire({ title: 'Gagal!', text: msg, icon: 'error', confirmButtonColor: '#EA580C' });
+                setStep(2);
+                document.getElementById('submitBtn').disabled = false;
+                return;
+            }
+
+            // Clear cart
+            cart = [];
+            saveCart();
+
+            // Show success
+            document.getElementById('browsePanel').style.display = 'none';
+            document.getElementById('sidebarPanel').style.display = 'none';
+            document.getElementById('stepsHeader').style.display = 'none';
+            document.getElementById('successPanel').style.display = 'block';
+            document.getElementById('successCode').textContent = data.order_code || '—';
+            document.getElementById('navCartCount').textContent = '0';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        } catch (e) {
+            Swal.fire({ title: 'Terjadi Kesalahan', text: 'Terjadi kesalahan. Silakan coba lagi.', icon: 'error', confirmButtonColor: '#EA580C' });
+            setStep(2);
+            document.getElementById('submitBtn').disabled = false;
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function scrollToCart() {
+        document.getElementById('cartPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ── Enter key on token input
+    document.getElementById('tokenInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') validateToken();
+    });
+
+    // ── Init
+    normalizeCart();
+    renderCart();
 </script>
 
 </body>

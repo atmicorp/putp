@@ -81,6 +81,7 @@
         td { padding: 14px 20px; font-size: 13.5px; vertical-align: middle; }
 
         .order-code { font-weight: 700; font-size: 13px; color: #1c1917; font-family: monospace; letter-spacing: 0.3px; }
+        .token { font-weight: 700; font-size: 13px; color: #1c1917; font-family: monospace; letter-spacing: 0.3px; }
         .customer-name  { font-weight: 600; font-size: 13.5px; color: #1c1917; }
         .customer-email { font-size: 12px; color: #9ca3af; margin-top: 1px; }
 
@@ -95,7 +96,7 @@
         .badge-rejected   { background: #fef2f2; color: #dc2626; }
         .badge-processing { background: #fff7ed; color: #ea580c; }
         .badge-done       { background: #f0fdf4; color: #15803d; }
-        .badge-form_required { background: #fefce8; color: #ca8a04; }
+        .badge-submit { background: #fefce8; color: #ca8a04; }
 
         .date-text { font-size: 12.5px; color: #6b7280; }
 
@@ -140,7 +141,7 @@
         .dot-rejected   { background: #dc2626; }
         .dot-processing { background: #ea580c; }
         .dot-done       { background: #15803d; }
-        .dot-form_required { background: #ca8a04; }
+        .dot-submit { background: #ca8a04; }
     </style>
 
     <div class="dash-title">Order</div>
@@ -205,6 +206,7 @@
                 <thead>
                     <tr>
                         <th>Order Code</th>
+                        <th>Token</th>
                         <th>Customer</th>
                         <th>Status</th>
                         <th>Dibuat oleh</th>
@@ -217,6 +219,9 @@
                         <tr>
                             <td>
                                 <span class="order-code">{{ $order->order_code }}</span>
+                            </td>
+                            <td>
+                                <span class="token">{{ $order->access_token }}</span>
                             </td>
                             <td>
                                 <div class="customer-name">{{ $order->customer_name }}</div>

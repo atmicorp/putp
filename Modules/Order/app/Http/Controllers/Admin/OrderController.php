@@ -3,9 +3,11 @@
 namespace Modules\Order\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderOffer;
 use App\Models\OrderOfferDetail;
+use App\Models\Package;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -25,16 +27,29 @@ class OrderController extends Controller
 
     public function create()
     {
-        return view('order::admin.orders.create');
+        // Ambil semua kategori beserta paket aktifnya
+        $categories = Category::with([
+            'packages' => fn($q) => $q->where('is_active', true)->orderBy('name'),
+        ])->get();
+    
+        return view('order::admin.orders.create', compact('categories'));
     }
-
+    
     public function store(Request $request)
     {
         $data = $request->validate([
-            'customer_name'  => ['required', 'string', 'max:255'],
-            'customer_email' => ['nullable', 'email', 'max:255'],
+            'customer_name'          => ['required', 'string', 'max:255'],
+            'customer_email'         => ['nullable', 'email', 'max:255'],
+            'filled_by'              => ['required', 'in:customer,admin'],
+    
+            // Validasi items hanya jika mode admin
+            'items'                  => ['required_if:filled_by,admin', 'array', 'min:1'],
+            'items.*.package_id'     => ['required_if:filled_by,admin', 'integer', 'exists:packages,id'],
+            'items.*.qty'            => ['required_if:filled_by,admin', 'integer', 'min:1'],
+            // custom_price opsional; jika tidak dikirim / null, fallback ke base_price package
+            'items.*.custom_price'   => ['nullable', 'numeric', 'min:0'],
         ]);
-
+    
         $order = Order::create([
             'customer_name'  => $data['customer_name'],
             'customer_slug'  => Str::slug($data['customer_name']),
@@ -42,10 +57,32 @@ class OrderController extends Controller
             'created_by'     => auth()->id(),
             'status'         => Order::STATUS_DRAFT,
         ]);
-
-        return redirect()->route('admin.orders.show', $order)
-            ->with('success', 'Order berhasil dibuat. Item layanan akan dipilih oleh guest melalui token.');
+    
+        if ($data['filled_by'] === 'admin' && !empty($data['items'])) {
+            foreach ($data['items'] as $item) {
+                $package = Package::findOrFail($item['package_id']);
+    
+                // Gunakan custom_price jika dikirim, fallback ke base_price
+                $unitPrice = isset($item['custom_price']) && $item['custom_price'] !== null
+                    ? (float) $item['custom_price']
+                    : (float) $package->base_price;
+    
+                $order->offerDetails()->create([
+                    'package_id' => $package->id,
+                    'qty'        => $item['qty'],
+                    'unit_price' => $unitPrice,
+                    'subtotal'   => $unitPrice * $item['qty'],
+                ]);
+            }
+        }
+    
+        $message = $data['filled_by'] === 'admin'
+            ? 'Order berhasil dibuat beserta paket layanan yang dipilih.'
+            : 'Order berhasil dibuat. Paket layanan akan dipilih oleh guest melalui token.';
+    
+        return redirect()->route('admin.orders.show', $order)->with('success', $message);
     }
+
 
     public function show(Order $order)
     {
@@ -68,6 +105,15 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order)
     {
+        // Strip thousand separator dari price sebelum validasi
+        $items = $request->input('items', []);
+        foreach ($items as $i => $item) {
+            if (isset($item['price'])) {
+                $items[$i]['price'] = str_replace('.', '', $item['price']);
+            }
+        }
+        $request->merge(['items' => $items]);
+
         $data = $request->validate([
             'customer_name'  => ['required', 'string', 'max:255'],
             'customer_email' => ['nullable', 'email', 'max:255'],
@@ -98,11 +144,13 @@ class OrderController extends Controller
             'terms' => $data['terms'] ?? null,
         ]);
 
-        $allowedDetailIds = $offer->details->pluck('id')->all();
+        $allowedDetailIds = $offer->details()->pluck('id')->all();
+        
         foreach ($data['items'] as $item) {
-            if (! in_array($item['id'], $allowedDetailIds, true)) {
+            if (! in_array((int) $item['id'], $allowedDetailIds, true)) {
                 continue;
             }
+            
             OrderOfferDetail::where('id', $item['id'])
                 ->update([
                     'qty'   => (int) $item['qty'],

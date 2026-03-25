@@ -39,12 +39,76 @@
         .kpi-card:nth-child(3) .kpi-icon { background: #eff6ff; }
         .kpi-card:nth-child(4) .kpi-icon { background: #f0fdf4; }
 
-        /* ── Middle row ── */
+        /* ── Filter Bar ── */
+        .filter-bar {
+            background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+            padding: 14px 20px; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+        .filter-bar-label {
+            font-size: 12px; font-weight: 600; color: #6b7280;
+            text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
+        }
+        .filter-tabs {
+            display: flex; gap: 4px; background: #f3f4f6;
+            border-radius: 8px; padding: 3px;
+        }
+        .filter-tab {
+            padding: 5px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600;
+            cursor: pointer; border: none; background: transparent; color: #6b7280;
+            transition: all 0.15s; font-family: inherit;
+        }
+        .filter-tab.active {
+            background: #fff; color: #ea580c;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .filter-inputs {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        }
+        .filter-input {
+            padding: 5px 10px; border: 1px solid #e5e7eb; border-radius: 7px;
+            font-size: 12.5px; color: #374151; background: #fafafa;
+            font-family: inherit; outline: none; transition: border-color 0.15s;
+        }
+        .filter-input:focus { border-color: #ea580c; background: #fff; }
+        .filter-sep { font-size: 12px; color: #9ca3af; }
+
+        .filter-apply-btn {
+            padding: 5px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 700;
+            cursor: pointer; border: none; background: #ea580c; color: #fff;
+            font-family: inherit; transition: background 0.15s; display: flex; align-items: center; gap: 5px;
+        }
+        .filter-apply-btn:hover { background: #c2410c; }
+        .filter-apply-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .filter-reset-btn {
+            padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 600;
+            cursor: pointer; border: 1px solid #e5e7eb; background: #fff; color: #6b7280;
+            font-family: inherit; transition: all 0.15s;
+        }
+        .filter-reset-btn:hover { border-color: #9ca3af; color: #374151; }
+
+        /* ── Loading state ── */
+        .chart-loading {
+            display: none; position: absolute; inset: 0;
+            background: rgba(255,255,255,0.75); border-radius: 12px;
+            align-items: center; justify-content: center; z-index: 10;
+        }
+        .chart-loading.visible { display: flex; }
+        .spinner {
+            width: 24px; height: 24px; border: 3px solid #f3f4f6;
+            border-top-color: #ea580c; border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Mid row ── */
         .mid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
 
         /* ── Chart / Section Cards ── */
         .section-card {
-            background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;
+            background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+            overflow: hidden; position: relative;
         }
         .section-header {
             display: flex; align-items: center; justify-content: space-between;
@@ -54,7 +118,7 @@
         .section-sub   { font-size: 12px; color: #9ca3af; margin-top: 2px; }
         .section-body  { padding: 20px; }
 
-        /* ── Status badges (same as order list) ── */
+        /* ── Status badges ── */
         .badge {
             display: inline-flex; align-items: center; gap: 4px;
             padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
@@ -65,7 +129,7 @@
         .badge-rejected      { background: #fef2f2; color: #dc2626; }
         .badge-processing    { background: #fff7ed; color: #ea580c; }
         .badge-done          { background: #f0fdf4; color: #15803d; }
-        .badge-form_required { background: #fefce8; color: #ca8a04; }
+        .badge-submit        { background: #fefce8; color: #ca8a04; }
 
         .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
         .dot-draft         { background: #9ca3af; }
@@ -74,7 +138,7 @@
         .dot-rejected      { background: #dc2626; }
         .dot-processing    { background: #ea580c; }
         .dot-done          { background: #15803d; }
-        .dot-form_required { background: #ca8a04; }
+        .dot-submit        { background: #ca8a04; }
 
         /* ── Status distribution list ── */
         .status-list { display: flex; flex-direction: column; gap: 10px; }
@@ -86,7 +150,6 @@
 
         /* ── Recent orders table ── */
         .table-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
-
         .table-toolbar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 16px 20px; border-bottom: 1px solid #f3f4f6;
@@ -116,12 +179,17 @@
         .act-view       { background: #fff7ed; color: #ea580c; }
         .act-view:hover { background: #ffedd5; }
 
-        .see-all-link {
-            font-size: 12.5px; font-weight: 600; color: #ea580c; text-decoration: none;
-        }
+        .see-all-link { font-size: 12.5px; font-weight: 600; color: #ea580c; text-decoration: none; }
         .see-all-link:hover { text-decoration: underline; }
 
-        /* ── Chart canvas ── */
+        /* ── Filter active badge ── */
+        .filter-active-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 20px;
+            background: #fff7ed; color: #ea580c;
+            font-size: 11.5px; font-weight: 600; border: 1px solid #fed7aa;
+        }
+
         #monthlyChart { width: 100% !important; }
     </style>
 
@@ -164,6 +232,53 @@
         </div>
     </div>
 
+    {{-- ═══ FILTER BAR ═══ --}}
+    <div class="filter-bar" id="filterBar">
+        <span class="filter-bar-label">Filter:</span>
+
+        {{-- Tabs --}}
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-type="default" onclick="switchTab(this, 'default')">6 Bulan</button>
+            <button class="filter-tab"        data-type="month"   onclick="switchTab(this, 'month')">Bulan</button>
+            <button class="filter-tab"        data-type="week"    onclick="switchTab(this, 'week')">Minggu</button>
+            <button class="filter-tab"        data-type="range"   onclick="switchTab(this, 'range')">Range</button>
+        </div>
+
+        {{-- Input: Month --}}
+        <div class="filter-inputs" id="input-month" style="display:none">
+            <input type="month" id="monthPicker" class="filter-input"
+                   value="{{ now()->format('Y-m') }}" max="{{ now()->format('Y-m') }}">
+        </div>
+
+        {{-- Input: Week --}}
+        <div class="filter-inputs" id="input-week" style="display:none">
+            <input type="week" id="weekPicker" class="filter-input"
+                   value="{{ now()->format('Y') }}-W{{ now()->format('W') }}">
+        </div>
+
+        {{-- Input: Range --}}
+        <div class="filter-inputs" id="input-range" style="display:none">
+            <input type="date" id="dateFrom" class="filter-input"
+                   value="{{ now()->subDays(29)->format('Y-m-d') }}" max="{{ now()->format('Y-m-d') }}">
+            <span class="filter-sep">→</span>
+            <input type="date" id="dateTo" class="filter-input"
+                   value="{{ now()->format('Y-m-d') }}" max="{{ now()->format('Y-m-d') }}">
+        </div>
+
+        <button class="filter-apply-btn" id="applyBtn" onclick="applyFilter()">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+            </svg>
+            Terapkan
+        </button>
+
+        <button class="filter-reset-btn" id="resetBtn" style="display:none" onclick="resetFilter()">
+            Reset
+        </button>
+
+        <span class="filter-active-badge" id="filterBadge" style="display:none"></span>
+    </div>
+
     {{-- Mid Row: Chart + Status Distribution --}}
     <div class="mid-row">
 
@@ -171,11 +286,14 @@
         <div class="section-card">
             <div class="section-header">
                 <div>
-                    <div class="section-title">Order per Bulan</div>
-                    <div class="section-sub">6 bulan terakhir</div>
+                    <div class="section-title">Order per Periode</div>
+                    <div class="section-sub" id="chartSubtitle">6 bulan terakhir</div>
                 </div>
             </div>
-            <div class="section-body">
+            <div class="section-body" style="position:relative">
+                <div class="chart-loading" id="chartLoading">
+                    <div class="spinner"></div>
+                </div>
                 <canvas id="monthlyChart" height="200"></canvas>
             </div>
         </div>
@@ -185,26 +303,29 @@
             <div class="section-header">
                 <div>
                     <div class="section-title">Status Order</div>
-                    <div class="section-sub">Distribusi semua order</div>
+                    <div class="section-sub">Distribusi berdasarkan filter aktif</div>
                 </div>
             </div>
-            <div class="section-body">
+            <div class="section-body" style="position:relative">
+                <div class="chart-loading" id="statusLoading">
+                    <div class="spinner"></div>
+                </div>
                 @php
                     $barColors = [
                         'draft'         => '#9ca3af',
+                        'submit'        => '#ca8a04',
                         'offered'       => '#2563eb',
                         'rejected'      => '#dc2626',
-                        'form_required' => '#ca8a04',
                         'approved'      => '#059669',
                         'processing'    => '#7c3aed',
                         'done'          => '#16a34a',
                     ];
                     $total = max($totalOrders, 1);
                 @endphp
-                <div class="status-list">
+                <div class="status-list" id="statusList">
                     @foreach($statuses as $key => $s)
                         @php $cnt = $countByStatus[$key] ?? 0; @endphp
-                        <div class="status-row">
+                        <div class="status-row" data-status="{{ $key }}">
                             <span class="status-row-label">
                                 <span class="badge badge-{{ $key }}">
                                     <span class="dot dot-{{ $key }}"></span>
@@ -213,6 +334,7 @@
                             </span>
                             <div class="status-bar-wrap">
                                 <div class="status-bar"
+                                     data-color="{{ $barColors[$key] ?? '#9ca3af' }}"
                                      style="width: {{ round($cnt / $total * 100) }}%; background: {{ $barColors[$key] ?? '#9ca3af' }};"></div>
                             </div>
                             <span class="status-row-count">{{ $cnt }}</span>
@@ -281,18 +403,24 @@
     {{-- Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
     <script>
-        const labels = {!! $chartLabels !!};
-        const counts = {!! $chartCounts !!};
+        // ── Initial data from server ──────────────────────────────────────────
+        const FILTER_URL    = '{{ route('admin.dashboard.filter') }}';
+        const CSRF          = '{{ csrf_token() }}';
+        const initialLabels = {!! $chartLabels !!};
+        const initialCounts = {!! $chartCounts !!};
 
+        // ── State ─────────────────────────────────────────────────────────────
+        let currentType = 'default';
+
+        // ── Chart setup ───────────────────────────────────────────────────────
         const ctx = document.getElementById('monthlyChart').getContext('2d');
-
-        new Chart(ctx, {
+        const chart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels,
+                labels: initialLabels,
                 datasets: [{
                     label: 'Order',
-                    data: counts,
+                    data: initialCounts,
                     backgroundColor: 'rgba(234,88,12,0.15)',
                     borderColor: '#ea580c',
                     borderWidth: 2,
@@ -310,28 +438,137 @@
                         bodyColor: '#d1d5db',
                         padding: 10,
                         cornerRadius: 8,
-                        callbacks: {
-                            label: ctx => ` ${ctx.parsed.y} order`
-                        }
+                        callbacks: { label: ctx => ` ${ctx.parsed.y} order` }
                     }
                 },
                 scales: {
                     x: {
                         grid: { display: false },
-                        ticks: { font: { family: 'Sora, sans-serif', size: 12 }, color: '#9ca3af' }
+                        ticks: { font: { family: 'Sora, sans-serif', size: 11 }, color: '#9ca3af', maxRotation: 45 }
                     },
                     y: {
                         beginAtZero: true,
                         grid: { color: '#f3f4f6' },
                         ticks: {
                             font: { family: 'Sora, sans-serif', size: 12 },
-                            color: '#9ca3af',
-                            stepSize: 1,
-                            precision: 0
+                            color: '#9ca3af', stepSize: 1, precision: 0
                         }
                     }
                 }
             }
+        });
+
+        // ── Tab switching ──────────────────────────────────────────────────────
+        function switchTab(btn, type) {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            currentType = type;
+
+            ['month', 'week', 'range'].forEach(t => {
+                document.getElementById('input-' + t).style.display = (t === type) ? 'flex' : 'none';
+            });
+
+            // Auto-apply for 'default' (no inputs)
+            if (type === 'default') applyFilter();
+        }
+
+        // ── Apply filter ───────────────────────────────────────────────────────
+        async function applyFilter() {
+            const params = new URLSearchParams({ filter_type: currentType });
+            let badgeText = '6 bulan terakhir';
+            let subtitleText = '6 bulan terakhir';
+
+            if (currentType === 'month') {
+                const v = document.getElementById('monthPicker').value;
+                if (!v) return;
+                params.set('month', v);
+                const d = new Date(v + '-01');
+                const lbl = d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+                badgeText = lbl; subtitleText = 'Per hari — ' + lbl;
+            } else if (currentType === 'week') {
+                const v = document.getElementById('weekPicker').value;
+                if (!v) return;
+                params.set('week', v.replace('W', '').replace('-', '-'));
+                badgeText = 'Minggu ' + v; subtitleText = 'Per hari — ' + v;
+            } else if (currentType === 'range') {
+                const from = document.getElementById('dateFrom').value;
+                const to   = document.getElementById('dateTo').value;
+                if (!from || !to) return;
+                if (from > to) { alert('Tanggal awal tidak boleh lebih besar dari tanggal akhir.'); return; }
+                params.set('date_from', from);
+                params.set('date_to',   to);
+                badgeText = from + ' → ' + to;
+                subtitleText = from + ' s/d ' + to;
+            }
+
+            // Show loaders
+            setLoading(true);
+
+            try {
+                const res  = await fetch(FILTER_URL + '?' + params.toString(), {
+                    headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' }
+                });
+                const data = await res.json();
+
+                // Update chart
+                chart.data.labels   = data.chart.labels;
+                chart.data.datasets[0].data = data.chart.counts;
+                chart.update();
+
+                // Update subtitle
+                document.getElementById('chartSubtitle').textContent = subtitleText;
+
+                // Update status bars
+                const total = Math.max(data.totalOrders, 1);
+                data.statuses.forEach(s => {
+                    const row   = document.querySelector(`.status-row[data-status="${s.key}"]`);
+                    if (!row) return;
+                    const bar   = row.querySelector('.status-bar');
+                    const count = row.querySelector('.status-row-count');
+                    const pct   = Math.round(s.count / total * 100);
+                    bar.style.width = pct + '%';
+                    count.textContent = s.count;
+                });
+
+                // Show badge + reset
+                if (currentType !== 'default') {
+                    document.getElementById('filterBadge').textContent  = '● ' + badgeText;
+                    document.getElementById('filterBadge').style.display = 'inline-flex';
+                    document.getElementById('resetBtn').style.display    = 'inline-block';
+                } else {
+                    document.getElementById('filterBadge').style.display = 'none';
+                    document.getElementById('resetBtn').style.display    = 'none';
+                }
+            } catch (e) {
+                console.error('Filter error:', e);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // ── Reset ─────────────────────────────────────────────────────────────
+        function resetFilter() {
+            currentType = 'default';
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('[data-type="default"]').classList.add('active');
+            ['month', 'week', 'range'].forEach(t => {
+                document.getElementById('input-' + t).style.display = 'none';
+            });
+            document.getElementById('filterBadge').style.display = 'none';
+            document.getElementById('resetBtn').style.display    = 'none';
+            applyFilter();
+        }
+
+        // ── Loader helper ──────────────────────────────────────────────────────
+        function setLoading(on) {
+            document.getElementById('chartLoading').classList.toggle('visible', on);
+            document.getElementById('statusLoading').classList.toggle('visible', on);
+            document.getElementById('applyBtn').disabled = on;
+        }
+
+        // ── Date-from guard ────────────────────────────────────────────────────
+        document.getElementById('dateFrom').addEventListener('change', function () {
+            document.getElementById('dateTo').min = this.value;
         });
     </script>
 </x-app-sidebar>
