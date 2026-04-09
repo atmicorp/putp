@@ -29,6 +29,9 @@ Route::middleware(['web', 'throttle:30,1'])->group(function () {
         [GuestOrderController::class, 'reject'])->name('orders.guest.reject');
 });
 
+Route::post('companies/quick-create', [AdminOrderController::class, 'quickCreateCompany'])->name('admin.companies.quick-create');
+Route::post('contacts/quick-create',  [AdminOrderController::class, 'quickCreateContact']) ->name('admin.contacts.quick-create');
+
 
 /*
 |--------------------------------------------------------------------------

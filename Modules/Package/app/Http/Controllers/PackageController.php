@@ -46,7 +46,7 @@ class PackageController extends Controller
     public function create()
     {
         $machines  = Machine::where('is_active', true)->orderBy('name')->get();
-        $operators = Operator::orderBy('name')->get();
+        $operators = Operator::all()->sortBy(fn($o) => $o->getAttributes()[array_key_first($o->getAttributes())]);
 
         return view('package::create', compact('machines', 'operators'));
     }
@@ -78,7 +78,7 @@ class PackageController extends Controller
     public function edit(Package $package)
     {
         $machines  = Machine::where('is_active', true)->orderBy('name')->get();
-        $operators = Operator::orderBy('name')->get();
+        $operators = Operator::all()->sortBy(fn($o) => $o->getAttributes()[array_key_first($o->getAttributes())]);
 
         return view('package::edit', compact('package', 'machines', 'operators'));
     }

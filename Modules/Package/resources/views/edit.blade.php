@@ -202,7 +202,7 @@
                             <option value="">-- Tidak ada --</option>
                             @foreach($operators as $operator)
                                 <option value="{{ $operator->id }}" {{ old('pic_operator_id', $package->pic_operator_id) == $operator->id ? 'selected' : '' }}>
-                                    {{ $operator->name }}
+                                    {{ $operator->user->name }} ({{ $operator->user->email }})
                                 </option>
                             @endforeach
                         </select>

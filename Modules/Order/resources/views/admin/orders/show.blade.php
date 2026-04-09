@@ -206,12 +206,16 @@
 
                     <div class="info-grid">
                         <div class="info-block">
-                            <div class="info-label">Nama Customer</div>
-                            <div class="info-val">{{ $order->customer_name }}</div>
+                            <div class="info-label">Nama Perusahaan</div>
+                            <div class="info-val">{{ $order->company->name }}</div>
                         </div>
                         <div class="info-block">
-                            <div class="info-label">Email Customer</div>
-                            <div class="info-val" style="font-size:13px;">{{ $order->customer_email }}</div>
+                            <div class="info-label">Nama Kontak</div>
+                            <div class="info-val">{{ $order->contact->name }}</div>
+                        </div>
+                        <div class="info-block">
+                            <div class="info-label">Email Kontak</div>
+                            <div class="info-val" style="font-size:13px;">{{ $order->contact->email }}</div>
                         </div>
                         @if($order->sent_at)
                         <div class="info-block">

@@ -829,6 +829,17 @@
                 <span class="nav-label">Order</span>
             </a>
 
+            <a href="{{ route('customer.index') }}"
+               data-label="Customer"
+               class="nav-item {{ request()->routeIs('customer.*') ? 'active' : '' }}"
+               aria-current="{{ request()->routeIs('customer.*') ? 'page' : 'false' }}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 21h18M5 21V7a2 2 0 012-2h10a2 2 0 012 2v14M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"/>
+                </svg>
+                <span class="nav-label">Customer</span>
+            </a>
+
             <div class="nav-section-label">Item</div>
 
             <a href="{{ route('category.index') }}"

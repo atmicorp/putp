@@ -4,5 +4,6 @@
     "Machine": true,
     "Package": true,
     "Test": true,
-    "Category": true
+    "Category": true,
+    "Customer": true
 }

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\OrderOffer;
+use App\Models\Company;
+use App\Models\Contact;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -16,9 +18,8 @@ class Order extends Model
     protected $fillable = [
         'order_code',
         'access_token',
-        'customer_name',
-        'customer_slug',
-        'customer_email',
+        'company_id',
+        'contact_id',
         'status',
         'sent_at',
         'created_by',
@@ -38,7 +39,7 @@ class Order extends Model
     */
 
     public const STATUS_DRAFT        = 'draft';
-    public const STATUS_SUBMIT        = 'submit';
+    public const STATUS_SUBMIT       = 'submit';
     public const STATUS_OFFERED      = 'offered';
     public const STATUS_REJECTED     = 'rejected';
     public const STATUS_FORM_REQUIRED = 'form_required';
@@ -67,10 +68,6 @@ class Order extends Model
                 } while (self::where('order_code', $order->order_code)->exists());
             }
 
-            if (blank($order->customer_slug) && filled($order->customer_name)) {
-                $order->customer_slug = Str::slug($order->customer_name);
-            }
-
             if (blank($order->status)) {
                 $order->status = self::STATUS_DRAFT;
             }
@@ -92,5 +89,14 @@ class Order extends Model
     {
         return $this->hasOne(OrderOffer::class);
     }
-    
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class);
+    }
 }

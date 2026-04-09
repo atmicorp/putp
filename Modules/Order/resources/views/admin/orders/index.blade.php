@@ -224,8 +224,8 @@
                                 <span class="token">{{ $order->access_token }}</span>
                             </td>
                             <td>
-                                <div class="customer-name">{{ $order->customer_name }}</div>
-                                <div class="customer-email">{{ $order->customer_email }}</div>
+                                <div class="customer-name">{{ $order->company->name ?? '-'  }}</div>
+                                <div class="customer-email">{{ $order->contact->name ?? '-'  }}</div>
                             </td>
                             <td>
                                 <span class="badge badge-{{ $order->status }}">

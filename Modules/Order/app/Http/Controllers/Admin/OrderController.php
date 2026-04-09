@@ -4,11 +4,14 @@ namespace Modules\Order\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Company;
+use App\Models\Contact;
 use App\Models\Order;
 use App\Models\OrderOffer;
 use App\Models\OrderOfferDetail;
 use App\Models\Package;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -27,46 +30,104 @@ class OrderController extends Controller
 
     public function create()
     {
-        // Ambil semua kategori beserta paket aktifnya
         $categories = Category::with([
             'packages' => fn($q) => $q->where('is_active', true)->orderBy('name'),
         ])->get();
-    
-        return view('order::admin.orders.create', compact('categories'));
+
+        $companies = Company::with('contacts')->orderBy('name')->get();
+
+        // Siapkan data untuk combobox — mapping dilakukan di controller
+        $companiesData = $companies->map(fn($c) => [
+            'id'       => $c->id,
+            'name'     => $c->name,
+            'contacts' => $c->contacts->map(fn($ct) => [
+                'id'       => $ct->id,
+                'name'     => $ct->name,
+                'email'    => $ct->email    ?? null,
+                'phone'    => $ct->phone    ?? null,
+            ])->values(),
+        ])->values();
+
+        return view('order::admin.orders.create', compact('categories', 'companies', 'companiesData'));
+    }
+
+    public function quickCreateCompany(Request $request): JsonResponse
+    {
+        $request->validate(['name' => 'required|string|max:255']);
+
+        $company = Company::firstOrCreate(
+            ['name' => $request->name],
+            ['name' => $request->name]
+        );
+
+        return response()->json([
+            'id'       => $company->id,
+            'name'     => $company->name,
+            'contacts' => $company->contacts ?? [],
+            'created'  => $company->wasRecentlyCreated,
+        ]);
+    }
+
+    public function quickCreateContact(Request $request): JsonResponse
+    {
+        $request->validate([
+            'company_id' => 'required|exists:companies,id',
+            'name'       => 'required|string|max:255',
+            'email'      => 'nullable|email|max:255',
+            'phone'      => 'nullable|string|max:50',
+        ]);
+
+        $contact = Contact::create([
+            'company_id' => $request->company_id,
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'phone'      => $request->phone,
+        ]);
+
+        return response()->json([
+            'id'       => $contact->id,
+            'name'     => $contact->name,
+            'position' => $contact->position,
+            'email'    => $contact->email,
+            'phone'    => $contact->phone,
+            'created'  => true,
+        ]);
     }
     
     public function store(Request $request)
     {
         $data = $request->validate([
-            'customer_name'          => ['required', 'string', 'max:255'],
-            'customer_email'         => ['nullable', 'email', 'max:255'],
+            'company_id'             => ['required', 'integer', 'exists:companies,id'],
+            'contact_id'             => ['required', 'integer', 'exists:contacts,id'],
             'filled_by'              => ['required', 'in:customer,admin'],
-    
+
             // Validasi items hanya jika mode admin
             'items'                  => ['required_if:filled_by,admin', 'array', 'min:1'],
             'items.*.package_id'     => ['required_if:filled_by,admin', 'integer', 'exists:packages,id'],
             'items.*.qty'            => ['required_if:filled_by,admin', 'integer', 'min:1'],
-            // custom_price opsional; jika tidak dikirim / null, fallback ke base_price package
             'items.*.custom_price'   => ['nullable', 'numeric', 'min:0'],
         ]);
-    
+
+        $contact = Contact::findOrFail($data['contact_id']);
+
         $order = Order::create([
-            'customer_name'  => $data['customer_name'],
-            'customer_slug'  => Str::slug($data['customer_name']),
-            'customer_email' => $data['customer_email'] ?? '',
+            'company_id'     => $data['company_id'],
+            'contact_id'     => $data['contact_id'],
+            'customer_name'  => $contact->name,
+            'customer_slug'  => Str::slug($contact->name) . '-' . Str::random(6),
+            'customer_email' => $contact->email ?? '',
             'created_by'     => auth()->id(),
             'status'         => Order::STATUS_DRAFT,
         ]);
-    
+
         if ($data['filled_by'] === 'admin' && !empty($data['items'])) {
             foreach ($data['items'] as $item) {
                 $package = Package::findOrFail($item['package_id']);
-    
-                // Gunakan custom_price jika dikirim, fallback ke base_price
+
                 $unitPrice = isset($item['custom_price']) && $item['custom_price'] !== null
                     ? (float) $item['custom_price']
                     : (float) $package->base_price;
-    
+
                 $order->offerDetails()->create([
                     'package_id' => $package->id,
                     'qty'        => $item['qty'],
@@ -75,21 +136,21 @@ class OrderController extends Controller
                 ]);
             }
         }
-    
+
         $message = $data['filled_by'] === 'admin'
             ? 'Order berhasil dibuat beserta paket layanan yang dipilih.'
             : 'Order berhasil dibuat. Paket layanan akan dipilih oleh guest melalui token.';
-    
+
         return redirect()->route('admin.orders.show', $order)->with('success', $message);
     }
 
 
     public function show(Order $order)
     {
-        $order->load(['offer.details.package', 'creator']);
+        $order->load(['offer.details.package', 'creator', 'company']);
 
         $guestLink = route('orders.guest.show', [
-            'slug'  => $order->customer_slug,
+            'slug'  => $order->company->slug,
             'token' => $order->access_token,
         ]);
 
