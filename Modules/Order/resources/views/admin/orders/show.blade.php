@@ -143,6 +143,100 @@
 
         .sent-info { font-size: 12px; color: #6b7280; text-align: center; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 5px; }
 
+        .doc-tabs {
+            display: flex;
+            border-bottom: 1px solid #f0ede9;
+            padding: 0 16px;
+            gap: 2px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .doc-tabs::-webkit-scrollbar { display: none; }
+
+        .doc-tab {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 14px;
+            border: none;
+            background: transparent;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: #9ca3af;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            white-space: nowrap;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .doc-tab:hover { color: #374151; }
+        .doc-tab.active {
+            color: #ea580c;
+            border-bottom-color: #ea580c;
+        }
+
+        /* ── Document Panel ── */
+        .doc-panel { padding: 20px 16px; }
+
+        .doc-panel-inner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #fafaf9;
+            border: 1px solid #f0ede9;
+            border-radius: 10px;
+            padding: 16px 20px;
+        }
+
+        .doc-icon-wrap {
+            flex-shrink: 0;
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .doc-icon-blue   { background: #eff6ff; }
+        .doc-icon-orange { background: #fff7ed; }
+        .doc-icon-green  { background: #f0fdf4; }
+
+        .doc-panel-text { flex: 1; min-width: 0; }
+
+        .doc-panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1c1917;
+            margin-bottom: 3px;
+        }
+        .doc-panel-desc {
+            font-size: 12.5px;
+            color: #78716c;
+            line-height: 1.5;
+        }
+
+        .btn-open-pdf {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: #1c1917;
+            color: #fff;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.15s, opacity 0.15s;
+            white-space: nowrap;
+        }
+        .btn-open-pdf:hover { background: #374151; }
+
+        @media (max-width: 600px) {
+            .doc-panel-inner { flex-wrap: wrap; }
+            .btn-open-pdf { width: 100%; justify-content: center; }
+        }
+
         /* Token box */
         .token-box {
             background: #1c1917; border-radius: 8px; padding: 12px 14px;
@@ -259,6 +353,7 @@
                                 <th>Qty</th>
                                 <th class="text-right">Harga Satuan</th>
                                 <th class="text-right">Subtotal</th>
+                                <th class="text-right">Nama Mahasiswa</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -278,6 +373,7 @@
                                     <td>{{ $detail->qty }}</td>
                                     <td class="price-cell">Rp {{ number_format($detail->price, 0, ',', '.') }}</td>
                                     <td class="price-cell">Rp {{ number_format($sub, 0, ',', '.') }}</td>
+                                    <td class="price-cell">{{ $detail->nama_mahasiswa ?? '-' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -298,6 +394,108 @@
                     </div>
                 </div>
             @endif
+
+            {{-- Document Tabs --}}
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <div class="card-icon">
+                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="card-title">Dokumen</div>
+                            <div class="card-subtitle">Lembar resmi order</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Tab Buttons --}}
+                <div class="doc-tabs">
+                    <button type="button" class="doc-tab active" onclick="switchDocTab('permintaan')">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        Lembar Permintaan
+                    </button>
+                    <button type="button" class="doc-tab" onclick="switchDocTab('penawaran')">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Lembar Penawaran
+                    </button>
+                    <button type="button" class="doc-tab" onclick="switchDocTab('bap')">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M15 11l-3 3-1.5-1.5"/>
+                        </svg>
+                        Berita Acara Penyelesaian
+                    </button>
+                </div>
+
+                {{-- Panel: Lembar Permintaan --}}
+                <div id="docPanelPermintaan" class="doc-panel">
+                    <div class="doc-panel-inner">
+                        <div class="doc-icon-wrap doc-icon-blue">
+                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#2563eb" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                        <div class="doc-panel-text">
+                            <div class="doc-panel-title">Lembar Permintaan</div>
+                            <div class="doc-panel-desc">Dokumen permintaan layanan dari kontak untuk order <strong>{{ $order->order_code }}</strong>.</div>
+                        </div>
+                        <a href="{{ route('admin.orders.lembar_permintaan', $order) }}" target="_blank" class="btn-open-pdf">
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            Buka PDF
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Panel: Lembar Penawaran --}}
+                <div id="docPanelPenawaran" class="doc-panel" style="display:none;">
+                    <div class="doc-panel-inner">
+                        <div class="doc-icon-wrap doc-icon-orange">
+                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="doc-panel-text">
+                            <div class="doc-panel-title">Lembar Penawaran</div>
+                            <div class="doc-panel-desc">Dokumen penawaran harga dan detail paket untuk order <strong>{{ $order->order_code }}</strong>.</div>
+                        </div>
+                        <a href="#" target="_blank" class="btn-open-pdf">
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            Buka PDF
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Panel: Berita Acara Penyelesaian --}}
+                <div id="docPanelBap" class="doc-panel" style="display:none;">
+                    <div class="doc-panel-inner">
+                        <div class="doc-icon-wrap doc-icon-green">
+                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M15 11l-3 3-1.5-1.5"/>
+                            </svg>
+                        </div>
+                        <div class="doc-panel-text">
+                            <div class="doc-panel-title">Berita Acara Penyelesaian</div>
+                            <div class="doc-panel-desc">Dokumen BAP sebagai bukti selesainya pekerjaan untuk order <strong>{{ $order->order_code }}</strong>.</div>
+                        </div>
+                        <a href="#" target="_blank" class="btn-open-pdf">
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            Buka PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
 
             {{-- Notes & Terms --}}
             @if($order->offer && ($order->offer->notes || $order->offer->terms))
@@ -339,19 +537,27 @@
                     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                     Notifikasi Internal
                 </div>
-                <div class="sidebar-card-body">
-                    <p style="font-size:12.5px;color:#6b7280;line-height:1.6;margin:0 0 14px;">
-                        Kirim notifikasi ke user internal (id=2) untuk memproses order ini (buat penawaran & invoice manual).
-                    </p>
-                    <form action="{{ route('admin.orders.notifyInternal', $order) }}" method="POST"
-                          onsubmit="return confirm('Kirim notifikasi internal untuk order {{ $order->order_code }}?')">
-                        @csrf
-                        <button type="submit" class="btn-send" style="background:#111827;" onmouseover="this.style.background='#000'" onmouseout="this.style.background='#111827'">
-                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                            Kirim Notifikasi
-                        </button>
-                    </form>
-                </div>
+                @if(is_null($order->offer->offer_file_path) && is_null($order->offer->invoice_file_path))                    
+                    <div class="sidebar-card-body">
+                        <p style="font-size:12.5px;color:#6b7280;line-height:1.6;margin:0 0 14px;">
+                            Kirim notifikasi ke user internal (id=2) untuk memproses order ini (buat penawaran & invoice manual).
+                        </p>
+                        <form action="{{ route('admin.orders.notifyInternal', $order) }}" method="POST"
+                            onsubmit="return confirm('Kirim notifikasi internal untuk order {{ $order->order_code }}?')">
+                            @csrf
+                            <button type="submit" class="btn-send" style="background:#111827;" onmouseover="this.style.background='#000'" onmouseout="this.style.background='#111827'">
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                                Kirim Notifikasi
+                            </button>
+                        </form>
+                    </div>
+                @else 
+                    <div class="sidebar-card-body">
+                        <p style="font-size:12.5px;color:#6b7280;line-height:1.6;margin:0 0 14px;">
+                           Invoice / Penawaran sudah diupload.
+                        </p>
+                    </div>
+                @endif
             </div>
 
             {{-- Send Offer --}}
@@ -512,6 +718,19 @@
                 txt.textContent = 'Tersalin!';
                 setTimeout(() => { btn.classList.remove('copied'); txt.textContent = 'Salin Token'; }, 2000);
             });
+        }
+
+        function switchDocTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.doc-tab').forEach(function (btn, i) {
+                const tabs = ['permintaan', 'penawaran', 'bap'];
+                btn.classList.toggle('active', tabs[i] === tab);
+            });
+
+            // Update panels
+            document.getElementById('docPanelPermintaan').style.display = tab === 'permintaan' ? '' : 'none';
+            document.getElementById('docPanelPenawaran').style.display  = tab === 'penawaran'  ? '' : 'none';
+            document.getElementById('docPanelBap').style.display        = tab === 'bap'        ? '' : 'none';
         }
     </script>
 </x-app-sidebar>

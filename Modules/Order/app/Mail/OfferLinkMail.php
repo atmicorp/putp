@@ -24,7 +24,7 @@ class OfferLinkMail extends Mailable
         $details = $offer->details;
 
         $link = route('orders.guest.show', [
-            'slug'  => $order->customer_slug,
+            'slug'  => $order->company->slug,
             'token' => $order->access_token,
         ]);
 

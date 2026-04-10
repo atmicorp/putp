@@ -99,4 +99,13 @@ class Order extends Model
     {
         return $this->belongsTo(Contact::class);
     }
+
+    public function getGrandTotalAttribute()
+    {
+        if (!$this->offer) return 0;
+
+        return $this->offer->details->sum(function ($d) {
+            return $d->qty * $d->price;
+        });
+    }
 }

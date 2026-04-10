@@ -208,9 +208,9 @@
                         <th>Order Code</th>
                         <th>Token</th>
                         <th>Customer</th>
-                        <th>Status</th>
-                        <th>Dibuat oleh</th>
                         <th>Tanggal</th>
+                        <th>Total Cost</th>
+                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -228,16 +228,18 @@
                                 <div class="customer-email">{{ $order->contact->name ?? '-'  }}</div>
                             </td>
                             <td>
+                                <span class="date-text">{{ $order->created_at->format('d M Y') }}</span>
+                            </td>
+                            <td>
+                                <span class="date-text">
+                                    Rp {{ number_format($order->grand_total, 0, ',', '.') }}
+                                </span>
+                            </td>
+                            <td>
                                 <span class="badge badge-{{ $order->status }}">
                                     <span class="dot dot-{{ $order->status }}"></span>
                                     {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                                 </span>
-                            </td>
-                            <td>
-                                <span class="date-text">{{ $order->creator?->name ?? '-' }}</span>
-                            </td>
-                            <td>
-                                <span class="date-text">{{ $order->created_at->format('d M Y') }}</span>
                             </td>
                             <td>
                                 <div class="actions">

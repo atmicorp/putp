@@ -15,7 +15,7 @@ class CustomerSubmittedItemsMail extends Mailable
 
     public function build()
     {
-        $this->order->loadMissing(['offer.details.package', 'creator']);
+        $this->order->load(['company', 'contact', 'creator', 'offer.details.package']);
 
         $order = $this->order;
 

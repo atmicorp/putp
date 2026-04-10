@@ -64,13 +64,17 @@
                     <div class="grid">
                         <div>
                             <label>Nama Customer</label>
-                            <input name="customer_name" value="{{ old('customer_name', $order->customer_name) }}" required>
-                            @error('customer_name')<div class="help" style="color:#dc2626;">{{ $message }}</div>@enderror
+                            <input name="company" value="{{ old('company', $order->company->name ?? '') }}" required>
+                            @error('company')<div class="help" style="color:#dc2626;">{{ $message }}</div>@enderror
+                        </div><div>
+                            <label>Nama Contact</label>
+                            <input name="contact" type="text" value="{{ old('contact', $order->contact->name ?? '') }}">
+                            @error('contact')<div class="help" style="color:#dc2626;">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <label>Email Customer (opsional sampai siap kirim)</label>
-                            <input name="customer_email" type="email" value="{{ old('customer_email', $order->customer_email) }}">
-                            @error('customer_email')<div class="help" style="color:#dc2626;">{{ $message }}</div>@enderror
+                            <input name="email" type="email" value="{{ old('email', $order->contact->email ?? '') }}">
+                            @error('email')<div class="help" style="color:#dc2626;">{{ $message }}</div>@enderror
                         </div>
                     </div>
                 </div>
@@ -94,6 +98,7 @@
                                     <th>Paket</th>
                                     <th class="r" style="width:110px;">Qty</th>
                                     <th class="r" style="width:180px;">Harga Satuan</th>
+                                    <th class="r" style="width:180px;">Nama Mahasiswa</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -112,6 +117,10 @@
                                         <td class="r">
                                             <input type="text" inputmode="numeric" name="items[{{ $i }}][price]" value="{{ number_format(old("items.$i.price", $d->price), 0, ',', '.') }}">
                                             @error("items.$i.price")<div class="help" style="color:#dc2626;">{{ $message }}</div>@enderror
+                                        </td>
+                                        <td class="r">
+                                            <input type="text" inputmode="text" name="items[{{ $i }}][nama_mahasiswa]" value="{{ old("items.$i.nama_mahasiswa", $d->nama_mahasiswa) }}">
+                                            @error("items.$i.nama_mahasiswa")<div class="help" style="color:#dc2626;">{{ $message }}</div>@enderror
                                         </td>
                                     </tr>
                                 @endforeach

@@ -13,6 +13,7 @@ class OrderOfferDetail extends Model
         'package_id',
         'qty',
         'price',
+        'nama_mahasiswa',
     ];
 
     protected function casts(): array

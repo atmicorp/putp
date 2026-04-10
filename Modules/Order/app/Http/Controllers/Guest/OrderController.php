@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -159,12 +160,12 @@ class OrderController extends Controller
     public function show(string $slug, string $token)
     {
         $order = Order::where('access_token', $token)
-            ->with(['offer.details.package'])
+            ->with(['offer.details.package', 'contact', 'company'])
             ->firstOrFail();
 
-        if ($slug !== $order->customer_slug) {
+        if ($slug !== $order->company->slug) {
             return redirect()->route('orders.guest.show', [
-                'slug'  => $order->customer_slug,
+                'slug'  => $order->company->slug,
                 'token' => $order->access_token,
             ]);
         }
@@ -172,12 +173,56 @@ class OrderController extends Controller
         return view('order::guest.orders.show', compact('order'));
     }
 
-    public function approve(string $slug, string $token)
+    public function sign(Request $request, string $slug, string $token)
     {
-        $order = Order::where('access_token', $token)->firstOrFail();
+        $request->validate([
+            'signature' => ['required', 'string'],
+        ]);
+
+        $order = Order::where('access_token', $token)
+            ->with(['contact', 'company'])
+            ->firstOrFail();
+
+        if ($slug !== $order->company->slug) {
+            abort(404);
+        }
+
+        $dataUri = $request->input('signature');
+        $base64  = preg_replace('/^data:image\/\w+;base64,/', '', $dataUri);
+        $decoded = base64_decode($base64);
+
+        $filename = 'signatures/contact_' . $order->contact->id . '_' . time() . '.png';
+        Storage::disk('local')->put($filename, $decoded);
+        $order->contact->update(['signature_path' => $filename]);
+
+        // Langsung approve setelah sign
         $order->update(['status' => Order::STATUS_APPROVED]);
-        return redirect()->route('orders.guest.show', ['slug' => $slug, 'token' => $token])
-            ->with('success', 'Penawaran berhasil disetujui.');
+
+        return redirect()->route('orders.guest.show', [
+            'slug'  => $slug,
+            'token' => $token,
+        ]);
+    }
+
+    public function approve(Request $request, string $slug, string $token)
+    {
+        $order = Order::where('access_token', $token)
+            ->with(['contact', 'company'])
+            ->firstOrFail();
+
+        if ($slug !== $order->company->slug) abort(404);
+
+        // Guard: must have signature
+        if (! $order->contact->signature_path) {
+            return back()->with('error', 'Tanda tangan diperlukan sebelum menyetujui penawaran.');
+        }
+
+        $order->update(['status' => Order::STATUS_APPROVED]);
+
+        return redirect()->route('orders.guest.show', [
+            'slug'  => $slug,
+            'token' => $token,
+        ]);
     }
 
     public function reject(string $slug, string $token)

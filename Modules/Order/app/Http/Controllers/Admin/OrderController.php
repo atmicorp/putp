@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Modules\Order\Mail\CustomerSubmittedItemsMail;
 use Modules\Order\Mail\OfferLinkMail;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -159,7 +160,7 @@ class OrderController extends Controller
 
     public function edit(Order $order)
     {
-        $order->load(['offer.details.package', 'creator']);
+        $order->load(['company', 'contact', 'offer.details.package', 'creator']);
 
         return view('order::admin.orders.edit', compact('order'));
     }
@@ -176,49 +177,70 @@ class OrderController extends Controller
         $request->merge(['items' => $items]);
 
         $data = $request->validate([
-            'customer_name'  => ['required', 'string', 'max:255'],
-            'customer_email' => ['nullable', 'email', 'max:255'],
+            'company'  => ['required', 'string', 'max:255'],
+            'contact'  => ['nullable', 'string', 'max:255'],
+            'email'    => ['nullable', 'email', 'max:255'],
 
             'notes' => ['nullable', 'string'],
             'terms' => ['nullable', 'string'],
 
-            'items'              => ['required', 'array', 'min:1'],
-            'items.*.id'         => ['required', 'integer', 'exists:order_offer_details,id'],
-            'items.*.qty'        => ['required', 'integer', 'min:1'],
-            'items.*.price'      => ['required', 'numeric', 'min:0'],
+            'items'          => ['required', 'array', 'min:1'],
+            'items.*.id'     => ['required', 'integer', 'exists:order_offer_details,id'],
+            'items.*.qty'    => ['required', 'integer', 'min:1'],
+            'items.*.price'  => ['required', 'numeric', 'min:0'],
+            'items.*.nama_mahasiswa' => ['nullable', 'string', 'max:255'],
 
             'offer_file'   => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
             'invoice_file' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
-        $order->load('offer.details');
+        // Update atau buat Company
+        $company = $order->company
+            ? tap($order->company)->update(['name' => $data['company']])
+            : Company::create(['name' => $data['company']]);
+
+        // Update atau buat Contact
+        $contact = $order->contact
+            ? tap($order->contact)->update([
+                'name'  => $data['contact'] ?? $order->contact->name,
+                'email' => $data['email']   ?? $order->contact->email,
+            ])
+            : ($data['contact']
+                ? $company->contacts()->create([
+                    'name'  => $data['contact'],
+                    'email' => $data['email'] ?? null,
+                ])
+                : null);
 
         $order->update([
-            'customer_name'  => $data['customer_name'],
-            'customer_slug'  => Str::slug($data['customer_name']),
-            'customer_email' => $data['customer_email'] ?? '',
+            'company_id' => $company->id,
+            'contact_id' => $contact?->id,
         ]);
 
+        // Offer
+        $order->load('offer.details');
         $offer = $order->offer ?? $order->offer()->create([]);
         $offer->update([
             'notes' => $data['notes'] ?? null,
             'terms' => $data['terms'] ?? null,
         ]);
 
+        // Update items
         $allowedDetailIds = $offer->details()->pluck('id')->all();
-        
+
         foreach ($data['items'] as $item) {
             if (! in_array((int) $item['id'], $allowedDetailIds, true)) {
                 continue;
             }
-            
-            OrderOfferDetail::where('id', $item['id'])
-                ->update([
-                    'qty'   => (int) $item['qty'],
-                    'price' => (float) $item['price'],
-                ]);
+
+            OrderOfferDetail::where('id', $item['id'])->update([
+                'qty'   => (int) $item['qty'],
+                'price' => (float) $item['price'],
+                'nama_mahasiswa' => $item['nama_mahasiswa'] ?? null,
+            ]);
         }
 
+        // Upload file
         $dir = 'orders/' . $order->order_code;
         if ($request->hasFile('offer_file')) {
             $path = $request->file('offer_file')->storeAs($dir, 'penawaran.pdf', 'public');
@@ -271,16 +293,12 @@ class OrderController extends Controller
     {
         $order->load(['offer.details.package']);
 
-        if (blank($order->customer_email)) {
+        if (blank($order->contact->email)) {
             return back()->with('error', 'Email customer masih kosong. Lengkapi email terlebih dahulu sebelum mengirim penawaran.');
         }
 
         if (!$order->offer || $order->offer->details->isEmpty()) {
             return back()->with('error', 'Penawaran belum ada / item masih kosong.');
-        }
-
-        if (blank($order->offer->offer_file_path) || blank($order->offer->invoice_file_path)) {
-            return back()->with('error', 'Upload file penawaran dan invoice terlebih dahulu sebelum mengirim penawaran ke customer.');
         }
 
         $mail = new OfferLinkMail($order);
@@ -293,7 +311,7 @@ class OrderController extends Controller
             $mail->attach(Storage::disk('public')->path($order->offer->invoice_file_path));
         }
 
-        Mail::to($order->customer_email)->send($mail);
+        Mail::to($order->contact->email)->send($mail);
 
         $order->update([
             'status'  => Order::STATUS_OFFERED,
@@ -301,5 +319,15 @@ class OrderController extends Controller
         ]);
 
         return back()->with('success', 'Email penawaran berhasil dikirim ke customer.');
+    }
+
+    public function lembarPermintaan(Order $order)
+    {
+        $order->load(['company', 'contact', 'creator', 'offer.details.package']);
+
+        $pdf = Pdf::loadView('order::admin.orders.lembar_permintaan', compact('order'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->stream("LembarPermintaan-{$order->order_code}.pdf");
     }
 }

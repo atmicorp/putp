@@ -15,6 +15,8 @@ Route::middleware(['web', 'auth'])->prefix('admin')->group(function () {
     Route::post('/orders/{order}/send-offer', [AdminOrderController::class, 'sendOffer'])->name('admin.orders.sendOffer');
     Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
      ->name('admin.orders.updateStatus');
+    Route::get('orders/{order}/lembar-permintaan', [AdminOrderController::class, 'lembarPermintaan'])
+    ->name('admin.orders.lembar_permintaan');
 });
 
 // Guest route (tanpa login)
@@ -27,6 +29,8 @@ Route::middleware(['web', 'throttle:30,1'])->group(function () {
 
     Route::post('/orders/{slug}/{token}/reject',
         [GuestOrderController::class, 'reject'])->name('orders.guest.reject');
+    Route::post('/orders/{slug}/{token}/sign',   
+        [GuestOrderController::class, 'sign'])->name('orders.guest.sign');
 });
 
 Route::post('companies/quick-create', [AdminOrderController::class, 'quickCreateCompany'])->name('admin.companies.quick-create');
