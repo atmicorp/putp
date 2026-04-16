@@ -368,169 +368,390 @@
             color: var(--muted);
             letter-spacing: .3px;
         }
+        /* ── LAYANAN SECTION START ── */
+            /* ── SECTION ── */
+            .section {
+                padding: 80px 24px;
+                max-width: 1180px;
+                margin: 0 auto;
+            }
+            .section-eyebrow {
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                color: var(--teal);
+                margin-bottom: 12px;
+            }
+            .section-title {
+                font-family: 'DM Serif Display', serif;
+                font-size: clamp(26px, 4vw, 46px);
+                color: var(--navy);
+                line-height: 1.15;
+                max-width: 480px;
+                margin-bottom: 16px;
+            }
+            .section-desc {
+                font-size: 16px;
+                color: #5A6B80;
+                line-height: 1.7;
+                max-width: 480px;
+                margin-bottom: 48px;
+            }
+            
+            /* ── CAT TABS ── */
+            .cat-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+            .cat-tab {
+                padding: 9px 20px;
+                border-radius: 999px;
+                border: 1px solid #E2E8F0;
+                font-size: 13px;
+                font-weight: 500;
+                cursor: pointer;
+                background: white;
+                color: #5A6B80;
+                transition: all .2s;
+            }
+            .cat-tab.active { color: white; border-color: transparent; }
 
-        /* ── LAYANAN ── */
-        .section {
-            padding: 80px 24px;
-            max-width: 1180px;
-            margin: 0 auto;
-        }
+            /* ── SPLIT PANEL LAYOUT ── */
+            .layanan-split {
+                display: grid;
+                grid-template-columns: 340px 1fr;
+                gap: 24px;
+                align-items: start;
+            }
 
-        .section-eyebrow {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--teal);
-            margin-bottom: 12px;
-        }
+            /* LEFT PANEL — daftar package */
+            .pkg-list-panel {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                position: sticky;
+                top: 24px;
+                max-height: calc(100vh - 80px);
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: #E2E8F0 transparent;
+                padding-right: 4px;
+            }
 
-        .section-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: clamp(26px, 4vw, 46px);
-            color: var(--navy);
-            line-height: 1.15;
-            max-width: 480px;
-            margin-bottom: 16px;
-        }
+            .pkg-list-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 14px;
+                padding: 16px 18px;
+                background: white;
+                border: 1.5px solid #E8EDF2;
+                border-radius: 14px;
+                cursor: pointer;
+                transition: all .22s cubic-bezier(.34,1.2,.64,1);
+            }
 
-        .section-desc {
-            font-size: 16px;
-            color: #5A6B80;
-            line-height: 1.7;
-            max-width: 480px;
-            margin-bottom: 48px;
-        }
+            .pkg-list-item:hover {
+                border-color: var(--active-accent, #EA580C);
+                box-shadow: 0 6px 20px rgba(0,0,0,.07);
+                transform: translateX(3px);
+            }
 
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-            gap: 16px;
-        }
+            .pkg-list-item.active {
+                border-color: var(--active-accent, #EA580C);
+                background: var(--active-bg, rgba(234,88,12,.04));
+                box-shadow: 0 8px 28px rgba(0,0,0,.09);
+            }
 
-        .service-card {
-            background: white;
-            border: 1px solid #E2E8F0;
-            border-radius: 16px;
-            padding: 28px 24px;
-            transition: all .25s;
-            position: relative;
-            overflow: hidden;
-        }
+            .pkg-list-thumb {
+                width: 52px;
+                height: 52px;
+                border-radius: 10px;
+                overflow: hidden;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                background: #F1F5F9;
+            }
 
-        .service-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--teal);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform .3s;
-        }
+            .pkg-list-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-        .service-card:hover {
-            border-color: var(--teal-l);
-            box-shadow: 0 16px 48px rgba(234,88,12,.12);
-            transform: translateY(-4px);
-        }
+            .pkg-list-info { flex: 1; min-width: 0; }
 
-        .service-card:hover::before { transform: scaleX(1); }
+            .pkg-list-num {
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 1.5px;
+                color: #94A3B8;
+                text-transform: uppercase;
+                margin-bottom: 2px;
+            }
 
-        .service-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(234,88,12,.1);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-            font-size: 22px;
-        }
+            .pkg-list-name {
+                font-family: 'DM Serif Display', serif;
+                font-size: 15px;
+                color: var(--navy);
+                line-height: 1.3;
+                margin-bottom: 4px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
 
-        .service-name {
-            font-family: 'DM Serif Display', serif;
-            font-size: 18px;
-            color: var(--navy);
-            margin-bottom: 8px;
-            line-height: 1.3;
-        }
+            .pkg-list-price {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--active-accent, #EA580C);
+            }
 
-        .service-desc {
-            font-size: 14px;
-            color: #5A6B80;
-            line-height: 1.65;
-        }
+            .pkg-list-arrow {
+                color: #CBD5E1;
+                flex-shrink: 0;
+                margin-top: 2px;
+                transition: color .2s, transform .2s;
+            }
 
-        /* ── PROSES ── */
-        .process-section {
-            background: var(--navy);
-            padding: 80px 24px;
-            position: relative;
-            overflow: hidden;
-        }
+            .pkg-list-item.active .pkg-list-arrow,
+            .pkg-list-item:hover .pkg-list-arrow {
+                color: var(--active-accent, #EA580C);
+                transform: translateX(3px);
+            }
 
-        .process-section::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(234,88,12,.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(234,88,12,.05) 1px, transparent 1px);
-            background-size: 48px 48px;
-        }
+            /* RIGHT PANEL — detail package */
+            .pkg-detail-panel {
+                background: white;
+                border: 1.5px solid #E8EDF2;
+                border-radius: 20px;
+                overflow: hidden;
+                animation: panelIn .3s cubic-bezier(.34,1.2,.64,1) both;
+            }
 
-        .process-inner {
-            position: relative;
-            z-index: 2;
-            max-width: 1180px;
-            margin: 0 auto;
-        }
+            @keyframes panelIn {
+                from { opacity: 0; transform: translateX(12px); }
+                to   { opacity: 1; transform: translateX(0); }
+            }
 
-        .process-section .section-title { color: white; }
-        .process-section .section-desc { color: rgba(255,255,255,.5); }
-        .process-section .section-eyebrow { color: var(--teal-l); }
+            .pkg-detail-img {
+                width: 100%;
+                height: 240px;
+                position: relative;
+                overflow: hidden;
+                background: #F1F5F9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 72px;
+            }
 
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
-            gap: 4px;
-        }
+            .pkg-detail-img img { width: 100%; height: 100%; object-fit: cover; }
 
-        .step {
-            background: rgba(255,255,255,.04);
-            border: 1px solid rgba(255,255,255,.07);
-            border-radius: 16px;
-            padding: 32px 24px;
-            position: relative;
-            transition: background .2s;
-        }
+            .pkg-detail-badge {
+                position: absolute;
+                top: 14px;
+                left: 14px;
+                color: white;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                padding: 5px 12px;
+                border-radius: 8px;
+                text-transform: uppercase;
+            }
 
-        .step:hover { background: rgba(255,255,255,.07); }
+            .pkg-detail-avail {
+                position: absolute;
+                top: 14px;
+                right: 14px;
+                font-size: 11px;
+                font-weight: 600;
+                padding: 5px 12px;
+                border-radius: 8px;
+            }
+            .pkg-detail-avail.avail { background: #D1FAE5; color: #065F46; }
+            .pkg-detail-avail.busy  { background: #FEE2E2; color: #991B1B; }
 
-        .step-num {
-            font-family: 'DM Serif Display', serif;
-            font-size: 44px;
-            color: rgba(234,88,12,.25);
-            line-height: 1;
-            margin-bottom: 16px;
-        }
+            .pkg-detail-body { padding: 24px 26px; }
 
-        .step-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: white;
-            margin-bottom: 8px;
-        }
+            .pkg-detail-eyebrow {
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 1.5px;
+                color: #94A3B8;
+                text-transform: uppercase;
+                margin-bottom: 6px;
+            }
 
-        .step-desc {
-            font-size: 13px;
-            color: rgba(255,255,255,.45);
-            line-height: 1.65;
-        }
+            .pkg-detail-title {
+                font-family: 'DM Serif Display', serif;
+                font-size: 26px;
+                color: var(--navy);
+                line-height: 1.2;
+                margin-bottom: 12px;
+            }
+
+            .pkg-detail-desc {
+                font-size: 14px;
+                color: #5A6B80;
+                line-height: 1.7;
+                margin-bottom: 22px;
+            }
+
+            .pkg-detail-section { margin-bottom: 22px; }
+
+            .pkg-detail-section-label {
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                color: #94A3B8;
+                margin-bottom: 12px;
+            }
+
+            .pkg-detail-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+            .pkg-detail-tag {
+                font-size: 12px;
+                font-weight: 500;
+                padding: 5px 12px;
+                border-radius: 8px;
+                border: 1px solid #E2E8F0;
+                color: #5A6B80;
+                background: #F8FAFC;
+            }
+
+            .pkg-detail-specs { width: 100%; font-size: 13px; border-collapse: collapse; }
+            .pkg-detail-specs td { padding: 9px 0; border-bottom: 1px solid #F1F5F9; }
+            .pkg-detail-specs td:first-child { color: #94A3B8; width: 42%; }
+            .pkg-detail-specs td:last-child { color: var(--navy); font-weight: 500; text-align: right; }
+
+            .pkg-detail-price-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: var(--price-bg, rgba(234,88,12,.07));
+                border-radius: 14px;
+                padding: 18px 20px;
+                margin-bottom: 16px;
+            }
+
+            .pkg-detail-price-label { font-size: 12px; color: #94A3B8; margin-bottom: 2px; }
+            .pkg-detail-price-value { font-size: 24px; font-weight: 700; color: var(--price-accent, #EA580C); }
+            .pkg-detail-price-unit  { font-size: 12px; color: #94A3B8; }
+
+            .pkg-detail-cart-btn {
+                width: 100%;
+                padding: 13px;
+                border-radius: 12px;
+                border: none;
+                font-size: 14px;
+                font-weight: 700;
+                font-family: 'DM Sans', sans-serif;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                transition: all .2s;
+                background: var(--price-accent, #EA580C);
+                color: white;
+            }
+
+            .pkg-detail-cart-btn:hover { opacity: .88; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+            .pkg-detail-cart-btn.in-cart { background: #16A34A; }
+
+            /* Empty state */
+            .pkg-detail-empty {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 14px;
+                padding: 60px 24px;
+                color: #94A3B8;
+                font-size: 14px;
+                text-align: center;
+            }
+
+            .pkg-detail-empty svg { opacity: .35; }
+
+            /* ── RESPONSIVE split panel ── */
+            @media (max-width: 900px) {
+                .layanan-split {
+                    grid-template-columns: 1fr;
+                }
+                .pkg-list-panel {
+                    position: static;
+                    max-height: none;
+                    overflow: visible;
+                    flex-direction: row;
+                    overflow-x: auto;
+                    gap: 10px;
+                    padding-bottom: 6px;
+                    padding-right: 0;
+                    scrollbar-width: thin;
+                }
+                .pkg-list-item {
+                    min-width: 220px;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                .pkg-list-item:hover { transform: translateY(-2px) translateX(0); }
+                .pkg-list-arrow { display: none; }
+            }
+            
+
+            
+            /* ── CALENDAR ── */
+            .cal-wrap { background: #F8FAFC; border-radius: 12px; padding: 16px; }
+            .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+            .cal-title { font-size: 14px; font-weight: 600; color: var(--navy); }
+            .cal-btn {
+                width: 28px; height: 28px; border-radius: 8px;
+                border: 1px solid #E2E8F0; background: white;
+                cursor: pointer; display: flex; align-items: center;
+                justify-content: center; color: #5A6B80; font-size: 13px; transition: all .2s;
+            }
+            .cal-btn:hover { border-color: #EA580C; color: #EA580C; }
+            .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+            .cal-day-name { font-size: 11px; font-weight: 600; color: #94A3B8; text-align: center; padding: 4px 0; }
+            .cal-day {
+                aspect-ratio: 1; border-radius: 8px; display: flex;
+                align-items: center; justify-content: center;
+                font-size: 12px; font-weight: 500; cursor: pointer;
+                transition: all .15s; border: 1px solid transparent; color: var(--navy);
+            }
+            .cal-day.empty    { cursor: default; }
+            .cal-day.available { background: #ECFDF5; color: #065F46; }
+            .cal-day.available:hover { background: #D1FAE5; }
+            .cal-day.busy     { background: #FEF2F2; color: #991B1B; cursor: not-allowed; }
+            .cal-day.past     { color: #CBD5E1; background: transparent; cursor: default; }
+            .cal-day.today    { border-color: #EA580C; font-weight: 700; }
+            .cal-day.selected { background: #EA580C !important; color: white !important; }
+            .cal-legend { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+            .cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #5A6B80; }
+            .cal-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+            
+            /* ── PRICE BOX ── */
+            .modal-price-box { border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+            .modal-price-label { font-size: 12px; margin-bottom: 2px; opacity: .7; }
+            .modal-price-value { font-size: 22px; font-weight: 700; }
+            .modal-price-duration { font-size: 13px; opacity: .7; }
+            .modal-footer { padding: 16px 24px; border-top: 1px solid #F1F5F9; display: flex; gap: 10px; }
+            .mf-btn-cancel {
+                flex: 1; padding: 12px; border-radius: 10px;
+                border: 1px solid #E2E8F0; background: transparent;
+                color: #5A6B80; font-size: 14px; cursor: pointer; transition: all .2s;
+            }
+            .mf-btn-cancel:hover { background: #F8FAFC; }
+            .mf-btn-book {
+                flex: 2; padding: 12px; border-radius: 10px;
+                border: none; background: #EA580C; color: white;
+                font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s;
+            }
+            .mf-btn-book:hover { opacity: .9; }
+            .mf-btn-book.sky { background: #0EA5E9; }
+            .mf-btn-book.grn { background: #10B981; }
+
+        /* ── LAYANAN SECTION END ── */
 
         /* ── CTA ── */
         .cta-section {
@@ -596,6 +817,97 @@
             flex-wrap: wrap;
             position: relative;
             z-index: 2;
+        }
+
+        /* ── PROCESS SECTION ── */
+        .process-section {
+            padding: 80px 24px;
+            background: var(--navy);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .process-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(234,88,12,.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(234,88,12,.06) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        .process-inner {
+            position: relative;
+            z-index: 2;
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .process-section .section-eyebrow { color: var(--teal-l); }
+        .process-section .section-title   { color: white; }
+        .process-section .section-desc    { color: rgba(255,255,255,.5); }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 8px;
+        }
+
+        .step {
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 20px;
+            padding: 28px 24px;
+            position: relative;
+            transition: all .25s;
+        }
+
+        .step:hover {
+            background: rgba(255,255,255,.07);
+            border-color: rgba(234,88,12,.35);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0,0,0,.3);
+        }
+
+        .step-num {
+            font-family: 'DM Serif Display', serif;
+            font-size: 36px;
+            color: var(--teal);
+            opacity: .5;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .step-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 18px;
+            color: white;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .step-desc {
+            font-size: 13px;
+            color: rgba(255,255,255,.5);
+            line-height: 1.7;
+        }
+
+        /* ── PROCESS RESPONSIVE ── */
+        @media (max-width: 1024px) {
+            .steps { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            .steps { grid-template-columns: 1fr; }
+            .process-section { padding: 60px 20px; }
+        }
+
+        .carousel-wrap {
+            overflow: hidden;
+            padding-top: 4px; /* prevents box-shadow/border clip on hover */
         }
 
         /* ── FOOTER ── */
@@ -1407,91 +1719,51 @@
     </div>
 </section>
 
-{{-- ──────────────────── LAYANAN ──────────────────── --}}
+{{-- ──────────────────── LAYANAN SECTION ──────────────────── --}}
 <div class="section" id="layanan">
     <p class="section-eyebrow">Layanan Kami</p>
     <h2 class="section-title">Apa yang Bisa Kami Uji untuk Anda?</h2>
-    <p class="section-desc">Didukung peralatan modern dan tenaga ahli berpengalaman, kami siap membantu kebutuhan teknis Anda.</p>
+    <p class="section-desc">
+        Didukung peralatan modern dan tenaga ahli berpengalaman,
+        kami siap membantu kebutuhan teknis Anda.
+    </p>
 
-    <div class="services-grid">
-        @php
-            $icons   = ['CAT-001' => '🧪', 'CAT-002' => '📐', 'CAT-003' => '⚙️'];
-            $descs   = [
-                'CAT-001' => 'Uji tarik, lentur, impak, kekerasan, dan analisis struktur material plastik sesuai standar ASTM dan ISO.',
-                'CAT-002' => 'Pendampingan pengembangan produk plastik dari desain hingga prototipe siap produksi.',
-                'CAT-003' => 'Layanan proses plastik meliputi ekstrusi, injeksi, dan vacuum forming.',
-            ];
-            $colors  = ['CAT-001' => '#EA580C', 'CAT-002' => '#0EA5E9', 'CAT-003' => '#10B981'];
-            $bgs     = ['CAT-001' => 'rgba(234,88,12,.08)', 'CAT-002' => 'rgba(14,165,233,.08)', 'CAT-003' => 'rgba(16,185,129,.08)'];
-        @endphp
+    @php
+        $catIcons    = ['CAT-001' => '🧪', 'CAT-002' => '📐', 'CAT-003' => '⚙️'];
+        $catAccents  = ['CAT-001' => '#EA580C', 'CAT-002' => '#0EA5E9', 'CAT-003' => '#10B981'];
+        $catBtnClass = ['CAT-001' => '',        'CAT-002' => 'btn-sky',  'CAT-003' => 'btn-grn'];
+    @endphp
 
+    {{-- Tabs Kategori --}}
+    <div class="cat-tabs" id="catTabs">
         @foreach ($categories as $category)
-        @php $idx = $loop->index; @endphp
-        <div class="service-card-new"
-            data-idx="{{ $idx }}"
-            data-color="{{ $colors[$category->category_id] ?? '#EA580C' }}"
-            style="--card-accent: {{ $colors[$category->category_id] ?? '#EA580C' }}; --card-bg: {{ $bgs[$category->category_id] ?? 'rgba(234,88,12,.08)' }}">
-        
-            <div class="scn-top">
-                <div class="scn-icon">{{ $icons[$category->category_id] ?? '🔬' }}</div>
-                <div class="scn-badge">{{ $category->packages->count() }} layanan</div>
-            </div>
-        
-            <h3 class="scn-title">{{ $category->nama_category }}</h3>
-            <p class="scn-desc">{{ $descs[$category->category_id] ?? '' }}</p>
-        
-            <div class="scn-preview">
-                @foreach ($category->packages->take(3) as $pkg)
-                <span class="scn-tag">{{ $pkg->name }}</span>
-                @endforeach
-                @if ($category->packages->count() > 3)
-                <span class="scn-tag scn-tag-more">+{{ $category->packages->count() - 3 }} lainnya</span>
-                @endif
-            </div>
-        
-            {{-- BARU: Dua tombol aksi --}}
-            <div class="scn-actions">
-                <button class="btn-add-cart" onclick="openModal({{ $idx }})" id="cartBtn-{{ $idx }}">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-                    Pilih Paket
-                </button>
-                <button class="btn-view-detail" onclick="openModal({{ $idx }})">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    Detail
-                </button>
-            </div>
-        </div>
+            <button
+                class="cat-tab{{ $loop->first ? ' active' : '' }}"
+                data-idx="{{ $loop->index }}"
+                data-accent="{{ $catAccents[$category->category_id] ?? '#EA580C' }}"
+                onclick="selectCat({{ $loop->index }})">
+                {{ $catIcons[$category->category_id] ?? '🔬' }}
+                {{ $category->nama_category }}
+            </button>
         @endforeach
     </div>
-</div>
 
-{{-- ──────────────────── MODAL ──────────────────── --}}
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
-    <div class="modal-box" id="modalBox" onclick="event.stopPropagation()">
-        <button class="modal-close" onclick="closeModal()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
+    {{-- Split Panel --}}
+    <div class="layanan-split">
+        {{-- LEFT: daftar package --}}
+        <div class="pkg-list-panel" id="pkgListPanel">
+            {{-- diisi JS --}}
+        </div>
 
-        <div class="modal-header" id="modalHeader">
-            <div class="modal-icon" id="modalIcon"></div>
-            <div>
-                <p class="modal-eyebrow" id="modalEyebrow">Kategori Layanan</p>
-                <h3 class="modal-title" id="modalTitle"></h3>
-                <p class="modal-subtitle" id="modalSubtitle"></p>
+        {{-- RIGHT: detail package --}}
+        <div class="pkg-detail-panel" id="pkgDetailPanel">
+            <div class="pkg-detail-empty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="4"/>
+                    <path d="M9 9h6M9 12h6M9 15h4"/>
+                </svg>
+                <span>Pilih paket di sebelah kiri untuk melihat detailnya</span>
             </div>
-        </div>
-
-        <div class="modal-body">
-            <p class="modal-section-label" id="modalCount"></p>
-            <div class="modal-packages" id="modalPackages"></div>
-        </div>
-
-        <div class="modal-footer">
-            <a id="modalWa" href="#" target="_blank" class="btn btn-primary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                Tanyakan via WhatsApp
-            </a>
-            <button class="btn btn-ghost-dark" onclick="closeModal()">Tutup</button>
         </div>
     </div>
 </div>
@@ -1577,108 +1849,273 @@
     });
 </script>
 
+
+{{-- layanan kami --}}
 <script>
     const categoryData = {!! $categoryJson !!};
 
-    const icons  = { 'CAT-001': '🧪', 'CAT-002': '📐', 'CAT-003': '⚙️' };
-    const colors = { 'CAT-001': '#EA580C', 'CAT-002': '#0EA5E9', 'CAT-003': '#10B981' };
-    const bgs    = { 'CAT-001': 'rgba(234,88,12,.1)', 'CAT-002': 'rgba(14,165,233,.1)', 'CAT-003': 'rgba(16,185,129,.1)' };
-    const descs  = {
-        'CAT-001': 'Uji tarik, lentur, impak, kekerasan, dan analisis struktur material plastik sesuai standar ASTM dan ISO.',
-        'CAT-002': 'Pendampingan pengembangan produk plastik dari desain hingga prototipe siap produksi.',
-        'CAT-003': 'Layanan proses plastik meliputi ekstrusi, injeksi, dan vacuum forming.',
+    const catAccents   = { 'CAT-001': '#EA580C', 'CAT-002': '#0EA5E9', 'CAT-003': '#10B981' };
+    const catBgMap     = {
+        'CAT-001': 'rgba(234,88,12,.06)',
+        'CAT-002': 'rgba(14,165,233,.06)',
+        'CAT-003': 'rgba(16,185,129,.06)'
     };
 
-    function openModal(idx) {
-        const cat    = categoryData[idx];
-        const accent = colors[cat.category_id] || '#EA580C';
-        const bg     = bgs[cat.category_id]    || 'rgba(234,88,12,.1)';
+    let activeCat     = 0;
+    let activePkgIdx  = 0;
+    let calYear       = new Date().getFullYear();
+    let calMonth      = new Date().getMonth();
+    let activePkgData = null;
 
-        const box = document.getElementById('modalBox');
-        box.style.setProperty('--modal-accent', accent);
-        box.style.setProperty('--modal-bg', bg);
+    /* ── Tab kategori ── */
+    function selectCat(idx) {
+        activeCat    = idx;
+        activePkgIdx = 0;
 
-        document.getElementById('modalIcon').textContent      = icons[cat.category_id] || '🔬';
-        document.getElementById('modalIcon').style.background = bg;
-        document.getElementById('modalTitle').textContent     = cat.nama;
-        document.getElementById('modalSubtitle').textContent  = descs[cat.category_id] || '';
-        document.getElementById('modalCount').textContent     = cat.packages.length + ' Paket Tersedia';
+        const tabs = document.querySelectorAll('.cat-tab');
+        tabs.forEach((t, i) => {
+            t.classList.toggle('active', i === idx);
+            const accent = t.dataset.accent;
+            t.style.background = i === idx ? accent : '';
+        });
 
-        const waText = encodeURIComponent('Halo PUTP, saya ingin bertanya mengenai layanan ' + cat.nama);
-        document.getElementById('modalWa').href = 'https://wa.me/6285802543185?text=' + waText;
-
-        const container = document.getElementById('modalPackages');
-        if (cat.packages.length === 0) {
-            container.innerHTML = '<p style="color:#94A3B8;font-size:14px;padding:12px 0;font-style:italic;">Belum ada paket tersedia.</p>';
+        renderPkgList();
+        const cat = categoryData[idx];
+        if (cat && cat.packages && cat.packages.length > 0) {
+            renderPkgDetail(idx, 0);
         } else {
-            container.innerHTML = cat.packages.map(function(pkg, i) {
-                const num   = String(i + 1).padStart(2, '0');
-                const price = Number(pkg.base_price).toLocaleString('id-ID');
-                const desc  = pkg.description
-                    ? '<div class="modal-pkg-desc">' + pkg.description + '</div>'
-                    : '';
-                const inCart = isInCart(pkg.id);
-                const btnTxt = inCart ? 'Hapus' : 'Tambah';
-                const btnCls = inCart ? 'btn-remove' : 'btn-add';
-                return '<div class="modal-pkg-item">'
-                    + '<div class="modal-pkg-left">'
-                    +   '<div class="modal-pkg-num">' + num + '</div>'
-                    +   '<div class="modal-pkg-info">'
-                    +     '<div class="modal-pkg-name">' + pkg.name + '</div>'
-                    +     desc
-                    +   '</div>'
-                    + '</div>'
-                    + '<button class="modal-pkg-btn ' + btnCls + '" onclick="togglePackageFromModal(' + pkg.id + ',' + idx + ')">' + btnTxt + '</button>'
-                    + '</div>';
-            }).join('');
+            showEmptyDetail();
+        }
+    }
+
+    /* ── Left panel: daftar package ── */
+    function renderPkgList() {
+        const cat    = categoryData[activeCat];
+        const accent = catAccents[cat?.category_id] || '#EA580C';
+        const bg     = catBgMap[cat?.category_id]   || 'rgba(234,88,12,.06)';
+        const panel  = document.getElementById('pkgListPanel');
+
+        if (!cat || !cat.packages || cat.packages.length === 0) {
+            panel.innerHTML = '<p style="color:#94A3B8;font-size:13px;padding:12px;">Tidak ada paket tersedia.</p>';
+            return;
         }
 
-        document.getElementById('modalOverlay').classList.add('open');
-        document.body.style.overflow = 'hidden';
+        panel.innerHTML = cat.packages.map((pkg, i) => {
+            const price = Number(pkg.base_price).toLocaleString('id-ID');
+            const num   = String(i + 1).padStart(2, '0');
+            const thumb = pkg.image_url
+                ? `<img src="${pkg.image_url}" alt="${pkg.name}">`
+                : `<span>${pkg.icon || '🔬'}</span>`;
+
+            return `
+            <div class="pkg-list-item${i === activePkgIdx ? ' active' : ''}"
+                 style="--active-accent:${accent};--active-bg:${bg};"
+                 onclick="selectPkg(${i})">
+                <div class="pkg-list-thumb">${thumb}</div>
+                <div class="pkg-list-info">
+                    <div class="pkg-list-num">Paket ${num}</div>
+                    <div class="pkg-list-name" title="${pkg.name}">${pkg.name}</div>
+                    <div class="pkg-list-price" style="color:${accent}">Rp ${price}</div>
+                </div>
+                <svg class="pkg-list-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+            </div>`;
+        }).join('');
     }
 
-    function closeModal() {
-        document.getElementById('modalOverlay').classList.remove('open');
-        document.body.style.overflow = '';
+    function selectPkg(pkgIdx) {
+        activePkgIdx = pkgIdx;
+        renderPkgList();
+        renderPkgDetail(activeCat, pkgIdx);
     }
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeModal();
+    /* ── Right panel: detail package ── */
+    function renderPkgDetail(catIdx, pkgIdx) {
+        const cat    = categoryData[catIdx];
+        const pkg    = cat.packages[pkgIdx];
+        if (!pkg) { showEmptyDetail(); return; }
+
+        activePkgData = pkg;
+
+        const accent = catAccents[cat.category_id] || '#EA580C';
+        const bg     = catBgMap[cat.category_id]   || 'rgba(234,88,12,.06)';
+        const num    = String(pkgIdx + 1).padStart(2, '0');
+        const price  = Number(pkg.base_price).toLocaleString('id-ID');
+
+        const imgContent = pkg.image_url
+            ? `<img src="${pkg.image_url}" alt="${pkg.name}">`
+            : `<span>${pkg.icon || '🔬'}</span>`;
+
+        const busyCount = (pkg.busy_days || []).length;
+        const availHtml = busyCount > 15
+            ? `<span class="pkg-detail-avail busy">Jadwal Penuh</span>`
+            : `<span class="pkg-detail-avail avail">Tersedia</span>`;
+
+        const tagsHtml = (pkg.tests || []).length
+            ? (pkg.tests).map(t => `<span class="pkg-detail-tag">${t}</span>`).join('')
+            : '<span style="color:#94A3B8;font-size:13px;">—</span>';
+
+        const specsHtml = (pkg.specs || []).length
+            ? `<table class="pkg-detail-specs">${(pkg.specs).map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</table>`
+            : '<span style="color:#94A3B8;font-size:13px;">—</span>';
+
+        const inCart = isInCart(pkg.id);
+
+        document.getElementById('pkgDetailPanel').innerHTML = `
+        <div class="pkg-detail-img">
+            ${imgContent}
+            <span class="pkg-detail-badge" style="background:${accent}">Paket ${num}</span>
+            ${availHtml}
+        </div>
+        <div class="pkg-detail-body">
+            <div class="pkg-detail-eyebrow">${cat.nama_category}</div>
+            <div class="pkg-detail-title">${pkg.name}</div>
+            <p class="pkg-detail-desc">${pkg.description || ''}</p>
+
+            <div class="pkg-detail-section">
+                <div class="pkg-detail-section-label">Pengujian yang tersedia</div>
+                <div class="pkg-detail-tags">${tagsHtml}</div>
+            </div>
+
+            <div class="pkg-detail-section">
+                <div class="pkg-detail-section-label">Detail teknis</div>
+                ${specsHtml}
+            </div>
+
+            <div class="pkg-detail-section">
+                <div class="pkg-detail-section-label">Ketersediaan jadwal</div>
+                <div class="cal-wrap">
+                    <div class="cal-nav">
+                        <button class="cal-btn" onclick="calMove(-1)">&#8592;</button>
+                        <div class="cal-title" id="calTitle"></div>
+                        <button class="cal-btn" onclick="calMove(1)">&#8594;</button>
+                    </div>
+                    <div class="cal-grid" id="calGrid"></div>
+                    <div class="cal-legend">
+                        <div class="cal-legend-item">
+                            <div class="cal-legend-dot" style="background:#ECFDF5;border:1px solid #A7F3D0;"></div>
+                            Tersedia
+                        </div>
+                        <div class="cal-legend-item">
+                            <div class="cal-legend-dot" style="background:#FEF2F2;border:1px solid #FCA5A5;"></div>
+                            Penuh / Tidak tersedia
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pkg-detail-price-row" style="--price-bg:${bg};--price-accent:${accent};">
+                <div>
+                    <div class="pkg-detail-price-label">Harga mulai dari</div>
+                    <div class="pkg-detail-price-value">Rp ${price}</div>
+                </div>
+                <div class="pkg-detail-price-unit">${pkg.price_unit || 'per paket'}</div>
+            </div>
+
+            <button class="pkg-detail-cart-btn${inCart ? ' in-cart' : ''}"
+                    style="--price-accent:${accent};"
+                    id="detailCartBtn"
+                    onclick="toggleCartFromDetail(${catIdx}, ${pkgIdx})">
+                ${inCart
+                    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Hapus dari Keranjang`
+                    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Tambah ke Keranjang`
+                }
+            </button>
+        </div>`;
+
+        calYear  = new Date().getFullYear();
+        calMonth = new Date().getMonth();
+        renderCalendar();
+    }
+
+    function showEmptyDetail() {
+        document.getElementById('pkgDetailPanel').innerHTML = `
+        <div class="pkg-detail-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="4"/>
+                <path d="M9 9h6M9 12h6M9 15h4"/>
+            </svg>
+            <span>Pilih paket di sebelah kiri untuk melihat detailnya</span>
+        </div>`;
+    }
+
+    /* ── CALENDAR ── */
+    const MONTH_NAMES = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const DAY_NAMES   = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+
+    function calMove(dir) {
+        calMonth += dir;
+        if (calMonth < 0)  { calMonth = 11; calYear--; }
+        if (calMonth > 11) { calMonth = 0;  calYear++; }
+        renderCalendar();
+    }
+
+    function renderCalendar() {
+        const titleEl = document.getElementById('calTitle');
+        const gridEl  = document.getElementById('calGrid');
+        if (!titleEl || !gridEl) return;
+
+        titleEl.textContent = `${MONTH_NAMES[calMonth]} ${calYear}`;
+
+        const today       = new Date(); today.setHours(0,0,0,0);
+        const firstDay    = new Date(calYear, calMonth, 1).getDay();
+        const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+        const busyDays    = activePkgData ? (activePkgData.busy_days || []) : [];
+
+        let html = DAY_NAMES.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+        for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const date    = new Date(calYear, calMonth, d);
+            const isPast  = date < today;
+            const isBusy  = busyDays.includes(d);
+            const isToday = date.getTime() === today.getTime();
+
+            let cls = 'cal-day';
+            if (isPast)      cls += ' past';
+            else if (isBusy) cls += ' busy';
+            else             cls += ' available';
+            if (isToday)     cls += ' today';
+
+            html += `<div class="${cls}">${d}</div>`;
+        }
+
+        gridEl.innerHTML = html;
+    }
+
+    /* ── Init ── */
+    document.addEventListener('DOMContentLoaded', function () {
+    init();
     });
-</script>
 
+    function init() {
+        const cart = getCart();
+        updateFloatingCart(cart.length);
+        selectCat(0);
+    }
+</script>
 
 {{-- cart --}}
 <script>
-    // ── WELCOME PAGE CART LOGIC
-    // Keranjang hanya menyimpan package IDs di localStorage
-    // Data lengkap diambil saat user masuk ke halaman keranjang
-    
+    // ── CART LOGIC
     const CART_KEY = 'putp_cart';
-    
+
     function getCart() {
         try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); }
         catch { return []; }
     }
-    
+
     function saveCart(cart) {
         localStorage.setItem(CART_KEY, JSON.stringify(cart));
     }
-    
+
     function isInCart(packageId) {
-        const cart = getCart();
-        return cart.some(c => c.package_id === packageId);
+        return getCart().some(c => c.package_id === packageId);
     }
 
     function addPackageToCart(pkg) {
         const cart = getCart();
         if (cart.some(c => c.package_id === pkg.id)) return cart;
-        cart.push({
-            package_id: pkg.id,
-            name: pkg.name,
-            price: pkg.base_price,
-            qty: 1,
-        });
+        cart.push({ package_id: pkg.id, name: pkg.name, price: pkg.base_price, qty: 1 });
         saveCart(cart);
         return cart;
     }
@@ -1689,15 +2126,15 @@
         return cart;
     }
 
-    function togglePackageFromModal(packageId, catIdx) {
+    /* Toggle dari right panel detail */
+    function toggleCartFromDetail(catIdx, pkgIdx) {
         const cat = categoryData[catIdx];
-        if (!cat) return;
-        const pkg = (cat.packages || []).find(p => p.id === packageId);
+        const pkg = cat?.packages?.[pkgIdx];
         if (!pkg) return;
 
         let cart;
-        if (isInCart(packageId)) {
-            cart = removePackageFromCart(packageId);
+        if (isInCart(pkg.id)) {
+            cart = removePackageFromCart(pkg.id);
             showWelcomeToast('Dihapus dari keranjang: ' + pkg.name);
         } else {
             cart = addPackageToCart(pkg);
@@ -1705,39 +2142,30 @@
         }
 
         updateFloatingCart(cart.length);
-        updateCategoryBtn(catIdx);
-        // re-render modal list to refresh button states
-        openModal(catIdx);
-    }
-    
-    function updateCategoryBtn(idx) {
-        const btn = document.getElementById('cartBtn-' + idx);
-        if (!btn) return;
-        const cat = categoryData[idx];
-        const cart = getCart();
-        const catPkgIds = (cat?.packages || []).map(p => p.id);
-        const countInCart = catPkgIds.filter(id => cart.some(c => c.package_id === id)).length;
 
-        if (countInCart > 0) {
-            btn.classList.add('in-cart');
-            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ${countInCart} dipilih`;
-        } else {
-            btn.classList.remove('in-cart');
-            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg> Pilih Paket`;
+        // Re-render detail button
+        const btn = document.getElementById('detailCartBtn');
+        if (btn) {
+            const nowInCart = isInCart(pkg.id);
+            btn.classList.toggle('in-cart', nowInCart);
+            btn.innerHTML = nowInCart
+                ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Hapus dari Keranjang`
+                : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Tambah ke Keranjang`;
         }
+
+        // Re-render list to reflect state
+        renderPkgList();
     }
-    
+
     function updateFloatingCart(count) {
         const fc    = document.getElementById('floatingCart');
         const badge = document.getElementById('fctCount');
         badge.textContent = count;
         fc.style.display  = count > 0 ? 'block' : 'none';
-    
-        // Animate badge
         badge.style.transform = 'scale(1.4)';
         setTimeout(() => badge.style.transform = '', 200);
     }
-    
+
     let wToastTimer;
     function showWelcomeToast(msg) {
         const hint = document.getElementById('floatingHint');
@@ -1746,19 +2174,10 @@
         clearTimeout(wToastTimer);
         wToastTimer = setTimeout(() => hint.classList.remove('show'), 3000);
     }
-    
-    // Init on load — sinkronkan state dari localStorage
-    (function initWelcomeCart() {
-        const cart = getCart();
-        updateFloatingCart(cart.length);
-    
-        // Tandai tombol kategori jika sudah ada di keranjang
-        if (typeof categoryData !== 'undefined') {
-            categoryData.forEach((cat, idx) => {
-                if (!cat.packages || cat.packages.length === 0) return;
-                updateCategoryBtn(idx);
-            });
-        }
+
+    // Init on load
+    (function initCart() {
+        updateFloatingCart(getCart().length);
     })();
 </script>
 
