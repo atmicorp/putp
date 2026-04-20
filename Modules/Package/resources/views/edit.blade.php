@@ -8,7 +8,7 @@
         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         <span class="current">Edit Package</span>
     </x-slot>
-
+    <link rel="stylesheet" href="https://unpkg.com/v-calendar@3/dist/style.css">
     <style>
         .alert { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; font-weight: 500; }
         .alert-danger { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
@@ -118,6 +118,36 @@
             cursor: pointer; font-family: 'Sora', sans-serif; transition: all 0.15s;
         }
         .btn-submit:hover { background: #c2410c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(234,88,12,0.25); }
+
+          /* Calendar */
+        .blackout-wrap { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+        .blackout-calendar-wrap { flex-shrink: 0; }
+        .blackout-chips-wrap { flex: 1; min-width: 200px; }
+        .blackout-chips-label { font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .blackout-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .blackout-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px 4px 10px; border-radius: 6px;
+            background: #fff7ed; border: 1px solid #fed7aa;
+            font-size: 12px; font-weight: 600; color: #c2410c;
+        }
+        .blackout-chip-remove {
+            cursor: pointer; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: #fed7aa; color: #c2410c; border: none; padding: 0; font-size: 10px;
+            transition: background 0.15s;
+        }
+        .blackout-chip-remove:hover { background: #fdba74; }
+        .blackout-empty { font-size: 12.5px; color: #c4c9d4; font-style: italic; }
+
+        /* Vanilla calendar override */
+        #blackout-calendar { user-select: none; }
+        .vc-container { font-family: 'Sora', sans-serif !important; border: 1px solid #e5e7eb !important; border-radius: 10px !important; box-shadow: none !important; }
+        .vc-header { padding: 10px 12px !important; }
+        .vc-title { font-size: 13px !important; font-weight: 700 !important; color: #1c1917 !important; }
+        .vc-weeks { padding: 6px !important; }
+        .vc-day-content:hover { background: #fff7ed !important; color: #ea580c !important; }
+        .vc-highlight { background: #ea580c !important; }
+        .vc-highlight-base-start, .vc-highlight-base-end, .vc-highlight-base-middle { background: #fff7ed !important; }
     </style>
 
     @if($errors->any())
@@ -212,6 +242,31 @@
                     </div>
                 </div>
 
+                {{-- ===================== BLACKOUT DATES ===================== --}}
+                <div class="section-label">Tanggal Tidak Tersedia</div>
+
+                <div class="form-group">
+                    {{-- Hidden input, dikirim ke server sebagai "2025-06-01,2025-06-15,..." --}}
+                    <input type="hidden" name="blackout_dates" id="blackout_dates_input">
+
+                    <div class="blackout-wrap">
+                        {{-- Calendar picker --}}
+                        <div class="blackout-calendar-wrap">
+                            <div id="blackout-calendar"></div>
+                        </div>
+
+                        {{-- Chips / list tanggal terpilih --}}
+                        <div class="blackout-chips-wrap">
+                            <div class="blackout-chips-label">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                Tanggal terpilih (<span id="blackout-count">0</span>)
+                            </div>
+                            <div id="blackout-chips" class="blackout-chips"></div>
+                            <div id="blackout-empty" class="blackout-empty">Belum ada tanggal dipilih</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="section-label">Status</div>
                 <div class="form-group">
                     <div class="toggle-group">
@@ -248,6 +303,144 @@
         </div>
     </form>
 
+    <script>
+        const existingDates = @json(
+            $package->blackoutDates->pluck('date')->map(fn($d) => $d->format('Y-m-d'))->values()
+        );
+
+        let selectedDates = new Set(existingDates);
+
+        function renderChips() {
+            const chips   = document.getElementById('blackout-chips');
+            const empty   = document.getElementById('blackout-empty');
+            const count   = document.getElementById('blackout-count');
+            const input   = document.getElementById('blackout_dates_input');
+            const sorted  = [...selectedDates].sort();
+
+            count.textContent = sorted.length;
+            input.value       = sorted.join(',');
+
+            if (sorted.length === 0) {
+                chips.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+            chips.innerHTML = sorted.map(d => {
+                const label = new Date(d + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                return `<span class="blackout-chip">
+                    ${label}
+                    <button type="button" class="blackout-chip-remove" onclick="removeDate('${d}')">✕</button>
+                </span>`;
+            }).join('');
+        }
+
+        function removeDate(d) {
+            selectedDates.delete(d);
+            renderChips();
+            // Juga de-highlight di calendar — re-render calendar
+            renderCalendar();
+        }
+
+        function pad(n) { return String(n).padStart(2, '0'); }
+        function toYMD(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+
+        function renderCalendar() {
+            const el = document.getElementById('blackout-calendar');
+            el.innerHTML = '';
+
+            // Simple vanilla calendar — tidak perlu library besar
+            const now = new Date();
+            let viewYear  = now.getFullYear();
+            let viewMonth = now.getMonth();
+
+            function buildCalendar() {
+                el.innerHTML = '';
+
+                const header = document.createElement('div');
+                header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 14px 6px;';
+
+                const prev = document.createElement('button');
+                prev.type = 'button';
+                prev.innerHTML = '&#8249;';
+                prev.style.cssText = 'background:none;border:none;cursor:pointer;font-size:18px;color:#6b7280;padding:2px 6px;border-radius:4px;';
+                prev.onclick = () => { viewMonth--; if(viewMonth<0){viewMonth=11;viewYear--;} buildCalendar(); };
+
+                const next = document.createElement('button');
+                next.type = 'button';
+                next.innerHTML = '&#8250;';
+                next.style.cssText = prev.style.cssText;
+                next.onclick = () => { viewMonth++; if(viewMonth>11){viewMonth=0;viewYear++;} buildCalendar(); };
+
+                const title = document.createElement('span');
+                title.style.cssText = 'font-size:13px;font-weight:700;color:#1c1917;';
+                title.textContent = new Date(viewYear, viewMonth).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+                header.append(prev, title, next);
+
+                const grid = document.createElement('div');
+                grid.style.cssText = 'padding:0 10px 10px;';
+
+                const dayNames = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+                const daysRow = document.createElement('div');
+                daysRow.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;';
+                dayNames.forEach(d => {
+                    const c = document.createElement('div');
+                    c.style.cssText = 'text-align:center;font-size:11px;font-weight:600;color:#9ca3af;padding:4px 0;';
+                    c.textContent = d;
+                    daysRow.appendChild(c);
+                });
+
+                const cells = document.createElement('div');
+                cells.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:2px;';
+
+                const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+                const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+                for (let i = 0; i < firstDay; i++) {
+                    cells.appendChild(document.createElement('div'));
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${viewYear}-${pad(viewMonth+1)}-${pad(day)}`;
+                    const isSelected = selectedDates.has(dateStr);
+
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = day;
+                    btn.style.cssText = `
+                        border: none; cursor: pointer; border-radius: 6px;
+                        padding: 6px 2px; font-size: 12.5px; font-family: 'Sora', sans-serif;
+                        font-weight: ${isSelected ? '700' : '400'};
+                        background: ${isSelected ? '#ea580c' : 'transparent'};
+                        color: ${isSelected ? '#fff' : '#374151'};
+                        transition: background 0.12s, color 0.12s;
+                    `;
+                    btn.onmouseenter = () => { if (!selectedDates.has(dateStr)) { btn.style.background='#fff7ed'; btn.style.color='#ea580c'; } };
+                    btn.onmouseleave = () => { if (!selectedDates.has(dateStr)) { btn.style.background='transparent'; btn.style.color='#374151'; } };
+                    btn.onclick = () => {
+                        if (selectedDates.has(dateStr)) selectedDates.delete(dateStr);
+                        else selectedDates.add(dateStr);
+                        renderChips();
+                        buildCalendar();
+                    };
+                    cells.appendChild(btn);
+                }
+
+                grid.append(daysRow, cells);
+                el.append(header, grid);
+
+                // Wrapper border
+                el.style.cssText = 'border:1px solid #e5e7eb;border-radius:10px;min-width:230px;';
+            }
+
+            buildCalendar();
+        }
+
+        renderCalendar();
+        renderChips();
+
+    </script>
     <script>
         const cb = document.getElementById('is_active');
         const lbl = document.getElementById('toggleLabel');

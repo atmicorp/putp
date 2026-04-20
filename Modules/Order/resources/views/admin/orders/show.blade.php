@@ -536,28 +536,23 @@
                 <div class="sidebar-card-header">
                     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                     Notifikasi Internal
-                </div>
-                @if(is_null($order->offer->offer_file_path) && is_null($order->offer->invoice_file_path))                    
+                </div>           
                     <div class="sidebar-card-body">
                         <p style="font-size:12.5px;color:#6b7280;line-height:1.6;margin:0 0 14px;">
                             Kirim notifikasi ke user internal (id=2) untuk memproses order ini (buat penawaran & invoice manual).
                         </p>
-                        <form action="{{ route('admin.orders.notifyInternal', $order) }}" method="POST"
-                            onsubmit="return confirm('Kirim notifikasi internal untuk order {{ $order->order_code }}?')">
+                        <form id="notifyInternalForm" action="{{ route('admin.orders.notifyInternal', $order) }}" method="POST">
                             @csrf
-                            <button type="submit" class="btn-send" style="background:#111827;" onmouseover="this.style.background='#000'" onmouseout="this.style.background='#111827'">
+                            <button type="button" class="btn-send" 
+                                style="background:#111827;" 
+                                onmouseover="this.style.background='#000'" 
+                                onmouseout="this.style.background='#111827'"
+                                onclick="confirmNotifyInternal()">
                                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                                 Kirim Notifikasi
                             </button>
                         </form>
                     </div>
-                @else 
-                    <div class="sidebar-card-body">
-                        <p style="font-size:12.5px;color:#6b7280;line-height:1.6;margin:0 0 14px;">
-                           Invoice / Penawaran sudah diupload.
-                        </p>
-                    </div>
-                @endif
             </div>
 
             {{-- Send Offer --}}
@@ -571,10 +566,9 @@
                         <p style="font-size:12.5px;color:#6b7280;line-height:1.6;margin:0 0 14px;">
                             Kirim email ke <strong style="color:#1c1917;">{{ $order->customer_email }}</strong> berisi link penawaran.
                         </p>
-                        <form action="{{ route('admin.orders.sendOffer', $order) }}" method="POST"
-                              onsubmit="return confirm('Kirim email penawaran ke {{ $order->customer_email }}?')">
+                        <form id="sendOfferForm" action="{{ route('admin.orders.sendOffer', $order) }}" method="POST">
                             @csrf
-                            <button type="submit" class="btn-send">
+                            <button type="button" class="btn-send" onclick="confirmSendOffer()">
                                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                                 Kirim Email Penawaran
                             </button>
@@ -584,10 +578,12 @@
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             Email berhasil dikirim
                         </div>
-                        <form action="{{ route('admin.orders.sendOffer', $order) }}" method="POST"
-                              onsubmit="return confirm('Kirim ulang email penawaran?')">
+                        <form id="sendOfferForm" action="{{ route('admin.orders.sendOffer', $order) }}" method="POST">
                             @csrf
-                            <button type="submit" class="btn-send" style="background:#3b82f6;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#3b82f6'">
+                            <button type="button" class="btn-send" style="background:#3b82f6;" 
+                                onmouseover="this.style.background='#1d4ed8'" 
+                                onmouseout="this.style.background='#3b82f6'"
+                                onclick="confirmResendOffer()">
                                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                 Kirim Ulang
                             </button>
@@ -605,6 +601,7 @@
                     @endif
                 </div>
             </div>
+
 
             {{-- Guest Link --}}
             <div class="sidebar-card">
@@ -696,6 +693,59 @@
 
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmNotifyInternal() {
+            Swal.fire({
+                title: 'Kirim Notifikasi?',
+                text: 'Kirim notifikasi internal untuk order {{ $order->order_code }}?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#111827',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Kirim!',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('notifyInternalForm').submit();
+                }
+            });
+        }
+        function confirmSendOffer() {
+            Swal.fire({
+                title: 'Kirim Penawaran?',
+                text: 'Kirim email penawaran ke {{ $order->contact->email }}?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#EA580C',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Kirim!',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('sendOfferForm').submit();
+                }
+            });
+        }
+
+        function confirmResendOffer() {
+            Swal.fire({
+                title: 'Kirim Ulang?',
+                text: 'Email penawaran akan dikirim ulang ke {{ $order->contact->email }}.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Kirim Ulang!',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('sendOfferForm').submit();
+                }
+            });
+        }
+    </script>
 
     <script>
         function copyLink() {

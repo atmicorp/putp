@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
     <link rel="icon" type="image/jpeg" href="{{ asset('logopoltek.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        window.LAYANAN_DATA = {!! $categoryJson !!};
+    </script>
 
     <style>
         :root {
@@ -369,387 +372,386 @@
             letter-spacing: .3px;
         }
         /* ── LAYANAN SECTION START ── */
-            /* ── SECTION ── */
-            .section {
-                padding: 80px 24px;
-                max-width: 1180px;
-                margin: 0 auto;
-            }
-            .section-eyebrow {
-                font-size: 12px;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-                color: var(--teal);
-                margin-bottom: 12px;
-            }
-            .section-title {
-                font-family: 'DM Serif Display', serif;
-                font-size: clamp(26px, 4vw, 46px);
-                color: var(--navy);
-                line-height: 1.15;
-                max-width: 480px;
-                margin-bottom: 16px;
-            }
-            .section-desc {
-                font-size: 16px;
-                color: #5A6B80;
-                line-height: 1.7;
-                max-width: 480px;
-                margin-bottom: 48px;
-            }
-            
-            /* ── CAT TABS ── */
-            .cat-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-            .cat-tab {
-                padding: 9px 20px;
-                border-radius: 999px;
-                border: 1px solid #E2E8F0;
-                font-size: 13px;
-                font-weight: 500;
-                cursor: pointer;
-                background: white;
-                color: #5A6B80;
-                transition: all .2s;
-            }
-            .cat-tab.active { color: white; border-color: transparent; }
+            /* ============================================================
+        LAYANAN SECTION — Split Panel Layout
+        ============================================================ */
 
-            /* ── SPLIT PANEL LAYOUT ── */
-            .layanan-split {
-                display: grid;
-                grid-template-columns: 340px 1fr;
-                gap: 24px;
-                align-items: start;
-            }
 
-            /* LEFT PANEL — daftar package */
+
+        /* ---------- 1. SECTION WRAPPER ---------- */
+        .section {
+            padding: 80px 24px;
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+        .section-eyebrow {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--teal);
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(26px, 4vw, 46px);
+            color: var(--navy);
+            line-height: 1.15;
+            max-width: 480px;
+            margin: 0 0 16px;
+        }
+        .section-desc {
+            font-size: 16px;
+            color: #5A6B80;
+            line-height: 1.7;
+            max-width: 480px;
+            margin-bottom: 48px;
+        }
+
+        /* ---------- 2. TAB KATEGORI ---------- */
+        .cat-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+        .cat-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 999px;
+            border: 1px solid #E2E8F0;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            background: #fff;
+            color: #5A6B80;
+            transition: all .2s;
+        }
+        .cat-tab:hover { border-color: var(--active-accent); color: var(--navy); }
+        .cat-tab.active {
+            color: #fff;
+            border-color: transparent;
+            background: var(--active-accent);
+        }
+        .cat-tab-icon { font-size: 15px; }
+
+        /* ====================================================
+        5. CALENDAR (inline di panel detail)
+        ==================================================== */
+        .cal-wrap {
+            background: #F8FAFC;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .cal-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .cal-title { font-size: 14px; font-weight: 600; color: var(--navy); }
+        .cal-btn {
+            width: 28px; height: 28px; border-radius: 8px;
+            border: 1px solid #E2E8F0; background: #fff;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: #5A6B80; font-size: 13px; transition: all .2s;
+        }
+        .cal-btn:hover { border-color: var(--active-accent); color: var(--active-accent); }
+
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .cal-day-name {
+            font-size: 11px; font-weight: 600; color: #94A3B8;
+            text-align: center; padding: 4px 0;
+        }
+        .cal-day {
+            aspect-ratio: 1; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 500; cursor: pointer;
+            transition: all .15s; border: 1px solid transparent; color: var(--navy);
+            cursor: default !important;
+        }
+        .cal-day.empty     { cursor: default; }
+        .cal-day.available { background: #ECFDF5; color: #065F46 cursor: default !important;; }
+        .cal-day.available:hover { background: #D1FAE5; }
+        .cal-day.busy      { background: #FEF2F2; color: #991B1B; cursor: not-allowed; }
+        .cal-day.past      { color: #CBD5E1; background: transparent; cursor: default; }
+        .cal-day.today     { border-color: var(--active-accent); font-weight: 700; }
+        .cal-day.selected  { background: var(--active-accent) !important; color: #fff !important; }
+
+        .cal-legend { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+        .cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #5A6B80; }
+        .cal-legend-dot  { width: 10px; height: 10px; border-radius: 3px; }
+
+        /* ---------- 3. SPLIT PANEL LAYOUT ---------- */
+        .layanan-split {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* ---------- 3a. PANEL KIRI — DAFTAR PAKET ---------- */
+        .pkg-list-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: sticky;
+            top: 24px;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            padding-right: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #E2E8F0 transparent;
+        }
+
+        .pkg-list-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px 18px;
+            background: #fff;
+            border: 1.5px solid #E8EDF2;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all .22s cubic-bezier(.34, 1.2, .64, 1);
+        }
+        .pkg-list-item:hover {
+            border-color: var(--active-accent);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .07);
+            transform: translateX(3px);
+        }
+        .pkg-list-item.active {
+            border-color: var(--active-accent);
+            background: var(--active-bg);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, .09);
+        }
+
+        .pkg-list-thumb {
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            background: #F1F5F9;
+        }
+        .pkg-list-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+        .pkg-list-info  { flex: 1; min-width: 0; }
+        .pkg-list-num {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #94A3B8;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .pkg-list-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 15px;
+            color: var(--navy);
+            line-height: 1.3;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pkg-list-price {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--active-accent);
+        }
+        .pkg-list-arrow {
+            color: #CBD5E1;
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: color .2s, transform .2s;
+        }
+        .pkg-list-item.active .pkg-list-arrow,
+        .pkg-list-item:hover .pkg-list-arrow {
+            color: var(--active-accent);
+            transform: translateX(3px);
+        }
+
+        /* ---------- 3b. PANEL KANAN — DETAIL PAKET ---------- */
+        .pkg-detail-panel {
+            background: #fff;
+            border: 1.5px solid #E8EDF2;
+            border-radius: 20px;
+            overflow: hidden;
+            animation: panelIn .3s cubic-bezier(.34, 1.2, .64, 1) both;
+            min-height: 320px;
+        }
+        @keyframes panelIn {
+            from { opacity: 0; transform: translateX(12px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        .pkg-detail-img {
+            width: 100%;
+            height: 240px;
+            position: relative;
+            overflow: hidden;
+            background: #F1F5F9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+        }
+        .pkg-detail-img img { width: 100%; height: 100%; object-fit: cover; }
+
+        .pkg-detail-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            color: #fff;
+            background: var(--active-accent);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            text-transform: uppercase;
+        }
+        .pkg-detail-avail {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 8px;
+        }
+        .pkg-detail-avail.avail { background: #D1FAE5; color: #065F46; }
+        .pkg-detail-avail.busy  { background: #FEE2E2; color: #991B1B; }
+
+        .pkg-detail-body { padding: 24px 26px; }
+
+        .pkg-detail-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #94A3B8;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .pkg-detail-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 26px;
+            color: var(--navy);
+            line-height: 1.2;
+            margin: 0 0 12px;
+        }
+        .pkg-detail-desc {
+            font-size: 14px;
+            color: #5A6B80;
+            line-height: 1.7;
+            margin-bottom: 22px;
+        }
+
+        .pkg-detail-section { margin-bottom: 22px; }
+        .pkg-detail-section-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #94A3B8;
+            margin-bottom: 12px;
+        }
+
+        .pkg-detail-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .pkg-detail-tag {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            color: #5A6B80;
+            background: #F8FAFC;
+        }
+
+        .pkg-detail-specs { width: 100%; font-size: 13px; border-collapse: collapse; }
+        .pkg-detail-specs td { padding: 9px 0; border-bottom: 1px solid #F1F5F9; }
+        .pkg-detail-specs td:first-child { color: #94A3B8; width: 42%; }
+        .pkg-detail-specs td:last-child  { color: var(--navy); font-weight: 500; text-align: right; }
+
+        .pkg-detail-price-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--price-bg);
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 16px;
+        }
+        .pkg-detail-price-label    { font-size: 12px; color: #94A3B8; margin-bottom: 2px; }
+        .pkg-detail-price-value    { font-size: 24px; font-weight: 700; color: var(--price-accent); }
+        .pkg-detail-price-unit     { font-size: 12px; color: #94A3B8; }
+
+        .pkg-detail-cart-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 12px;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all .2s;
+            background: var(--price-accent);
+            color: #fff;
+        }
+        .pkg-detail-cart-btn:hover {
+            opacity: .88;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .15);
+        }
+        .pkg-detail-cart-btn.in-cart { background: #16A34A; }
+
+        /* ---------- EMPTY STATE ---------- */
+        .pkg-detail-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 80px 24px;
+            color: #94A3B8;
+            font-size: 14px;
+            text-align: center;
+        }
+        .pkg-detail-empty svg { opacity: .35; }
+
+        /* ---------- RESPONSIVE (≤ 900px) ---------- */
+        @media (max-width: 900px) {
+            .layanan-split { grid-template-columns: 1fr; }
+
             .pkg-list-panel {
-                display: flex;
-                flex-direction: column;
+                position: static;
+                max-height: none;
+                overflow: visible;
+                flex-direction: row;
+                overflow-x: auto;
                 gap: 10px;
-                position: sticky;
-                top: 24px;
-                max-height: calc(100vh - 80px);
-                overflow-y: auto;
-                scrollbar-width: thin;
-                scrollbar-color: #E2E8F0 transparent;
-                padding-right: 4px;
+                padding: 0 0 6px;
             }
-
             .pkg-list-item {
-                display: flex;
-                align-items: flex-start;
-                gap: 14px;
-                padding: 16px 18px;
-                background: white;
-                border: 1.5px solid #E8EDF2;
-                border-radius: 14px;
-                cursor: pointer;
-                transition: all .22s cubic-bezier(.34,1.2,.64,1);
-            }
-
-            .pkg-list-item:hover {
-                border-color: var(--active-accent, #EA580C);
-                box-shadow: 0 6px 20px rgba(0,0,0,.07);
-                transform: translateX(3px);
-            }
-
-            .pkg-list-item.active {
-                border-color: var(--active-accent, #EA580C);
-                background: var(--active-bg, rgba(234,88,12,.04));
-                box-shadow: 0 8px 28px rgba(0,0,0,.09);
-            }
-
-            .pkg-list-thumb {
-                width: 52px;
-                height: 52px;
-                border-radius: 10px;
-                overflow: hidden;
-                flex-shrink: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 22px;
-                background: #F1F5F9;
-            }
-
-            .pkg-list-thumb img { width: 100%; height: 100%; object-fit: cover; }
-
-            .pkg-list-info { flex: 1; min-width: 0; }
-
-            .pkg-list-num {
-                font-size: 10px;
-                font-weight: 700;
-                letter-spacing: 1.5px;
-                color: #94A3B8;
-                text-transform: uppercase;
-                margin-bottom: 2px;
-            }
-
-            .pkg-list-name {
-                font-family: 'DM Serif Display', serif;
-                font-size: 15px;
-                color: var(--navy);
-                line-height: 1.3;
-                margin-bottom: 4px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .pkg-list-price {
-                font-size: 13px;
-                font-weight: 600;
-                color: var(--active-accent, #EA580C);
-            }
-
-            .pkg-list-arrow {
-                color: #CBD5E1;
-                flex-shrink: 0;
-                margin-top: 2px;
-                transition: color .2s, transform .2s;
-            }
-
-            .pkg-list-item.active .pkg-list-arrow,
-            .pkg-list-item:hover .pkg-list-arrow {
-                color: var(--active-accent, #EA580C);
-                transform: translateX(3px);
-            }
-
-            /* RIGHT PANEL — detail package */
-            .pkg-detail-panel {
-                background: white;
-                border: 1.5px solid #E8EDF2;
-                border-radius: 20px;
-                overflow: hidden;
-                animation: panelIn .3s cubic-bezier(.34,1.2,.64,1) both;
-            }
-
-            @keyframes panelIn {
-                from { opacity: 0; transform: translateX(12px); }
-                to   { opacity: 1; transform: translateX(0); }
-            }
-
-            .pkg-detail-img {
-                width: 100%;
-                height: 240px;
-                position: relative;
-                overflow: hidden;
-                background: #F1F5F9;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 72px;
-            }
-
-            .pkg-detail-img img { width: 100%; height: 100%; object-fit: cover; }
-
-            .pkg-detail-badge {
-                position: absolute;
-                top: 14px;
-                left: 14px;
-                color: white;
-                font-size: 11px;
-                font-weight: 700;
-                letter-spacing: 1px;
-                padding: 5px 12px;
-                border-radius: 8px;
-                text-transform: uppercase;
-            }
-
-            .pkg-detail-avail {
-                position: absolute;
-                top: 14px;
-                right: 14px;
-                font-size: 11px;
-                font-weight: 600;
-                padding: 5px 12px;
-                border-radius: 8px;
-            }
-            .pkg-detail-avail.avail { background: #D1FAE5; color: #065F46; }
-            .pkg-detail-avail.busy  { background: #FEE2E2; color: #991B1B; }
-
-            .pkg-detail-body { padding: 24px 26px; }
-
-            .pkg-detail-eyebrow {
-                font-size: 11px;
-                font-weight: 700;
-                letter-spacing: 1.5px;
-                color: #94A3B8;
-                text-transform: uppercase;
-                margin-bottom: 6px;
-            }
-
-            .pkg-detail-title {
-                font-family: 'DM Serif Display', serif;
-                font-size: 26px;
-                color: var(--navy);
-                line-height: 1.2;
-                margin-bottom: 12px;
-            }
-
-            .pkg-detail-desc {
-                font-size: 14px;
-                color: #5A6B80;
-                line-height: 1.7;
-                margin-bottom: 22px;
-            }
-
-            .pkg-detail-section { margin-bottom: 22px; }
-
-            .pkg-detail-section-label {
-                font-size: 11px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 1.5px;
-                color: #94A3B8;
-                margin-bottom: 12px;
-            }
-
-            .pkg-detail-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-
-            .pkg-detail-tag {
-                font-size: 12px;
-                font-weight: 500;
-                padding: 5px 12px;
-                border-radius: 8px;
-                border: 1px solid #E2E8F0;
-                color: #5A6B80;
-                background: #F8FAFC;
-            }
-
-            .pkg-detail-specs { width: 100%; font-size: 13px; border-collapse: collapse; }
-            .pkg-detail-specs td { padding: 9px 0; border-bottom: 1px solid #F1F5F9; }
-            .pkg-detail-specs td:first-child { color: #94A3B8; width: 42%; }
-            .pkg-detail-specs td:last-child { color: var(--navy); font-weight: 500; text-align: right; }
-
-            .pkg-detail-price-row {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                background: var(--price-bg, rgba(234,88,12,.07));
-                border-radius: 14px;
-                padding: 18px 20px;
-                margin-bottom: 16px;
-            }
-
-            .pkg-detail-price-label { font-size: 12px; color: #94A3B8; margin-bottom: 2px; }
-            .pkg-detail-price-value { font-size: 24px; font-weight: 700; color: var(--price-accent, #EA580C); }
-            .pkg-detail-price-unit  { font-size: 12px; color: #94A3B8; }
-
-            .pkg-detail-cart-btn {
-                width: 100%;
-                padding: 13px;
-                border-radius: 12px;
-                border: none;
-                font-size: 14px;
-                font-weight: 700;
-                font-family: 'DM Sans', sans-serif;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-                transition: all .2s;
-                background: var(--price-accent, #EA580C);
-                color: white;
-            }
-
-            .pkg-detail-cart-btn:hover { opacity: .88; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.15); }
-            .pkg-detail-cart-btn.in-cart { background: #16A34A; }
-
-            /* Empty state */
-            .pkg-detail-empty {
-                display: flex;
+                min-width: 220px;
                 flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 14px;
-                padding: 60px 24px;
-                color: #94A3B8;
-                font-size: 14px;
-                text-align: center;
+                gap: 8px;
             }
+            .pkg-list-item:hover { transform: translateY(-2px); }
+            .pkg-list-arrow { display: none; }
+        }
 
-            .pkg-detail-empty svg { opacity: .35; }
-
-            /* ── RESPONSIVE split panel ── */
-            @media (max-width: 900px) {
-                .layanan-split {
-                    grid-template-columns: 1fr;
-                }
-                .pkg-list-panel {
-                    position: static;
-                    max-height: none;
-                    overflow: visible;
-                    flex-direction: row;
-                    overflow-x: auto;
-                    gap: 10px;
-                    padding-bottom: 6px;
-                    padding-right: 0;
-                    scrollbar-width: thin;
-                }
-                .pkg-list-item {
-                    min-width: 220px;
-                    flex-direction: column;
-                    gap: 8px;
-                }
-                .pkg-list-item:hover { transform: translateY(-2px) translateX(0); }
-                .pkg-list-arrow { display: none; }
-            }
-            
-
-            
-            /* ── CALENDAR ── */
-            .cal-wrap { background: #F8FAFC; border-radius: 12px; padding: 16px; }
-            .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-            .cal-title { font-size: 14px; font-weight: 600; color: var(--navy); }
-            .cal-btn {
-                width: 28px; height: 28px; border-radius: 8px;
-                border: 1px solid #E2E8F0; background: white;
-                cursor: pointer; display: flex; align-items: center;
-                justify-content: center; color: #5A6B80; font-size: 13px; transition: all .2s;
-            }
-            .cal-btn:hover { border-color: #EA580C; color: #EA580C; }
-            .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-            .cal-day-name { font-size: 11px; font-weight: 600; color: #94A3B8; text-align: center; padding: 4px 0; }
-            .cal-day {
-                aspect-ratio: 1; border-radius: 8px; display: flex;
-                align-items: center; justify-content: center;
-                font-size: 12px; font-weight: 500; cursor: pointer;
-                transition: all .15s; border: 1px solid transparent; color: var(--navy);
-            }
-            .cal-day.empty    { cursor: default; }
-            .cal-day.available { background: #ECFDF5; color: #065F46; }
-            .cal-day.available:hover { background: #D1FAE5; }
-            .cal-day.busy     { background: #FEF2F2; color: #991B1B; cursor: not-allowed; }
-            .cal-day.past     { color: #CBD5E1; background: transparent; cursor: default; }
-            .cal-day.today    { border-color: #EA580C; font-weight: 700; }
-            .cal-day.selected { background: #EA580C !important; color: white !important; }
-            .cal-legend { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
-            .cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #5A6B80; }
-            .cal-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
-            
-            /* ── PRICE BOX ── */
-            .modal-price-box { border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
-            .modal-price-label { font-size: 12px; margin-bottom: 2px; opacity: .7; }
-            .modal-price-value { font-size: 22px; font-weight: 700; }
-            .modal-price-duration { font-size: 13px; opacity: .7; }
-            .modal-footer { padding: 16px 24px; border-top: 1px solid #F1F5F9; display: flex; gap: 10px; }
-            .mf-btn-cancel {
-                flex: 1; padding: 12px; border-radius: 10px;
-                border: 1px solid #E2E8F0; background: transparent;
-                color: #5A6B80; font-size: 14px; cursor: pointer; transition: all .2s;
-            }
-            .mf-btn-cancel:hover { background: #F8FAFC; }
-            .mf-btn-book {
-                flex: 2; padding: 12px; border-radius: 10px;
-                border: none; background: #EA580C; color: white;
-                font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s;
-            }
-            .mf-btn-book:hover { opacity: .9; }
-            .mf-btn-book.sky { background: #0EA5E9; }
-            .mf-btn-book.grn { background: #10B981; }
 
         /* ── LAYANAN SECTION END ── */
 
@@ -1719,54 +1721,61 @@
     </div>
 </section>
 
-{{-- ──────────────────── LAYANAN SECTION ──────────────────── --}}
-<div class="section" id="layanan">
-    <p class="section-eyebrow">Layanan Kami</p>
-    <h2 class="section-title">Apa yang Bisa Kami Uji untuk Anda?</h2>
-    <p class="section-desc">
-        Didukung peralatan modern dan tenaga ahli berpengalaman,
-        kami siap membantu kebutuhan teknis Anda.
-    </p>
+{{-- ──────────────────── LAYANAN KAMI ──────────────────── --}}
+<section class="section layanan-section" id="layanan">
 
+    {{-- 1. HEADER SECTION --}}
+    <div class="section-header">
+        <div class="section-eyebrow">Layanan Kami</div>
+        <h2 class="section-title">Apa yang Bisa Kami Uji untuk Anda?</h2>
+        <p class="section-desc">
+            Didukung peralatan modern dan tenaga ahli berpengalaman,
+            kami siap membantu kebutuhan teknis Anda.
+        </p>
+    </div>
+
+    {{-- 2. TAB KATEGORI (di atas) --}}
     @php
-        $catIcons    = ['CAT-001' => '🧪', 'CAT-002' => '📐', 'CAT-003' => '⚙️'];
-        $catAccents  = ['CAT-001' => '#EA580C', 'CAT-002' => '#0EA5E9', 'CAT-003' => '#10B981'];
-        $catBtnClass = ['CAT-001' => '',        'CAT-002' => 'btn-sky',  'CAT-003' => 'btn-grn'];
+        $catIcons   = ['CAT-001' => '🧪', 'CAT-002' => '📐', 'CAT-003' => '⚙️'];
+        $catAccents = ['CAT-001' => '#EA580C', 'CAT-002' => '#0EA5E9', 'CAT-003' => '#10B981'];
     @endphp
 
-    {{-- Tabs Kategori --}}
     <div class="cat-tabs" id="catTabs">
         @foreach ($categories as $category)
             <button
-                class="cat-tab{{ $loop->first ? ' active' : '' }}"
+                type="button"
+                class="cat-tab {{ $loop->first ? 'active' : '' }}"
                 data-idx="{{ $loop->index }}"
+                data-cat-id="{{ $category->category_id }}"
                 data-accent="{{ $catAccents[$category->category_id] ?? '#EA580C' }}"
                 onclick="selectCat({{ $loop->index }})">
-                {{ $catIcons[$category->category_id] ?? '🔬' }}
-                {{ $category->nama_category }}
+                <span class="cat-tab-icon">{{ $catIcons[$category->category_id] ?? '🔬' }}</span>
+                <span>{{ $category->nama_category }}</span>
             </button>
         @endforeach
     </div>
 
-    {{-- Split Panel --}}
+    {{-- 3. SPLIT PANEL: kiri = daftar paket, kanan = detail --}}
     <div class="layanan-split">
-        {{-- LEFT: daftar package --}}
-        <div class="pkg-list-panel" id="pkgListPanel">
-            {{-- diisi JS --}}
-        </div>
 
-        {{-- RIGHT: detail package --}}
-        <div class="pkg-detail-panel" id="pkgDetailPanel">
+        {{-- 3a. PANEL KIRI — daftar paket (di-render oleh JS) --}}
+        <aside class="pkg-list-panel" id="pkgListPanel">
+            {{-- diisi oleh renderPackageList() --}}
+        </aside>
+
+        {{-- 3b. PANEL KANAN — detail paket (di-render oleh JS) --}}
+        <article class="pkg-detail-panel" id="pkgDetailPanel">
             <div class="pkg-detail-empty">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="4"/>
-                    <path d="M9 9h6M9 12h6M9 15h4"/>
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.4">
+                    <path d="M3 7h18M3 12h18M3 17h18"/>
                 </svg>
-                <span>Pilih paket di sebelah kiri untuk melihat detailnya</span>
+                <div>Pilih paket di sebelah kiri untuk melihat detailnya.</div>
             </div>
-        </div>
+        </article>
+
     </div>
-</div>
+</section>
 
 {{-- ──────────────────── PROSES ──────────────────── --}}
 <div class="process-section">
@@ -1827,6 +1836,11 @@
     </div>
 </footer>
 
+
+<script>
+    window.LAYANAN_DATA = {!! $categoryJson !!};
+</script>
+
 <script>
     const toggle = document.getElementById('navToggle');
     const menu = document.getElementById('mobileMenu');
@@ -1852,246 +1866,311 @@
 
 {{-- layanan kami --}}
 <script>
-    const categoryData = {!! $categoryJson !!};
+    (function () {
+        const DATA = window.LAYANAN_DATA || [];
 
-    const catAccents   = { 'CAT-001': '#EA580C', 'CAT-002': '#0EA5E9', 'CAT-003': '#10B981' };
-    const catBgMap     = {
-        'CAT-001': 'rgba(234,88,12,.06)',
-        'CAT-002': 'rgba(14,165,233,.06)',
-        'CAT-003': 'rgba(16,185,129,.06)'
-    };
+        let activeCatIdx = 0;
+        let activePkgIdx = 0;
 
-    let activeCat     = 0;
-    let activePkgIdx  = 0;
-    let calYear       = new Date().getFullYear();
-    let calMonth      = new Date().getMonth();
-    let activePkgData = null;
+        const $list   = document.getElementById('pkgListPanel');
+        const $detail = document.getElementById('pkgDetailPanel');
+        const $tabs   = document.getElementById('catTabs');
 
-    /* ── Tab kategori ── */
-    function selectCat(idx) {
-        activeCat    = idx;
-        activePkgIdx = 0;
+        // Format harga ke Rupiah
+        const rupiah = (n) =>
+            'Rp ' + Number(n || 0).toLocaleString('id-ID');
 
-        const tabs = document.querySelectorAll('.cat-tab');
-        tabs.forEach((t, i) => {
-            t.classList.toggle('active', i === idx);
-            const accent = t.dataset.accent;
-            t.style.background = i === idx ? accent : '';
-        });
+        // ---------- 1. PILIH KATEGORI ----------
+        window.selectCat = function (idx) {
+            activeCatIdx = idx;
+            activePkgIdx = 0;
 
-        renderPkgList();
-        const cat = categoryData[idx];
-        if (cat && cat.packages && cat.packages.length > 0) {
-            renderPkgDetail(idx, 0);
-        } else {
-            showEmptyDetail();
-        }
-    }
-
-    /* ── Left panel: daftar package ── */
-    function renderPkgList() {
-        const cat    = categoryData[activeCat];
-        const accent = catAccents[cat?.category_id] || '#EA580C';
-        const bg     = catBgMap[cat?.category_id]   || 'rgba(234,88,12,.06)';
-        const panel  = document.getElementById('pkgListPanel');
-
-        if (!cat || !cat.packages || cat.packages.length === 0) {
-            panel.innerHTML = '<p style="color:#94A3B8;font-size:13px;padding:12px;">Tidak ada paket tersedia.</p>';
-            return;
-        }
-
-        panel.innerHTML = cat.packages.map((pkg, i) => {
-            const price = Number(pkg.base_price).toLocaleString('id-ID');
-            const num   = String(i + 1).padStart(2, '0');
-            const thumb = pkg.image_url
-                ? `<img src="${pkg.image_url}" alt="${pkg.name}">`
-                : `<span>${pkg.icon || '🔬'}</span>`;
-
-            return `
-            <div class="pkg-list-item${i === activePkgIdx ? ' active' : ''}"
-                 style="--active-accent:${accent};--active-bg:${bg};"
-                 onclick="selectPkg(${i})">
-                <div class="pkg-list-thumb">${thumb}</div>
-                <div class="pkg-list-info">
-                    <div class="pkg-list-num">Paket ${num}</div>
-                    <div class="pkg-list-name" title="${pkg.name}">${pkg.name}</div>
-                    <div class="pkg-list-price" style="color:${accent}">Rp ${price}</div>
-                </div>
-                <svg class="pkg-list-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-            </div>`;
-        }).join('');
-    }
-
-    function selectPkg(pkgIdx) {
-        activePkgIdx = pkgIdx;
-        renderPkgList();
-        renderPkgDetail(activeCat, pkgIdx);
-    }
-
-    /* ── Right panel: detail package ── */
-    function renderPkgDetail(catIdx, pkgIdx) {
-        const cat    = categoryData[catIdx];
-        const pkg    = cat.packages[pkgIdx];
-        if (!pkg) { showEmptyDetail(); return; }
-
-        activePkgData = pkg;
-
-        const accent = catAccents[cat.category_id] || '#EA580C';
-        const bg     = catBgMap[cat.category_id]   || 'rgba(234,88,12,.06)';
-        const num    = String(pkgIdx + 1).padStart(2, '0');
-        const price  = Number(pkg.base_price).toLocaleString('id-ID');
-
-        const imgContent = pkg.image_url
-            ? `<img src="${pkg.image_url}" alt="${pkg.name}">`
-            : `<span>${pkg.icon || '🔬'}</span>`;
-
-        const busyCount = (pkg.busy_days || []).length;
-        const availHtml = busyCount > 15
-            ? `<span class="pkg-detail-avail busy">Jadwal Penuh</span>`
-            : `<span class="pkg-detail-avail avail">Tersedia</span>`;
-
-        const tagsHtml = (pkg.tests || []).length
-            ? (pkg.tests).map(t => `<span class="pkg-detail-tag">${t}</span>`).join('')
-            : '<span style="color:#94A3B8;font-size:13px;">—</span>';
-
-        const specsHtml = (pkg.specs || []).length
-            ? `<table class="pkg-detail-specs">${(pkg.specs).map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</table>`
-            : '<span style="color:#94A3B8;font-size:13px;">—</span>';
-
-        const inCart = isInCart(pkg.id);
-
-        document.getElementById('pkgDetailPanel').innerHTML = `
-        <div class="pkg-detail-img">
-            ${imgContent}
-            <span class="pkg-detail-badge" style="background:${accent}">Paket ${num}</span>
-            ${availHtml}
-        </div>
-        <div class="pkg-detail-body">
-            <div class="pkg-detail-eyebrow">${cat.nama_category}</div>
-            <div class="pkg-detail-title">${pkg.name}</div>
-            <p class="pkg-detail-desc">${pkg.description || ''}</p>
-
-            <div class="pkg-detail-section">
-                <div class="pkg-detail-section-label">Pengujian yang tersedia</div>
-                <div class="pkg-detail-tags">${tagsHtml}</div>
-            </div>
-
-            <div class="pkg-detail-section">
-                <div class="pkg-detail-section-label">Detail teknis</div>
-                ${specsHtml}
-            </div>
-
-            <div class="pkg-detail-section">
-                <div class="pkg-detail-section-label">Ketersediaan jadwal</div>
-                <div class="cal-wrap">
-                    <div class="cal-nav">
-                        <button class="cal-btn" onclick="calMove(-1)">&#8592;</button>
-                        <div class="cal-title" id="calTitle"></div>
-                        <button class="cal-btn" onclick="calMove(1)">&#8594;</button>
-                    </div>
-                    <div class="cal-grid" id="calGrid"></div>
-                    <div class="cal-legend">
-                        <div class="cal-legend-item">
-                            <div class="cal-legend-dot" style="background:#ECFDF5;border:1px solid #A7F3D0;"></div>
-                            Tersedia
-                        </div>
-                        <div class="cal-legend-item">
-                            <div class="cal-legend-dot" style="background:#FEF2F2;border:1px solid #FCA5A5;"></div>
-                            Penuh / Tidak tersedia
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pkg-detail-price-row" style="--price-bg:${bg};--price-accent:${accent};">
-                <div>
-                    <div class="pkg-detail-price-label">Harga mulai dari</div>
-                    <div class="pkg-detail-price-value">Rp ${price}</div>
-                </div>
-                <div class="pkg-detail-price-unit">${pkg.price_unit || 'per paket'}</div>
-            </div>
-
-            <button class="pkg-detail-cart-btn${inCart ? ' in-cart' : ''}"
-                    style="--price-accent:${accent};"
-                    id="detailCartBtn"
-                    onclick="toggleCartFromDetail(${catIdx}, ${pkgIdx})">
-                ${inCart
-                    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Hapus dari Keranjang`
-                    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Tambah ke Keranjang`
+            $tabs.querySelectorAll('.cat-tab').forEach((t, i) => {
+                t.classList.toggle('active', i === idx);
+                if (i === idx) {
+                    const accent = t.dataset.accent || '#EA580C';
+                    document.documentElement.style.setProperty('--active-accent', accent);
+                    document.documentElement.style.setProperty('--price-accent',  accent);
+                    document.documentElement.style.setProperty('--active-bg',
+                        hexToRgba(accent, 0.04));
+                    document.documentElement.style.setProperty('--price-bg',
+                        hexToRgba(accent, 0.07));
                 }
-            </button>
-        </div>`;
+            });
 
-        calYear  = new Date().getFullYear();
-        calMonth = new Date().getMonth();
-        renderCalendar();
-    }
+            renderPackageList();
+            // Langsung tampilkan detail paket pertama jika ada
+            const cat = DATA[idx];
+            if (cat && cat.packages && cat.packages.length > 0) {
+                renderPackageDetail(); // activePkgIdx sudah 0
+            } else {
+                $detail.innerHTML = `<div class="pkg-detail-empty">Belum ada paket di kategori ini.</div>`;
+            }
+        };
 
-    function showEmptyDetail() {
-        document.getElementById('pkgDetailPanel').innerHTML = `
-        <div class="pkg-detail-empty">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="4"/>
-                <path d="M9 9h6M9 12h6M9 15h4"/>
-            </svg>
-            <span>Pilih paket di sebelah kiri untuk melihat detailnya</span>
-        </div>`;
-    }
+        // ---------- 2. RENDER DAFTAR PAKET (KIRI) ----------
+        function renderPackageList() {
+            const cat = DATA[activeCatIdx];
+            if (!cat || !cat.packages || cat.packages.length === 0) {
+                $list.innerHTML = `<div class="pkg-detail-empty">
+                    Belum ada paket di kategori ini.
+                </div>`;
+                return;
+            }
 
-    /* ── CALENDAR ── */
-    const MONTH_NAMES = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-    const DAY_NAMES   = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-
-    function calMove(dir) {
-        calMonth += dir;
-        if (calMonth < 0)  { calMonth = 11; calYear--; }
-        if (calMonth > 11) { calMonth = 0;  calYear++; }
-        renderCalendar();
-    }
-
-    function renderCalendar() {
-        const titleEl = document.getElementById('calTitle');
-        const gridEl  = document.getElementById('calGrid');
-        if (!titleEl || !gridEl) return;
-
-        titleEl.textContent = `${MONTH_NAMES[calMonth]} ${calYear}`;
-
-        const today       = new Date(); today.setHours(0,0,0,0);
-        const firstDay    = new Date(calYear, calMonth, 1).getDay();
-        const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-        const busyDays    = activePkgData ? (activePkgData.busy_days || []) : [];
-
-        let html = DAY_NAMES.map(d => `<div class="cal-day-name">${d}</div>`).join('');
-        for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
-
-        for (let d = 1; d <= daysInMonth; d++) {
-            const date    = new Date(calYear, calMonth, d);
-            const isPast  = date < today;
-            const isBusy  = busyDays.includes(d);
-            const isToday = date.getTime() === today.getTime();
-
-            let cls = 'cal-day';
-            if (isPast)      cls += ' past';
-            else if (isBusy) cls += ' busy';
-            else             cls += ' available';
-            if (isToday)     cls += ' today';
-
-            html += `<div class="${cls}">${d}</div>`;
+            $list.innerHTML = cat.packages.map((pkg, i) => {
+                const inCart = isInCart(pkg.id);
+                return `
+                    <div class="pkg-list-item ${i === activePkgIdx ? 'active' : ''} ${inCart ? 'in-cart' : ''}"
+                        onclick="selectPkg(${i})">
+                        <div class="pkg-list-thumb">
+                            ${pkg.gambar
+                                ? `<img src="${pkg.gambar}" alt="${pkg.nama}">`
+                                : '🔬'}
+                        </div>
+                        <div class="pkg-list-info">
+                            <div class="pkg-list-num">Paket ${String(i + 1).padStart(2, '0')}</div>
+                            <div class="pkg-list-name">${pkg.nama}</div>
+                            <div class="pkg-list-price">${rupiah(pkg.harga)}</div>
+                        </div>
+                        ${inCart
+                            ? `<svg class="pkg-list-incart-icon" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <polyline points="20 6 9 17 4 12"/>
+                              </svg>`
+                            : `<svg class="pkg-list-arrow" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                              </svg>`
+                        }
+                    </div>
+                `;
+            }).join('');
         }
 
-        gridEl.innerHTML = html;
-    }
+        // ---------- 3. PILIH PAKET ----------
+        window.selectPkg = function (idx) {
+            activePkgIdx = idx;
+            renderPackageList();
+            renderPackageDetail();
+        };
 
-    /* ── Init ── */
-    document.addEventListener('DOMContentLoaded', function () {
-    init();
-    });
+        // ---------- 4. RENDER DETAIL PAKET (KANAN) ----------
+        function renderPackageDetail() {
+            const cat = DATA[activeCatIdx];
+            const pkg = cat?.packages?.[activePkgIdx];
 
-    function init() {
-        const cart = getCart();
-        updateFloatingCart(cart.length);
-        selectCat(0);
-    }
+            if (!pkg) {
+                $detail.innerHTML = `
+                    <div class="pkg-detail-empty">
+                        Pilih paket di sebelah kiri untuk melihat detailnya.
+                    </div>`;
+                return;
+            }
+
+            const inCart = isInCart(pkg.id);
+
+            const tags = (pkg.tags || []).map(t =>
+                `<span class="pkg-detail-tag">${t}</span>`).join('');
+
+            const specs = Object.entries(pkg.specs || {}).map(([k, v]) =>
+                `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+
+            $detail.innerHTML = `
+                <div class="pkg-detail-img">
+                    ${pkg.gambar
+                        ? `<img src="${pkg.gambar}" alt="${pkg.nama}">`
+                        : '🧪'}
+                    ${pkg.badge ? `<span class="pkg-detail-badge">${pkg.badge}</span>` : ''}
+                    <span class="pkg-detail-avail ${pkg.available ? 'avail' : 'busy'}">
+                        ${pkg.available ? 'Tersedia' : 'Sibuk'}
+                    </span>
+                </div>
+
+                <div class="pkg-detail-body">
+                    <div class="pkg-detail-eyebrow">${cat.nama_category}</div>
+                    <h3 class="pkg-detail-title">${pkg.nama}</h3>
+                    <p class="pkg-detail-desc">${pkg.deskripsi || ''}</p>
+
+                    ${tags ? `
+                        <div class="pkg-detail-section">
+                            <div class="pkg-detail-section-label">Termasuk</div>
+                            <div class="pkg-detail-tags">${tags}</div>
+                        </div>` : ''}
+
+                    ${specs ? `
+                        <div class="pkg-detail-section">
+                            <div class="pkg-detail-section-label">Spesifikasi</div>
+                            <table class="pkg-detail-specs"><tbody>${specs}</tbody></table>
+                        </div>` : ''}
+
+                    <div class="cal-wrap" id="calWrap-${pkg.id}">
+                        <div class="cal-nav">
+                            <button class="cal-btn" onclick="calNav(-1)">‹</button>
+                            <div class="cal-title" id="calTitle">—</div>
+                            <button class="cal-btn" onclick="calNav(1)">›</button>
+                        </div>
+                        <div class="cal-grid" id="calGrid"></div>
+                        <div class="cal-legend">
+                            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:#ECFDF5"></span> Tersedia</div>
+                            <div class="cal-legend-item"><span class="cal-legend-dot" style="background:#FEF2F2"></span>Tidak tersedia</div>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        id="detailCartBtn"
+                        class="pkg-detail-cart-btn ${inCart ? 'in-cart' : ''}"
+                        onclick="bookPkg('${pkg.id}')">
+                        ${inCart
+                            ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                               Hapus dari Keranjang`
+                            : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                               Masukkan Keranjang`
+                        }
+                    </button>
+                </div>
+            `;
+
+            renderCalendar();
+        }
+
+        // ---------- 5. AKSI PESAN — toggle masuk/keluar keranjang ----------
+        window.bookPkg = function (id) {
+            const cat = DATA[activeCatIdx];
+            const pkg = cat?.packages?.find(p => String(p.id) === String(id));
+            if (!pkg) return;
+
+            // Bentuk objek yang kompatibel dengan addPackageToCart
+            const cartItem = {
+                id:         pkg.id,
+                name:       pkg.nama,       // mapping: nama → name
+                base_price: pkg.harga,      // mapping: harga → base_price
+            };
+
+            let inCart;
+            if (isInCart(pkg.id)) {
+                removePackageFromCart(pkg.id);
+                showWelcomeToast('🗑️ Dihapus dari keranjang: ' + pkg.nama);
+                inCart = false;
+            } else {
+                addPackageToCart(cartItem);
+                showWelcomeToast('🛒 Ditambahkan ke keranjang: ' + pkg.nama);
+                inCart = true;
+            }
+
+            // Update badge floating cart
+            updateFloatingCart(getCart().length);
+
+            // Update tombol di detail panel (tanpa re-render ulang seluruh panel)
+            const btn = document.getElementById('detailCartBtn');
+            if (btn) {
+                btn.classList.toggle('in-cart', inCart);
+                btn.innerHTML = inCart
+                    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                       Hapus dari Keranjang`
+                    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                       Pesan Sekarang`;
+            }
+
+            // Update daftar paket di kiri (tampilkan ikon centang jika sudah di cart)
+            renderPackageList();
+        };
+
+        /* ============================================================
+           KALENDER — dummy: Sabtu/Minggu = sibuk, lainnya = tersedia
+        ============================================================ */
+        let calCursor   = new Date();
+        let calSelected = null;
+
+        const BULAN = ['Januari','Februari','Maret','April','Mei','Juni',
+                       'Juli','Agustus','September','Oktober','November','Desember'];
+        const HARI  = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+
+        window.calNav = function (delta) {
+            calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth() + delta, 1);
+            renderCalendar();
+        };
+
+        // window.calPick = function (iso) {
+        //     calSelected = iso;
+        //     renderCalendar();
+        // };
+
+        function renderCalendar() {
+            const grid  = document.getElementById('calGrid');
+            const title = document.getElementById('calTitle');
+            if (!grid || !title) return;
+
+            // Ambil array blackout milik paket yang sedang ditampilkan
+            const cat      = DATA[activeCatIdx];
+            const pkg      = cat?.packages?.[activePkgIdx];
+            const blackouts = new Set(pkg?.blackouts || []);   // Set<"YYYY-MM-DD">
+
+            const y = calCursor.getFullYear();
+            const m = calCursor.getMonth();
+            title.textContent = `${BULAN[m]} ${y}`;
+
+            const firstDay  = new Date(y, m, 1).getDay();
+            const totalDays = new Date(y, m + 1, 0).getDate();
+            const today     = new Date(); today.setHours(0, 0, 0, 0);
+
+            let html = HARI.map(h => `<div class="cal-day-name">${h}</div>`).join('');
+
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="cal-day empty"></div>`;
+            }
+
+            for (let d = 1; d <= totalDays; d++) {
+                const date = new Date(y, m, d);
+                const iso = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;   // "YYYY-MM-DD"
+                const dow  = date.getDay();
+                let cls    = 'cal-day ';
+
+                if (date < today) {
+                    cls += 'past';                              // lampau
+                } else if (blackouts.has(iso)) {
+                    cls += 'busy';                              // blackout dari DB ← baru
+                } else if (dow === 0 || dow === 7) {
+                    cls += 'busy';                              // Sabtu/Minggu
+                } else {
+                    cls += 'available';
+                }
+
+                if (date.getTime() === today.getTime()) cls += ' today';
+                if (iso === calSelected)               cls += ' selected';
+
+                html += `<div class="${cls}" ${onclick}>${d}</div>`;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        // helper: hex → rgba
+        function hexToRgba(hex, a) {
+            const m = hex.replace('#', '');
+            const n = parseInt(m.length === 3
+                ? m.split('').map(x => x + x).join('') : m, 16);
+            return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+        }
+
+        // ---------- INIT ----------
+        function init() {
+            if (typeof isInCart === 'undefined') {
+                setTimeout(init, 50);
+                return;
+            }
+            selectCat(0);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
 </script>
 
 {{-- cart --}}
@@ -2115,7 +2194,12 @@
     function addPackageToCart(pkg) {
         const cart = getCart();
         if (cart.some(c => c.package_id === pkg.id)) return cart;
-        cart.push({ package_id: pkg.id, name: pkg.name, price: pkg.base_price, qty: 1 });
+        cart.push({
+            package_id: pkg.id,
+            name:       pkg.name,
+            price:      pkg.base_price,
+            qty:        1
+        });
         saveCart(cart);
         return cart;
     }
@@ -2143,7 +2227,6 @@
 
         updateFloatingCart(cart.length);
 
-        // Re-render detail button
         const btn = document.getElementById('detailCartBtn');
         if (btn) {
             const nowInCart = isInCart(pkg.id);
@@ -2153,7 +2236,6 @@
                 : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Tambah ke Keranjang`;
         }
 
-        // Re-render list to reflect state
         renderPkgList();
     }
 
@@ -2180,6 +2262,7 @@
         updateFloatingCart(getCart().length);
     })();
 </script>
+
 
 </body>
 </html>

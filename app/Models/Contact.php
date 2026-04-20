@@ -46,6 +46,6 @@ class Contact extends Model
             return null;
         }
 
-        return asset('storage/' . $this->signature_path);
+        return url('signature/' . $this->signature_path);
     }
 }

@@ -60,9 +60,11 @@ class PackageController extends Controller
             'description'     => 'nullable|string|max:2000',
             'base_price'      => 'required|numeric|min:0',
             'is_active'       => 'boolean',
+            'blackout_dates'  => 'nullable|string', // comma-separated dari JS
         ]);
 
-        Package::create($validated);
+        $package = Package::create(collect($validated)->except('blackout_dates')->toArray());
+        $this->syncBlackoutDates($package, $request->blackout_dates);
 
         return redirect()->route('package.index')
             ->with('success', 'Package berhasil ditambahkan.');
@@ -92,9 +94,11 @@ class PackageController extends Controller
             'description'     => 'nullable|string|max:2000',
             'base_price'      => 'required|numeric|min:0',
             'is_active'       => 'boolean',
+            'blackout_dates'  => 'nullable|string',
         ]);
 
-        $package->update($validated);
+        $package->update(collect($validated)->except('blackout_dates')->toArray());
+        $this->syncBlackoutDates($package, $request->blackout_dates);
 
         return redirect()->route('package.index')
             ->with('success', 'Package berhasil diperbarui.');
@@ -106,5 +110,24 @@ class PackageController extends Controller
 
         return redirect()->route('package.index')
             ->with('success', 'Package berhasil dihapus.');
+    }
+
+    private function syncBlackoutDates(Package $package, ?string $rawDates): void
+    {
+        $dates = collect(
+            array_filter(
+                array_map('trim', explode(',', $rawDates ?? ''))
+            )
+        )->unique()->values();
+
+        // Hapus semua yang tidak ada di list baru
+        $package->blackoutDates()
+            ->whereNotIn('date', $dates)
+            ->delete();
+
+        // Insert yang belum ada (ignore duplicate karena unique constraint)
+        foreach ($dates as $date) {
+            $package->blackoutDates()->firstOrCreate(['date' => $date]);
+        }
     }
 }

@@ -132,6 +132,25 @@
         .order-id { font-size: 13px; font-weight: 600; color: #374151; }
         .order-date { font-size: 12px; color: #9ca3af; }
         .order-status { display: inline-flex; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+
+        .signature-box {
+            width: 240px;
+            height: 120px; /* ⬅️ ini yang bikin lebih panjang ke bawah */
+            background: #fff;
+            border: 1px dashed #ccc;
+            border-radius: 10px;
+            padding: 10px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .signature-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
     </style>
 
     @if(session('success'))
@@ -255,8 +274,11 @@
                                     @if($contact->signature_path)
                                         <div class="contact-sig">
                                             <div class="contact-sig-label">Tanda Tangan</div>
-                                            <img src="{{ $contact->signature_url }}" alt="Tanda Tangan {{ $contact->name }}">
-                                        </div>
+                                                 <div class="signature-box">
+                                                    <img src="{{ $contact->signature_url }}"
+                                                        alt="Tanda Tangan {{ $contact->name }}">
+                                                </div>
+                                            </div>
                                     @endif
                                 </div>
                             </div>

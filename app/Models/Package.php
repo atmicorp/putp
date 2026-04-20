@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Machine;
+use App\Models\PackageBlackoutDate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -54,5 +55,20 @@ class Package extends Model
     public function offerDetails(): HasMany
     {
         return $this->hasMany(OrderOfferDetail::class);
+    }
+
+    public function blackoutDates(): HasMany
+    {
+        return $this->hasMany(PackageBlackoutDate::class);
+    }
+
+    /**
+     * Cek apakah package full (tidak tersedia) di tanggal tertentu.
+     */
+    public function isBlackoutOn(\Carbon\Carbon|string $date): bool
+    {
+        return $this->blackoutDates()
+            ->whereDate('date', $date)
+            ->exists();
     }
 }

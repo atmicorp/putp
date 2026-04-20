@@ -246,20 +246,24 @@
                                     <a href="{{ route('admin.orders.show', $order) }}" class="act-btn act-view">Detail</a>
 
                                     @if($order->status === 'approved')
-                                        <form action="{{ route('admin.orders.updateStatus', $order) }}" method="POST"
-                                            onsubmit="return confirm('Ubah status ke Processing?')">
+                                        <form id="processingForm-{{ $order->id }}" action="{{ route('admin.orders.updateStatus', $order) }}" method="POST">
                                             @csrf @method('PATCH')
                                             <input type="hidden" name="status" value="processing">
-                                            <button type="submit" class="act-btn act-processing">▶ Processing</button>
+                                            <button type="button" class="act-btn act-processing" 
+                                                onclick="confirmProcessing('{{ $order->id }}', '{{ $order->order_code }}')">
+                                                ▶ Processing
+                                            </button>
                                         </form>
                                     @endif
 
                                     @if($order->status === 'processing')
-                                        <form action="{{ route('admin.orders.updateStatus', $order) }}" method="POST"
-                                            onsubmit="return confirm('Tandai order ini sebagai Done?')">
+                                        <form id="doneForm-{{ $order->id }}" action="{{ route('admin.orders.updateStatus', $order) }}" method="POST">
                                             @csrf @method('PATCH')
                                             <input type="hidden" name="status" value="done">
-                                            <button type="submit" class="act-btn act-done">✓ Done</button>
+                                            <button type="button" class="act-btn act-done"
+                                                onclick="confirmDone('{{ $order->id }}', '{{ $order->order_code }}')">
+                                                ✓ Done
+                                            </button>
                                         </form>
                                     @endif
                                 </div>
@@ -290,6 +294,43 @@
             @endif
         @endif
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmProcessing(id, code) {
+            Swal.fire({
+                title: 'Ubah ke Processing?',
+                text: `Order ${code} akan diubah statusnya ke Processing.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Processing!',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(`processingForm-${id}`).submit();
+                }
+            });
+        }
+
+        function confirmDone(id, code) {
+            Swal.fire({
+                title: 'Tandai Done?',
+                text: `Order ${code} akan ditandai sebagai selesai.`,
+                icon: 'success',
+                showCancelButton: true,
+                confirmButtonColor: '#22c55e',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Done!',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(`doneForm-${id}`).submit();
+                }
+            });
+        }
+    </script>
 
     <script>
         document.getElementById('searchInput').addEventListener('input', function () {
