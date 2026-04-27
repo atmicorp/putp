@@ -8,6 +8,7 @@ use App\Models\Machine;
 use App\Models\Operator;
 use App\Models\Package;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 // use Illuminate\Validation\Rule;
 
 class PackageController extends Controller
@@ -60,8 +61,14 @@ class PackageController extends Controller
             'description'     => 'nullable|string|max:2000',
             'base_price'      => 'required|numeric|min:0',
             'is_active'       => 'boolean',
-            'blackout_dates'  => 'nullable|string', // comma-separated dari JS
+            'blackout_dates'  => 'nullable|string',
+            'image'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')
+                ->store('packages', 'local');
+        }
 
         $package = Package::create(collect($validated)->except('blackout_dates')->toArray());
         $this->syncBlackoutDates($package, $request->blackout_dates);
@@ -95,21 +102,55 @@ class PackageController extends Controller
             'base_price'      => 'required|numeric|min:0',
             'is_active'       => 'boolean',
             'blackout_dates'  => 'nullable|string',
+            'image'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'remove_image'    => 'nullable|boolean',
         ]);
 
-        $package->update(collect($validated)->except('blackout_dates')->toArray());
+        // Hapus gambar lama jika ada upload baru atau request hapus
+        if ($request->hasFile('image') || $request->boolean('remove_image')) {
+            if ($package->image) {
+                Storage::disk('local')->delete($package->image);
+            }
+            $validated['image'] = null;
+        }
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')
+                ->store('packages', 'local');
+        }
+
+        $package->update(collect($validated)->except(['blackout_dates', 'remove_image'])->toArray());
         $this->syncBlackoutDates($package, $request->blackout_dates);
 
         return redirect()->route('package.index')
             ->with('success', 'Package berhasil diperbarui.');
     }
 
+
     public function destroy(Package $package)
     {
+        // Hapus file gambar sebelum delete record
+        if ($package->image) {
+            Storage::disk('local')->delete($package->image);
+        }
+
         $package->delete();
 
         return redirect()->route('package.index')
             ->with('success', 'Package berhasil dihapus.');
+    }
+
+    /**
+     * Serve gambar dari storage private (hanya untuk user yang berhak).
+     */
+    public function serveImage(Package $package)
+    {
+        abort_if(!$package->image, 404);
+        abort_unless(Storage::disk('local')->exists($package->image), 404);
+
+        return response()->file(
+            Storage::disk('local')->path($package->image)
+        );
     }
 
     private function syncBlackoutDates(Package $package, ?string $rawDates): void

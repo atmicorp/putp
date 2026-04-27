@@ -6,3 +6,7 @@ use Modules\Package\Http\Controllers\PackageController;
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('packages', PackageController::class)->names('package');
 });
+
+Route::get('packages/{package}/image', [PackageController::class, 'serveImage'])
+    ->name('package.image')
+    ->middleware('auth');

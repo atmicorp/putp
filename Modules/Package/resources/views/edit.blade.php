@@ -157,7 +157,7 @@
         </div>
     @endif
 
-    <form action="{{ route('package.update', $package) }}" method="POST">
+    <form action="{{ route('package.update', $package) }}" method="POST" enctype="multipart/form-data">
         @csrf @method('PUT')
         <div class="form-card">
 
@@ -267,6 +267,47 @@
                     </div>
                 </div>
 
+                {{-- Gambar Package --}}
+                <div class="section-label">Gambar Package</div>
+                <div class="form-group">
+                    <label class="form-label" for="image">Upload Gambar</label>
+                    <div class="image-upload-wrap">
+
+                        {{-- Jika sudah ada gambar --}}
+                        @if ($package->image)
+                            <div class="image-preview-box" id="imagePreviewBox">
+                                <img id="imagePreview" src="{{ route('package.image', $package) }}" alt="Gambar Package">
+                                <button type="button" class="image-remove-btn" id="removeImageBtn" title="Hapus gambar">
+                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                            <label class="image-dropzone" id="imageDropzone" for="image" style="display:none;">
+                        @else
+                            <div class="image-preview-box" id="imagePreviewBox" style="display:none;">
+                                <img id="imagePreview" src="" alt="Preview">
+                                <button type="button" class="image-remove-btn" id="removeImageBtn" title="Hapus gambar">
+                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                            <label class="image-dropzone" id="imageDropzone" for="image">
+                        @endif
+                                <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4-4a3 3 0 014 0l4 4M14 14l1-1a3 3 0 014 0l1 1M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                <span class="image-dropzone-text">Klik untuk pilih gambar</span>
+                                <span class="image-dropzone-sub">JPG, PNG, WEBP — maks. 2MB</span>
+                            </label>
+
+                        {{-- Hidden flag untuk menghapus gambar yang ada --}}
+                        <input type="hidden" name="remove_image" id="remove_image" value="0">
+                        <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                    </div>
+                    @error('image')
+                        <div class="invalid-msg">
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
+
                 <div class="section-label">Status</div>
                 <div class="form-group">
                     <div class="toggle-group">
@@ -303,6 +344,7 @@
         </div>
     </form>
 
+    {{-- edit script --}}
     <script>
         const existingDates = @json(
             $package->blackoutDates->pluck('date')->map(fn($d) => $d->format('Y-m-d'))->values()
@@ -442,9 +484,39 @@
 
     </script>
     <script>
+        {{-- Toggle is_active --}}
         const cb = document.getElementById('is_active');
         const lbl = document.getElementById('toggleLabel');
         function sync() { lbl.textContent = cb.checked ? 'Active' : 'Inactive'; lbl.style.color = cb.checked ? '#15803d' : '#6b7280'; }
         cb.addEventListener('change', sync); sync();
+
+        {{-- Image upload preview --}}
+        const imageInput      = document.getElementById('image');
+        const imagePreview    = document.getElementById('imagePreview');
+        const imagePreviewBox = document.getElementById('imagePreviewBox');
+        const imageDropzone   = document.getElementById('imageDropzone');
+        const removeImageBtn  = document.getElementById('removeImageBtn');
+        const removeImageFlag = document.getElementById('remove_image');
+
+        imageInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    imagePreview.src              = e.target.result;
+                    imagePreviewBox.style.display = 'block';
+                    imageDropzone.style.display   = 'none';
+                    removeImageFlag.value         = '0';
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        removeImageBtn.addEventListener('click', function () {
+            imageInput.value              = '';
+            imagePreview.src              = '';
+            imagePreviewBox.style.display = 'none';
+            imageDropzone.style.display   = '';
+            removeImageFlag.value         = '1'; // tandai hapus di server
+        });
     </script>
 </x-app-sidebar>

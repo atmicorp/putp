@@ -11,7 +11,7 @@ class WelcomeController extends Controller
         $categories = Category::with(['packages' => function ($query) {
             $query->where('is_active', true)
                 ->with('blackoutDates')                          // ← tambahan
-                ->select('id', 'category_id', 'name', 'description', 'base_price');
+                ->select('id', 'category_id', 'name', 'description', 'base_price','image');
         }])->get();
 
         // Siapkan data untuk JS — proses di PHP, bukan di Blade
@@ -32,7 +32,7 @@ class WelcomeController extends Controller
                         'deskripsi'   => $p->description,
                         'harga'       => $p->base_price,
                         'satuan'      => 'paket',
-                        'gambar'      => $p->gambar ?? null,
+                        'gambar' => $p->image ? route('package.image', $p->id) : null,
                         'tags'        => [],
                         'specs'       => [],
                         'available'   => true,

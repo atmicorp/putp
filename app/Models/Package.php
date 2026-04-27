@@ -14,14 +14,25 @@ class Package extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'machine_id',
-        'pic_operator_id',
-        'category_id', 
-        'name',
-        'description',
-        'base_price',
-        'is_active',
+    'machine_id',
+    'pic_operator_id',
+    'category_id',
+    'name',
+    'description',
+    'image',        // ← tambahkan ini
+    'base_price',
+    'is_active',
     ];
+
+    /**
+     * URL untuk mengakses gambar package melalui route private.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image
+            ? route('package.image', ['package' => $this->id])
+            : null;
+    }
 
     protected function casts(): array
     {
