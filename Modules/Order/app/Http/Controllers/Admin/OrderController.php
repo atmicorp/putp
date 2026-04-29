@@ -37,19 +37,23 @@ class OrderController extends Controller
 
         $companies = Company::with('contacts')->orderBy('name')->get();
 
-        // Siapkan data untuk combobox — mapping dilakukan di controller
         $companiesData = $companies->map(fn($c) => [
             'id'       => $c->id,
             'name'     => $c->name,
             'contacts' => $c->contacts->map(fn($ct) => [
-                'id'       => $ct->id,
-                'name'     => $ct->name,
-                'email'    => $ct->email    ?? null,
-                'phone'    => $ct->phone    ?? null,
+                'id'    => $ct->id,
+                'name'  => $ct->name,
+                'email' => $ct->email ?? null,
+                'phone' => $ct->phone ?? null,
             ])->values(),
         ])->values();
 
-        return view('order::admin.orders.create', compact('categories', 'companies', 'companiesData'));
+        // Ambil semua user dengan role pic
+        $pics = User::where('role', User::ROLE_PIC)
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
+
+        return view('order::admin.orders.create', compact('categories', 'companies', 'companiesData', 'pics'));
     }
 
     public function quickCreateCompany(Request $request): JsonResponse
@@ -76,6 +80,7 @@ class OrderController extends Controller
             'name'       => 'required|string|max:255',
             'email'      => 'nullable|email|max:255',
             'phone'      => 'nullable|string|max:50',
+            'jabatan'      => 'nullable|string|max:50',
         ]);
 
         $contact = Contact::create([
@@ -83,12 +88,13 @@ class OrderController extends Controller
             'name'       => $request->name,
             'email'      => $request->email,
             'phone'      => $request->phone,
+            'jabatan'    => $request->jabatan,
         ]);
 
         return response()->json([
             'id'       => $contact->id,
             'name'     => $contact->name,
-            'position' => $contact->position,
+            'jabatan' => $contact->jabatan,
             'email'    => $contact->email,
             'phone'    => $contact->phone,
             'created'  => true,
@@ -100,6 +106,7 @@ class OrderController extends Controller
         $data = $request->validate([
             'company_id'             => ['required', 'integer', 'exists:companies,id'],
             'contact_id'             => ['required', 'integer', 'exists:contacts,id'],
+            'pic_id'                 => ['required', 'integer', 'exists:users,id'],
             'filled_by'              => ['required', 'in:customer,admin'],
 
             // Validasi items hanya jika mode admin
@@ -114,6 +121,7 @@ class OrderController extends Controller
         $order = Order::create([
             'company_id'     => $data['company_id'],
             'contact_id'     => $data['contact_id'],
+            'pic_id'         => $data['pic_id'], 
             'customer_name'  => $contact->name,
             'customer_slug'  => Str::slug($contact->name) . '-' . Str::random(6),
             'customer_email' => $contact->email ?? '',
@@ -321,13 +329,13 @@ class OrderController extends Controller
         return back()->with('success', 'Email penawaran berhasil dikirim ke customer.');
     }
 
-    public function lembarPermintaan(Order $order)
+    public function PermohonanKerjasama(Order $order)
     {
         $order->load(['company', 'contact', 'creator', 'offer.details.package']);
 
-        $pdf = Pdf::loadView('order::admin.orders.lembar_permintaan', compact('order'))
+        $pdf = Pdf::loadView('order::admin.orders.permohonan_kerjasama', compact('order'))
             ->setPaper('a4', 'portrait');
 
-        return $pdf->stream("LembarPermintaan-{$order->order_code}.pdf");
+        return $pdf->stream("PermohonanKerjasama-{$order->order_code}.pdf");
     }
 }

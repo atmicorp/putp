@@ -37,7 +37,7 @@ class User extends Authenticatable
     // --- Roles ---
     public const ROLE_ADMIN = 'admin';
     public const ROLE_OPERATOR = 'operator';
-    public const ROLE_STAFF = 'staff';
+    public const ROLE_PIC = 'pic';
 
     public function hasRole(string $role): bool
     {

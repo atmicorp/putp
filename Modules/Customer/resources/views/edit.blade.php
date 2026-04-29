@@ -197,15 +197,19 @@
                                             <label class="form-label">Nama <span class="req">*</span></label>
                                             <input type="text" name="existing_contacts[{{ $i }}][name]" class="form-control" value="{{ old('existing_contacts.'.$i.'.name', $contact->name) }}" required>
                                         </div>
-                                    </div>
-                                    <div class="contact-grid" style="margin-bottom:12px;">
                                         <div class="form-group" style="margin:0;">
                                             <label class="form-label">Email</label>
                                             <input type="email" name="existing_contacts[{{ $i }}][email]" class="form-control" value="{{ old('existing_contacts.'.$i.'.email', $contact->email) }}">
                                         </div>
+                                    </div>
+                                    <div class="contact-grid" style="margin-bottom:12px;">
                                         <div class="form-group" style="margin:0;">
                                             <label class="form-label">Telepon</label>
                                             <input type="text" name="existing_contacts[{{ $i }}][phone]" class="form-control" value="{{ old('existing_contacts.'.$i.'.phone', $contact->phone) }}">
+                                        </div>
+                                        <div class="form-group" style="margin:0;">
+                                            <label class="form-label">Jabatan</label>
+                                            <input type="text" name="existing_contacts[{{ $i }}][jabatan]" class="form-control" value="{{ old('existing_contacts.'.$i.'.jabatan', $contact->jabatan) }}">
                                         </div>
                                     </div>
                                     <div class="form-group" style="margin:0;">
@@ -323,15 +327,19 @@
                         <label class="form-label">Nama <span class="req">*</span></label>
                         <input type="text" name="new_contacts[${idx}][name]" class="form-control" placeholder="Nama lengkap" required>
                     </div>
-                </div>
-                <div class="contact-grid" style="margin-bottom:12px;">
                     <div class="form-group" style="margin:0;">
                         <label class="form-label">Email</label>
                         <input type="email" name="new_contacts[${idx}][email]" class="form-control" placeholder="email@perusahaan.com">
                     </div>
+                </div>
+                <div class="contact-grid" style="margin-bottom:12px;">
                     <div class="form-group" style="margin:0;">
                         <label class="form-label">Telepon</label>
                         <input type="text" name="new_contacts[${idx}][phone]" class="form-control" placeholder="08xxxxxxxxxx">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label class="form-label">Jabatan</label>
+                        <input type="text" name="new_contacts[${idx}][jabatan]" class="form-control" placeholder="Jabatan di perusahaan">
                     </div>
                 </div>
                 <div class="form-group" style="margin:0;">

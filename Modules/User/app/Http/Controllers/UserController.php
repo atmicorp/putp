@@ -87,7 +87,7 @@ class UserController extends Controller
         return [
             'admin'    => 'Admin',
             'operator' => 'Operator',
-            'staff'    => 'Staff',
+            'pic'    => 'PIC',
         ];
     }
 

@@ -15,6 +15,7 @@ class Contact extends Model
         'name',
         'email',
         'phone',
+        'jabatan',
         'signature_path',
     ];
 

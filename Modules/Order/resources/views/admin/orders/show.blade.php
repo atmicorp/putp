@@ -290,7 +290,7 @@
                     <div class="order-hero">
                         <div>
                             <div class="order-code-big">{{ $order->order_code }}</div>
-                            <div class="order-meta">Dibuat {{ $order->created_at->format('d M Y, H:i') }} oleh {{ $order->creator?->name ?? '-' }}</div>
+                            <div class="order-meta">Dibuat {{ $order->created_at->format('d M Y, H:i') }} || PIC : {{ $order->pic->name }}</div>
                         </div>
                         <span class="badge badge-{{ $order->status }}">
                             <span class="dot dot-{{ $order->status }}"></span>
@@ -417,13 +417,19 @@
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
-                        Lembar Permintaan
+                        Surat Permohonan Kerjasama (PKS)
                     </button>
-                    <button type="button" class="doc-tab" onclick="switchDocTab('penawaran')">
+                    <button type="button" class="doc-tab" onclick="switchDocTab('perjanjian')">
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        Lembar Penawaran
+                        Perjanjian Kerjasama
+                    </button>
+                    <button type="button" class="doc-tab" onclick="switchDocTab('kesanggupan')">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Surat Kesanggupan Kerjasama
                     </button>
                     <button type="button" class="doc-tab" onclick="switchDocTab('bap')">
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -431,9 +437,15 @@
                         </svg>
                         Berita Acara Penyelesaian
                     </button>
+                    <button type="button" class="doc-tab" onclick="switchDocTab('laporan')">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M15 11l-3 3-1.5-1.5"/>
+                        </svg>
+                        Laporan Kegiatan Kerjasama
+                    </button>
                 </div>
 
-                {{-- Panel: Lembar Permintaan --}}
+                {{-- Panel: Surat Permohonan Kerjasama --}}
                 <div id="docPanelPermintaan" class="doc-panel">
                     <div class="doc-panel-inner">
                         <div class="doc-icon-wrap doc-icon-blue">
@@ -442,10 +454,10 @@
                             </svg>
                         </div>
                         <div class="doc-panel-text">
-                            <div class="doc-panel-title">Lembar Permintaan</div>
-                            <div class="doc-panel-desc">Dokumen permintaan layanan dari kontak untuk order <strong>{{ $order->order_code }}</strong>.</div>
+                            <div class="doc-panel-title">Surat Permohonan Kerjasama (PKS)</div>
+                            <div class="doc-panel-desc">Dokumen permohonan kerjasama dari kontak untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                        <a href="{{ route('admin.orders.lembar_permintaan', $order) }}" target="_blank" class="btn-open-pdf">
+                        <a href="{{ route('admin.orders.permohonan_kerjasama', $order) }}" target="_blank" class="btn-open-pdf">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -454,8 +466,8 @@
                     </div>
                 </div>
 
-                {{-- Panel: Lembar Penawaran --}}
-                <div id="docPanelPenawaran" class="doc-panel" style="display:none;">
+                {{-- Panel: Perjanjian Kerjasama --}}
+                <div id="docPanelPerjanjian" class="doc-panel" style="display:none;">
                     <div class="doc-panel-inner">
                         <div class="doc-icon-wrap doc-icon-orange">
                             <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="1.5">
@@ -463,8 +475,29 @@
                             </svg>
                         </div>
                         <div class="doc-panel-text">
-                            <div class="doc-panel-title">Lembar Penawaran</div>
-                            <div class="doc-panel-desc">Dokumen penawaran harga dan detail paket untuk order <strong>{{ $order->order_code }}</strong>.</div>
+                            <div class="doc-panel-title">Perjanjian Kerjasama</div>
+                            <div class="doc-panel-desc">Dokumen perjanjian kerjasama resmi untuk order <strong>{{ $order->order_code }}</strong>.</div>
+                        </div>
+                        <a href="#" target="_blank" class="btn-open-pdf">
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            Buka PDF
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Panel: Surat Kesanggupan Kerjasama --}}
+                <div id="docPanelKesanggupan" class="doc-panel" style="display:none;">
+                    <div class="doc-panel-inner">
+                        <div class="doc-icon-wrap doc-icon-purple">
+                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#7c3aed" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="doc-panel-text">
+                            <div class="doc-panel-title">Surat Kesanggupan Kerjasama</div>
+                            <div class="doc-panel-desc">Dokumen pernyataan kesanggupan pelaksanaan kerjasama untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
                         <a href="#" target="_blank" class="btn-open-pdf">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -486,6 +519,27 @@
                         <div class="doc-panel-text">
                             <div class="doc-panel-title">Berita Acara Penyelesaian</div>
                             <div class="doc-panel-desc">Dokumen BAP sebagai bukti selesainya pekerjaan untuk order <strong>{{ $order->order_code }}</strong>.</div>
+                        </div>
+                        <a href="#" target="_blank" class="btn-open-pdf">
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            Buka PDF
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Panel: Laporan Kegiatan Kerjasama --}}
+                <div id="docPanelLaporan" class="doc-panel" style="display:none;">
+                    <div class="doc-panel-inner">
+                        <div class="doc-icon-wrap doc-icon-teal">
+                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#0d9488" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M15 11l-3 3-1.5-1.5"/>
+                            </svg>
+                        </div>
+                        <div class="doc-panel-text">
+                            <div class="doc-panel-title">Laporan Kegiatan Kerjasama</div>
+                            <div class="doc-panel-desc">Dokumen laporan hasil kegiatan kerjasama untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
                         <a href="#" target="_blank" class="btn-open-pdf">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -771,16 +825,25 @@
         }
 
         function switchDocTab(tab) {
-            // Update tab buttons
-            document.querySelectorAll('.doc-tab').forEach(function (btn, i) {
-                const tabs = ['permintaan', 'penawaran', 'bap'];
-                btn.classList.toggle('active', tabs[i] === tab);
+            // Sembunyikan semua panel
+            const panels = {
+                permintaan: 'docPanelPermintaan',
+                perjanjian: 'docPanelPerjanjian',
+                kesanggupan: 'docPanelKesanggupan',
+                bap: 'docPanelBap',
+                laporan: 'docPanelLaporan',
+            };
+
+            Object.values(panels).forEach(id => {
+                document.getElementById(id).style.display = 'none';
             });
 
-            // Update panels
-            document.getElementById('docPanelPermintaan').style.display = tab === 'permintaan' ? '' : 'none';
-            document.getElementById('docPanelPenawaran').style.display  = tab === 'penawaran'  ? '' : 'none';
-            document.getElementById('docPanelBap').style.display        = tab === 'bap'        ? '' : 'none';
+            // Tampilkan panel yang dipilih
+            document.getElementById(panels[tab]).style.display = 'block';
+
+            // Update active tab button
+            document.querySelectorAll('.doc-tab').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
         }
     </script>
 </x-app-sidebar>

@@ -15,8 +15,8 @@ Route::middleware(['web', 'auth'])->prefix('admin')->group(function () {
     Route::post('/orders/{order}/send-offer', [AdminOrderController::class, 'sendOffer'])->name('admin.orders.sendOffer');
     Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
      ->name('admin.orders.updateStatus');
-    Route::get('orders/{order}/lembar-permintaan', [AdminOrderController::class, 'lembarPermintaan'])
-    ->name('admin.orders.lembar_permintaan');
+    Route::get('orders/{order}/permohonan-kerjasama', [AdminOrderController::class, 'PermohonanKerjasama'])
+    ->name('admin.orders.permohonan_kerjasama');
 });
 
 // Guest route (tanpa login)

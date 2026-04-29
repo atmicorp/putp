@@ -22,6 +22,7 @@ class Order extends Model
         'contact_id',
         'status',
         'sent_at',
+        'pic_id',
         'created_by',
     ];
 
@@ -107,5 +108,10 @@ class Order extends Model
         return $this->offer->details->sum(function ($d) {
             return $d->qty * $d->price;
         });
+    }
+
+    public function pic(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'pic_id');
     }
 }

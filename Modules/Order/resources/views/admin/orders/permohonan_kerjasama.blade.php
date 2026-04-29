@@ -16,7 +16,7 @@
             padding: 30px 40px;
         }
 
-        .kop { border: 1px solid #999; padding: 6px; margin-bottom: 10px; }
+        .kop { padding: 6px; margin-bottom: 10px; }
         .kop img { width: 100%; display: block; }
 
         .judul { text-align: center; margin-bottom: 4px; }

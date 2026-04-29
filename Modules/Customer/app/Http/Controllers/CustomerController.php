@@ -51,6 +51,7 @@ class CustomerController extends Controller
             'contacts.*.email'            => 'nullable|email|max:255',
             'contacts.*.phone'            => 'nullable|string|max:50',
             'contacts.*.signature'        => 'nullable|image|max:2048',
+            'contacts.*.jabatan'          => 'nullable|string|max:50',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -66,6 +67,7 @@ class CustomerController extends Controller
                     'name'           => $contactData['name'],
                     'email'          => $contactData['email'] ?? null,
                     'phone'          => $contactData['phone'] ?? null,
+                    'jabatan'        => $contactData['jabatan'] ?? null,
                     'signature_path' => $signaturePath,
                 ]);
             }
@@ -117,6 +119,8 @@ class CustomerController extends Controller
             'new_contacts.*.email'                  => 'nullable|email|max:255',
             'new_contacts.*.phone'                  => 'nullable|string|max:50',
             'new_contacts.*.signature'              => 'nullable|image|max:2048',
+            'existing_contacts.*.jabatan' => 'nullable|string|max:50',
+            'new_contacts.*.jabatan'      => 'nullable|string|max:50',
         ]);
 
         DB::transaction(function () use ($request, $company) {
@@ -154,6 +158,7 @@ class CustomerController extends Controller
                     'name'           => $data['name'],
                     'email'          => $data['email'] ?? null,
                     'phone'          => $data['phone'] ?? null,
+                    'jabatan'        => $data['jabatan'] ?? null, 
                     'signature_path' => $signaturePath,
                 ]);
             }
@@ -169,6 +174,7 @@ class CustomerController extends Controller
                     'name'           => $data['name'],
                     'email'          => $data['email'] ?? null,
                     'phone'          => $data['phone'] ?? null,
+                    'jabatan'        => $data['jabatan'] ?? null, 
                     'signature_path' => $signaturePath,
                 ]);
             }

@@ -172,20 +172,24 @@
                                         <label class="form-label">Nama <span class="req">*</span></label>
                                         <input type="text" name="contacts[0][name]" class="form-control" placeholder="Nama lengkap" required>
                                     </div>
-                                </div>
-                                <div class="contact-grid" style="margin-bottom:12px;">
                                     <div class="form-group" style="margin:0;">
                                         <label class="form-label">Email</label>
                                         <input type="email" name="contacts[0][email]" class="form-control" placeholder="email@perusahaan.com">
                                     </div>
+                                </div>
+                                <div class="contact-grid" style="margin-bottom:12px;">
                                     <div class="form-group" style="margin:0;">
                                         <label class="form-label">Telepon</label>
                                         <input type="text" name="contacts[0][phone]" class="form-control" placeholder="08xxxxxxxxxx">
                                     </div>
+                                    <div class="form-group" style="margin:0;">
+                                        <label class="form-label">Jabatan</label>
+                                        <input type="text" name="contacts[0][jabatan]" class="form-control" placeholder="Jabatan di perusahaan">
+                                    </div>
                                 </div>
                                 <div class="form-group" style="margin:0;">
                                     <label class="form-label">Tanda Tangan (opsional)</label>
-                                    <div class="sig-upload" onclick="this.querySelector('input').click()">
+                                    <div class="sig-upload" onclick="this.querySelector('input').click())">
                                         <input type="file" name="contacts[0][signature]" accept="image/*" style="display:none;" onchange="previewSig(this)">
                                         <div class="sig-upload-text">
                                             <strong>Upload Tanda Tangan</strong>
@@ -276,20 +280,19 @@
                     <div class="form-group" style="margin:0;">
                         <label class="form-label">Nama <span class="req">*</span></label>
                         <input type="text" name="contacts[${idx}][name]" class="form-control" placeholder="Nama lengkap" required>
-                    </div>
-                    <div class="form-group" style="margin:0;">
-                        <label class="form-label">Jabatan</label>
-                        <input type="text" name="contacts[${idx}][position]" class="form-control" placeholder="Direktur, Manager, dll">
+                    </div><div class="form-group" style="margin:0;">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="contacts[${idx}][email]" class="form-control" placeholder="email@perusahaan.com">
                     </div>
                 </div>
                 <div class="contact-grid" style="margin-bottom:12px;">
                     <div class="form-group" style="margin:0;">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="contacts[${idx}][email]" class="form-control" placeholder="email@perusahaan.com">
-                    </div>
-                    <div class="form-group" style="margin:0;">
                         <label class="form-label">Telepon</label>
                         <input type="text" name="contacts[${idx}][phone]" class="form-control" placeholder="08xxxxxxxxxx">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label class="form-label">Jabatan</label>
+                        <input type="text" name="contacts[${idx}][jabatan]" class="form-control" placeholder="Jabatan di perusahaan">
                     </div>
                 </div>
                 <div class="form-group" style="margin:0;">

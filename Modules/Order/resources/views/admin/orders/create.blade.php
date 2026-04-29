@@ -61,10 +61,20 @@
         .err-msg { font-size: 11.5px; color: #dc2626; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 
         /* ── Combobox ── */
-        .cb-wrap { position: relative; }
+        /* PERBAIKAN UTAMA: position relative + overflow visible agar dropdown tampil di bawah input */
+        .cb-wrap {
+            position: relative;  /* anchor untuk dropdown absolute */
+        }
 
+        /* PERBAIKAN UTAMA: ganti fixed → absolute, top 100%+4px, width 100% */
         .cb-dropdown {
-            display: none; position: fixed; z-index: 9998;
+            display: none;
+            position: absolute;          /* relatif terhadap .cb-wrap */
+            top: calc(100% + 4px);       /* tepat di bawah input */
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 9998;
             background: #fff; border: 1.5px solid #e5e7eb; border-radius: 10px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.12);
             max-height: 240px; overflow-y: auto;
@@ -399,6 +409,7 @@
                                 <span class="cb-clear" id="companyClearBtn" onclick="clearCompany()" title="Reset pilihan">
                                     <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </span>
+                                {{-- Dropdown tetap di dalam cb-wrap (absolute positioning) --}}
                                 <div class="cb-dropdown" id="companyDropdown"></div>
                             </div>
                             @error('company_id')
@@ -420,6 +431,7 @@
                                        oninput="cbFilter('contact')"
                                        onfocus="cbOpen('contact')"
                                        onkeydown="cbKeydown(event,'contact')">
+                                {{-- Dropdown tepat di bawah input contact --}}
                                 <div class="cb-dropdown" id="contactDropdown"></div>
                             </div>
                             @error('contact_id')
@@ -444,11 +456,77 @@
                                             <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                                             <span id="previewPhoneText"></span>
                                         </span>
+                                        <span id="previewJabatan" style="display:none;">
+                                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                            <span id="previewJabatanText"></span>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
+                {{-- PIC --}}
+                <div class="card" style="margin-bottom: 20px;">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="card-title">PIC Internal</div>
+                            <div class="card-subtitle">Pilih staff yang bertanggung jawab atas order ini</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>PIC <span class="req">*</span></label>
+                            <div class="cb-wrap" id="picComboWrap">
+                                <input type="text" id="picInput" autocomplete="off"
+                                    placeholder="Cari nama PIC…"
+                                    class="{{ $errors->has('pic_id') ? 'input-error' : '' }}"
+                                    oninput="cbFilter('pic')"
+                                    onfocus="cbOpen('pic')"
+                                    onkeydown="cbKeydown(event,'pic')">
+                                <span class="cb-clear" id="picClearBtn" onclick="clearPic()" title="Reset pilihan" style="display:none;">
+                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </span>
+                                <div class="cb-dropdown" id="picDropdown"></div>
+                            </div>
+                            <input type="hidden" name="pic_id" id="hidden_pic_id">
+                            @error('pic_id')
+                                <div class="err-msg">
+                                    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+
+                            {{-- PIC preview --}}
+                            <div class="contact-preview" id="picPreview" style="display:none; margin-top:10px;">
+                                <div class="contact-avatar" id="picPreviewAvatar">--</div>
+                                <div class="contact-preview-info">
+                                    <div class="contact-preview-name" id="picPreviewName"></div>
+                                    <div class="contact-preview-meta">
+                                        <span id="picPreviewEmail" style="display:none;">
+                                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                            </svg>
+                                            <span id="picPreviewEmailText"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -543,35 +621,41 @@
 
     <script>
     // ─── Data dari Laravel ─────────────────────────────────────────────────────
-    const CATEGORIES = @json($categories ?? []);
+    const CATEGORIES     = @json($categories ?? []);
     const COMPANIES_DATA = @json($companiesData);
+    const PICS_DATA      = @json($pics);
 
     const OLD_COMPANY_ID = {{ old('company_id', 'null') }};
     const OLD_CONTACT_ID = {{ old('contact_id', 'null') }};
+    const OLD_PIC_ID     = {{ old('pic_id',     'null') }};
+
     const ROUTE_COMPANY_QC = "{{ route('admin.companies.quick-create') }}";
     const ROUTE_CONTACT_QC = "{{ route('admin.contacts.quick-create') }}";
-    const CSRF_TOKEN = "{{ csrf_token() }}";
+    const CSRF_TOKEN       = "{{ csrf_token() }}";
 
     // ─── Helpers ───────────────────────────────────────────────────────────────
     const fmt = v => 'Rp ' + (isNaN(v) || !v ? 0 : Number(v)).toLocaleString('id-ID');
+
     function escHtml(s) {
         return String(s ?? '')
             .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
             .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
+
     function initials(name) {
         return String(name ?? '').split(' ').slice(0,2).map(w => w[0] ?? '').join('').toUpperCase() || '?';
     }
 
     // ─── Package State ─────────────────────────────────────────────────────────
     const selected = {};
-    let currentContact = null;
-    let currentCompanyName = '';
+    let currentContact      = null;
+    let currentCompanyName  = '';
 
     // ─── Combobox State ────────────────────────────────────────────────────────
     const CB = {
         company: { input: null, dropdown: null, selected: null, focusIdx: -1 },
         contact: { input: null, dropdown: null, selected: null, focusIdx: -1 },
+        pic:     { input: null, dropdown: null, selected: null, focusIdx: -1 },
     };
 
     // ─── Init ──────────────────────────────────────────────────────────────────
@@ -580,46 +664,42 @@
         CB.company.dropdown = document.getElementById('companyDropdown');
         CB.contact.input    = document.getElementById('contactInput');
         CB.contact.dropdown = document.getElementById('contactDropdown');
+        CB.pic.input        = document.getElementById('picInput');
+        CB.pic.dropdown     = document.getElementById('picDropdown');
 
-        // Pindahkan dropdown ke body agar bebas dari overflow:hidden ancestor
-        document.body.appendChild(CB.company.dropdown);
-        document.body.appendChild(CB.contact.dropdown);
+        // PERBAIKAN: Semua dropdown TIDAK dipindah ke body.
+        // Dropdown tetap di dalam .cb-wrap masing-masing dengan position: absolute.
+        // Tidak perlu appendChild ke body sama sekali.
 
-        // Tutup dropdown saat klik di luar
         document.addEventListener('click', e => {
-            if (!e.target.closest('#companyComboWrap') && !e.target.closest('#companyDropdown')) cbClose('company');
-            if (!e.target.closest('#contactComboWrap') && !e.target.closest('#contactDropdown'))  cbClose('contact');
+            if (!e.target.closest('#companyComboWrap')) cbClose('company');
+            if (!e.target.closest('#contactComboWrap')) cbClose('contact');
+            if (!e.target.closest('#picComboWrap'))     cbClose('pic');
         });
 
         buildCategories();
         applyToggleState(document.getElementById('adminFillToggle').checked);
 
-        // Restore old() setelah validation error
         if (OLD_COMPANY_ID) restoreOldValues();
+        if (OLD_PIC_ID)     restoreOldPic();
     });
 
     // ─── Combobox: open / close / filter ──────────────────────────────────────
-    function cbPositionDropdown(type) {
-        const input = CB[type].input;
-        const dd    = CB[type].dropdown;
-        const rect  = input.getBoundingClientRect();
-        dd.style.top   = (rect.bottom + window.scrollY + 4) + 'px';
-        dd.style.left  = (rect.left   + window.scrollX)     + 'px';
-        dd.style.width = rect.width + 'px';
-    }
+    // PERBAIKAN: cbPositionDropdown dihapus sepenuhnya.
+    // Dropdown sudah otomatis muncul tepat di bawah input berkat position: absolute + top: calc(100% + 4px).
 
     function cbOpen(type) {
         if (type === 'contact' && CB.contact.input.disabled) return;
-        cbPositionDropdown(type);
         CB[type].dropdown.classList.add('open');
-        if (type === 'company') renderCompanyDropdown();
-        else renderContactDropdown();
+        if      (type === 'company') renderCompanyDropdown();
+        else if (type === 'contact') renderContactDropdown();
+        else if (type === 'pic')     renderPicDropdown();
     }
 
     function cbClose(type) {
         CB[type].dropdown.classList.remove('open');
         CB[type].focusIdx = -1;
-        // Jika user menghapus teks tapi ada yg terpilih, kembalikan teks
+        // Jika user hapus teks tapi sudah ada pilihan, kembalikan teks
         if (CB[type].selected && CB[type].input) {
             CB[type].input.value = CB[type].selected.name;
         }
@@ -627,21 +707,11 @@
 
     function cbFilter(type) {
         if (type === 'contact' && CB.contact.input.disabled) return;
-        cbPositionDropdown(type);
         CB[type].dropdown.classList.add('open');
-        if (type === 'company') renderCompanyDropdown();
-        else renderContactDropdown();
+        if      (type === 'company') renderCompanyDropdown();
+        else if (type === 'contact') renderContactDropdown();
+        else if (type === 'pic')     renderPicDropdown();
     }
-
-    // Reposition on scroll/resize so fixed dropdown follows input
-    window.addEventListener('scroll', () => {
-        if (CB.company.dropdown.classList.contains('open')) cbPositionDropdown('company');
-        if (CB.contact.dropdown.classList.contains('open'))  cbPositionDropdown('contact');
-    }, true);
-    window.addEventListener('resize', () => {
-        if (CB.company.dropdown.classList.contains('open')) cbPositionDropdown('company');
-        if (CB.contact.dropdown.classList.contains('open'))  cbPositionDropdown('contact');
-    });
 
     function cbKeydown(e, type) {
         const opts = [...CB[type].dropdown.querySelectorAll('.cb-opt')];
@@ -657,14 +727,19 @@
             if (CB[type].focusIdx >= 0) opts[CB[type].focusIdx].click();
             return;
         } else if (e.key === 'Escape') {
-            cbClose(type); return;
+            cbClose(type);
+            return;
         }
         opts.forEach((o, i) => o.classList.toggle('focused', i === CB[type].focusIdx));
+        opts[CB[type].focusIdx]?.scrollIntoView({ block: 'nearest' });
     }
+
+    // PERBAIKAN: Tidak perlu scroll/resize listener untuk reposition dropdown
+    // karena dropdown sudah absolute dan otomatis mengikuti posisi parent-nya.
 
     // ─── Company Dropdown ──────────────────────────────────────────────────────
     function renderCompanyDropdown() {
-        const q = (CB.company.input.value || '').toLowerCase().trim();
+        const q       = (CB.company.input.value || '').toLowerCase().trim();
         const matches = q
             ? COMPANIES_DATA.filter(c => c.name.toLowerCase().includes(q))
             : COMPANIES_DATA;
@@ -683,7 +758,6 @@
                 </div>`;
         });
 
-        // Tombol buat baru
         const exact = COMPANIES_DATA.some(c => c.name.toLowerCase() === q);
         if (q && !exact) {
             html += `
@@ -705,18 +779,16 @@
         const co = COMPANIES_DATA.find(c => c.id === id);
         if (!co) return;
 
-        CB.company.selected = co;
-        CB.company.input.value = co.name;
+        CB.company.selected     = co;
+        CB.company.input.value  = co.name;
         document.getElementById('hidden_company_id').value = co.id;
         document.getElementById('companyClearBtn').classList.add('visible');
         cbClose('company');
 
-        // Reset kontak
         clearContact();
-        CB.contact.input.disabled = false;
+        CB.contact.input.disabled    = false;
         CB.contact.input.placeholder = '— Cari atau tambah kontak baru —';
 
-        // Summary
         currentCompanyName = co.name;
         document.getElementById('sum-company').textContent = co.name;
         updateSummary();
@@ -727,10 +799,10 @@
         if (!name) return;
 
         const btn = CB.company.dropdown.querySelector('.create-new');
-        if (btn) { btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Menyimpan…'; }
+        if (btn) btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Menyimpan…';
 
         try {
-            const res = await fetch(ROUTE_COMPANY_QC, {
+            const res  = await fetch(ROUTE_COMPANY_QC, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
                 body: JSON.stringify({ name }),
@@ -739,7 +811,6 @@
             if (!res.ok) throw new Error(data.message || 'Gagal menyimpan');
 
             const newCo = { id: data.id, name: data.name, contacts: data.contacts || [] };
-            // Sisipkan di urutan awal agar mudah ditemukan
             COMPANIES_DATA.unshift(newCo);
             selectCompany(newCo.id);
         } catch (err) {
@@ -749,12 +820,12 @@
     }
 
     function clearCompany() {
-        CB.company.selected = null;
+        CB.company.selected    = null;
         CB.company.input.value = '';
         document.getElementById('hidden_company_id').value = '';
         document.getElementById('companyClearBtn').classList.remove('visible');
         clearContact();
-        CB.contact.input.disabled = true;
+        CB.contact.input.disabled    = true;
         CB.contact.input.placeholder = '— Pilih dulu perusahaan —';
         currentCompanyName = '';
         document.getElementById('sum-company').textContent = '—';
@@ -765,12 +836,20 @@
     function renderContactDropdown() {
         if (!CB.company.selected) return;
         const contacts = CB.company.selected.contacts || [];
-        const q = (CB.contact.input.value || '').toLowerCase().trim();
-        const matches = q
-            ? contacts.filter(c => c.name.toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q) || (c.phone||'').toLowerCase().includes(q))
+        const q        = (CB.contact.input.value || '').toLowerCase().trim();
+        const matches  = q
+            ? contacts.filter(c =>
+                c.name.toLowerCase().includes(q) ||
+                (c.email || '').toLowerCase().includes(q) ||
+                (c.phone || '').toLowerCase().includes(q))
             : contacts;
 
         let html = '';
+
+        if (!matches.length && !q) {
+            html += '<div class="cb-opt-empty" style="padding-bottom:0">Belum ada kontak untuk perusahaan ini.</div>';
+        }
+
         matches.slice(0, 20).forEach((c, i) => {
             html += `
                 <div class="cb-opt" data-idx="${i}" onclick="selectContact(${c.id})">
@@ -779,11 +858,11 @@
                     </svg>
                     <div>
                         <div>${escHtml(c.name)}</div>
+                        ${c.email ? `<div class="cb-opt-sub">${escHtml(c.email)}</div>` : ''}
                     </div>
                 </div>`;
         });
 
-        // Tombol tambah kontak baru
         const exact = contacts.some(c => c.name.toLowerCase() === q);
         if (!exact) {
             html += `
@@ -795,10 +874,6 @@
                 </div>`;
         }
 
-        if (!matches.length && !q) {
-            html = `<div class="cb-opt-empty" style="padding-bottom:0">Belum ada kontak untuk perusahaan ini.</div>` + html;
-        }
-
         CB.contact.dropdown.innerHTML = html;
     }
 
@@ -808,8 +883,8 @@
         const contact = co.contacts.find(c => c.id === id);
         if (!contact) return;
 
-        CB.contact.selected = contact;
-        CB.contact.input.value = contact.name;
+        CB.contact.selected     = contact;
+        CB.contact.input.value  = contact.name;
         document.getElementById('hidden_contact_id').value = contact.id;
         cbClose('contact');
 
@@ -820,12 +895,60 @@
 
     function clearContact() {
         CB.contact.selected = null;
-        currentContact = null;
+        currentContact      = null;
         if (CB.contact.input) CB.contact.input.value = '';
         document.getElementById('hidden_contact_id').value = '';
         hideContactPreview();
         document.getElementById('sum-contact-wrap').innerHTML =
             '<div style="font-size:12px;color:#9ca3af;font-style:italic;">Belum ada kontak dipilih.</div>';
+    }
+
+    // ─── PIC Dropdown ──────────────────────────────────────────────────────────
+    function renderPicDropdown() {
+        const q       = (CB.pic.input.value || '').toLowerCase().trim();
+        const matches = q
+            ? PICS_DATA.filter(p => p.name.toLowerCase().includes(q) || (p.email || '').toLowerCase().includes(q))
+            : PICS_DATA;
+
+        let html = '';
+        matches.slice(0, 20).forEach((p, i) => {
+            html += `
+                <div class="cb-opt" data-idx="${i}" onclick="selectPic(${p.id})">
+                    <svg class="cb-opt-icon" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <div>
+                        <div>${escHtml(p.name)}</div>
+                        ${p.email ? `<div class="cb-opt-sub">${escHtml(p.email)}</div>` : ''}
+                    </div>
+                </div>`;
+        });
+
+        if (!html) {
+            html = '<div class="cb-opt-empty">Tidak ada PIC ditemukan.</div>';
+        }
+        CB.pic.dropdown.innerHTML = html;
+    }
+
+    function selectPic(id) {
+        const pic = PICS_DATA.find(p => p.id === id);
+        if (!pic) return;
+
+        CB.pic.selected    = pic;
+        CB.pic.input.value = pic.name;
+        document.getElementById('hidden_pic_id').value = pic.id;
+        document.getElementById('picClearBtn').style.display = 'flex';
+        cbClose('pic');
+
+        showPicPreview(pic);
+    }
+
+    function clearPic() {
+        CB.pic.selected    = null;
+        CB.pic.input.value = '';
+        document.getElementById('hidden_pic_id').value = '';
+        document.getElementById('picClearBtn').style.display = 'none';
+        hidePicPreview();
     }
 
     // ─── Modal: Tambah kontak baru ─────────────────────────────────────────────
@@ -835,56 +958,61 @@
 
         const overlay = document.createElement('div');
         overlay.className = 'qc-modal-overlay';
-        overlay.id = 'qcContactModal';
+        overlay.id        = 'qcContactModal';
         overlay.innerHTML = `
             <div class="qc-modal" onclick="event.stopPropagation()">
-                <div class="qc-modal-title">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                    </svg>
-                    Tambah Kontak Baru
-                </div>
-                <div class="form-group">
-                    <label>Nama <span class="req">*</span></label>
-                    <input type="text" id="qc-name" value="${escHtml(prefillName)}" placeholder="Nama lengkap kontak">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>No. HP / WA</label>
-                        <input type="text" id="qc-phone" placeholder="08xx…">
+                <div class="qc-modal-header">
+                    <div class="qc-modal-title">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                        </svg>
+                        <span>Tambah Kontak Baru</span>
                     </div>
                 </div>
-                <div class="form-group" style="margin-bottom:0">
-                    <label>Email</label>
-                    <input type="email" id="qc-email" placeholder="email@perusahaan.com">
+                <div class="qc-modal-body">
+                    <div class="form-group">
+                        <label>Nama <span class="req">*</span></label>
+                        <input type="text" id="qc-name" value="${escHtml(prefillName)}" placeholder="Nama lengkap kontak">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>No. HP / WA</label>
+                            <input type="text" id="qc-phone" placeholder="08xx…">
+                        </div>
+                        <div class="form-group">
+                            <label>Jabatan</label>
+                            <input type="text" id="qc-jabatan" placeholder="Jabatan kontak">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="qc-email" placeholder="email@perusahaan.com">
+                    </div>
                 </div>
                 <div class="qc-modal-footer">
                     <button type="button" class="btn-qc-cancel" onclick="closeContactModal()">Batal</button>
                     <button type="button" class="btn-qc-save" id="qcSaveBtn" onclick="saveNewContact()">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        Simpan Kontak
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Simpan
                     </button>
                 </div>
             </div>`;
 
-        // Tutup modal saat klik overlay
         overlay.addEventListener('click', closeContactModal);
         document.body.appendChild(overlay);
-
-        setTimeout(() => {
-            const nameInput = document.getElementById('qc-name');
-            if (nameInput) nameInput.focus();
-        }, 50);
+        setTimeout(() => document.getElementById('qc-name')?.focus(), 50);
     }
 
     function closeContactModal() {
-        const m = document.getElementById('qcContactModal');
-        if (m) m.remove();
+        document.getElementById('qcContactModal')?.remove();
     }
 
     async function saveNewContact() {
         const nameInput = document.getElementById('qc-name');
-        const name = nameInput ? nameInput.value.trim() : '';
+        const name      = nameInput?.value.trim() ?? '';
         if (!name) {
             if (nameInput) { nameInput.focus(); nameInput.style.borderColor = '#fca5a5'; }
             return;
@@ -897,12 +1025,13 @@
         const payload = {
             company_id: CB.company.selected.id,
             name,
-            phone:    document.getElementById('qc-phone').value.trim()    || null,
-            email:    document.getElementById('qc-email').value.trim()    || null,
+            phone:   document.getElementById('qc-phone').value.trim()   || null,
+            email:   document.getElementById('qc-email').value.trim()   || null,
+            jabatan: document.getElementById('qc-jabatan').value.trim() || null,
         };
 
         try {
-            const res = await fetch(ROUTE_CONTACT_QC, {
+            const res  = await fetch(ROUTE_CONTACT_QC, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
                 body: JSON.stringify(payload),
@@ -915,7 +1044,6 @@
                 throw new Error(errMsg);
             }
 
-            // Tambah ke list lokal
             CB.company.selected.contacts.unshift(data);
             const co = COMPANIES_DATA.find(c => c.id === CB.company.selected.id);
             if (co) co.contacts.unshift(data);
@@ -924,26 +1052,26 @@
             selectContact(data.id);
         } catch (err) {
             alert('Gagal menyimpan kontak: ' + err.message);
-            btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Simpan Kontak';
+            btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Simpan';
             btn.classList.remove('btn-loading');
         }
     }
 
     // ─── Contact Preview ───────────────────────────────────────────────────────
     function showContactPreview(c) {
-        const preview = document.getElementById('contactPreview');
-        preview.classList.add('visible');
+        document.getElementById('contactPreview').classList.add('visible');
         document.getElementById('previewAvatar').textContent = initials(c.name);
         document.getElementById('previewName').textContent   = c.name;
+        document.getElementById('previewPos').textContent    = c.jabatan ?? '';
 
-        const posEl = document.getElementById('previewPos');
-
-        const emailWrap = document.getElementById('previewEmail');
-        const phoneWrap = document.getElementById('previewPhone');
-        if (c.email) { emailWrap.style.display = ''; document.getElementById('previewEmailText').textContent = c.email; }
-        else emailWrap.style.display = 'none';
-        if (c.phone) { phoneWrap.style.display = ''; document.getElementById('previewPhoneText').textContent = c.phone; }
-        else phoneWrap.style.display = 'none';
+        const toggle = (wrapId, textId, val) => {
+            const el = document.getElementById(wrapId);
+            if (val) { el.style.display = ''; document.getElementById(textId).textContent = val; }
+            else el.style.display = 'none';
+        };
+        toggle('previewJabatan', 'previewJabatanText', c.jabatan);
+        toggle('previewEmail',   'previewEmailText',   c.email);
+        toggle('previewPhone',   'previewPhoneText',   c.phone);
 
         document.getElementById('sum-contact-wrap').innerHTML = `
             <div class="sum-contact-box">
@@ -951,12 +1079,33 @@
                 <div>
                     <div class="sum-contact-name">${escHtml(c.name)}</div>
                     <div class="sum-contact-sub">${escHtml(c.email || c.phone || 'Kontak')}</div>
+                    <div class="sum-contact-pos">${escHtml(c.jabatan || '')}</div>
                 </div>
             </div>`;
     }
 
     function hideContactPreview() {
         document.getElementById('contactPreview').classList.remove('visible');
+    }
+
+    // ─── PIC Preview ───────────────────────────────────────────────────────────
+    function showPicPreview(p) {
+        const preview = document.getElementById('picPreview');
+        preview.style.display = 'flex';
+        document.getElementById('picPreviewAvatar').textContent = initials(p.name);
+        document.getElementById('picPreviewName').textContent   = p.name;
+
+        const emailEl = document.getElementById('picPreviewEmail');
+        if (p.email) {
+            document.getElementById('picPreviewEmailText').textContent = p.email;
+            emailEl.style.display = 'inline-flex';
+        } else {
+            emailEl.style.display = 'none';
+        }
+    }
+
+    function hidePicPreview() {
+        document.getElementById('picPreview').style.display = 'none';
     }
 
     // ─── Restore old() setelah validation error ────────────────────────────────
@@ -968,6 +1117,11 @@
             const ct = co.contacts.find(c => c.id == OLD_CONTACT_ID);
             if (ct) selectContact(ct.id);
         }
+    }
+
+    function restoreOldPic() {
+        const pic = PICS_DATA.find(p => p.id == OLD_PIC_ID);
+        if (pic) selectPic(pic.id);
     }
 
     // ─── Build Categories ──────────────────────────────────────────────────────
@@ -982,7 +1136,7 @@
         activeCats.forEach((cat, ci) => {
             const block = document.createElement('div');
             block.className = 'cat-block' + (ci === 0 ? ' open' : '');
-            block.id = 'catblock-' + cat.category_id;
+            block.id        = 'catblock-' + cat.category_id;
             block.innerHTML = `
                 <div class="cat-header" onclick="toggleCat('catblock-${cat.category_id}')">
                     <div class="cat-header-left">
@@ -1004,14 +1158,14 @@
 
     function makePkgItem(pkg, catId) {
         const el = document.createElement('div');
-        el.className = 'pkg-item';
-        el.id = 'pkgitem-' + pkg.id;
-        el.dataset.catId = catId;
+        el.className       = 'pkg-item';
+        el.id              = 'pkgitem-' + pkg.id;
+        el.dataset.catId   = catId;
         el.dataset.basePrice = pkg.base_price;
         el.innerHTML = `
             <div class="pkg-check" id="pkgcheck-${pkg.id}">
                 <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"
-                     id="pkgchksvg-${pkg.id}" style="display:none">
+                    id="pkgchksvg-${pkg.id}" style="display:none">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                 </svg>
             </div>
@@ -1023,20 +1177,20 @@
                 <div class="pkg-qty-wrap" id="pkgqty-${pkg.id}">
                     <button type="button" class="qty-btn" onclick="chQty(${pkg.id},-1,event)">&#8722;</button>
                     <input class="qty-val" type="number" min="1" value="1"
-                           id="qtyinp-${pkg.id}"
-                           oninput="onQtyInput(${pkg.id})"
-                           onclick="event.stopPropagation()">
+                        id="qtyinp-${pkg.id}"
+                        oninput="onQtyInput(${pkg.id})"
+                        onclick="event.stopPropagation()">
                     <button type="button" class="qty-btn" onclick="chQty(${pkg.id},+1,event)">+</button>
                 </div>
                 <div class="pkg-price-wrap">
                     <span class="pkg-price-label">Harga/unit</span>
                     <input class="pkg-price-input" type="number" min="0" step="1000"
-                           id="priceinp-${pkg.id}"
-                           value="${parseFloat(pkg.base_price) || 0}"
-                           data-base="${parseFloat(pkg.base_price) || 0}"
-                           oninput="onPriceInput(${pkg.id})"
-                           onclick="event.stopPropagation()"
-                           title="Klik untuk ubah harga">
+                        id="priceinp-${pkg.id}"
+                        value="${parseFloat(pkg.base_price) || 0}"
+                        data-base="${parseFloat(pkg.base_price) || 0}"
+                        oninput="onPriceInput(${pkg.id})"
+                        onclick="event.stopPropagation()"
+                        title="Klik untuk ubah harga">
                     <span class="pkg-price-changed" id="pricechanged-${pkg.id}">${fmt(pkg.base_price)} (default)</span>
                 </div>
             </div>`;
@@ -1054,12 +1208,11 @@
             document.getElementById('pkgchksvg-' + pkgId).style.display = 'none';
             const pinp = document.getElementById('priceinp-' + pkgId);
             if (pinp) pinp.value = pinp.dataset.base;
-            const pchg = document.getElementById('pricechanged-' + pkgId);
-            if (pchg) pchg.classList.remove('visible');
+            document.getElementById('pricechanged-' + pkgId)?.classList.remove('visible');
         } else {
-            const pinp = document.getElementById('priceinp-' + pkgId);
+            const pinp         = document.getElementById('priceinp-' + pkgId);
             const currentPrice = pinp ? (parseFloat(pinp.value) || parseFloat(basePrice) || 0) : (parseFloat(basePrice) || 0);
-            selected[pkgId] = { qty: 1, name, price: currentPrice, basePrice: parseFloat(basePrice) || 0 };
+            selected[pkgId]    = { qty: 1, name, price: currentPrice, basePrice: parseFloat(basePrice) || 0 };
             el.classList.add('selected');
             document.getElementById('pkgchksvg-' + pkgId).style.display = 'block';
             document.getElementById('qtyinp-' + pkgId).value = 1;
@@ -1071,7 +1224,7 @@
     function chQty(pkgId, delta, e) {
         e.stopPropagation();
         const inp = document.getElementById('qtyinp-' + pkgId);
-        let q = (parseInt(inp.value) || 1) + delta;
+        let q     = (parseInt(inp.value) || 1) + delta;
         if (q < 1) q = 1;
         inp.value = q;
         if (selected[pkgId]) { selected[pkgId].qty = q; updateSummary(); }
@@ -1079,7 +1232,7 @@
 
     function onQtyInput(pkgId) {
         const inp = document.getElementById('qtyinp-' + pkgId);
-        let q = parseInt(inp.value) || 1;
+        let q     = parseInt(inp.value) || 1;
         if (q < 1) { q = 1; inp.value = 1; }
         if (selected[pkgId]) { selected[pkgId].qty = q; updateSummary(); }
     }
@@ -1087,7 +1240,7 @@
     function onPriceInput(pkgId) {
         const pinp = document.getElementById('priceinp-' + pkgId);
         const pchg = document.getElementById('pricechanged-' + pkgId);
-        let p = parseFloat(pinp.value) || 0;
+        let p      = parseFloat(pinp.value) || 0;
         if (p < 0) { p = 0; pinp.value = 0; }
         if (pchg) {
             const base = parseFloat(pinp.dataset.base) || 0;
@@ -1106,7 +1259,7 @@
         badge.textContent = selCnt > 0 ? selCnt + ' dipilih' : total + ' paket';
     }
 
-    // ─── Summary ──────────────────────────────────────────────────────────────
+    // ─── Summary ───────────────────────────────────────────────────────────────
     function updateSummary() {
         const isAdmin = document.getElementById('adminFillToggle').checked;
         if (!isAdmin) return;
@@ -1117,7 +1270,7 @@
         if (!keys.length) {
             document.getElementById('sum-items-content').innerHTML =
                 '<div style="font-size:12px;color:#9ca3af"><em>Belum ada paket dipilih.</em></div>';
-            document.getElementById('sum-total').textContent = '—';
+            document.getElementById('sum-total').textContent     = '—';
             document.getElementById('subtotalDisplay').textContent = 'Rp 0';
             return;
         }
@@ -1134,12 +1287,12 @@
             </li>`;
         });
         html += '</ul>';
-        document.getElementById('sum-items-content').innerHTML = html;
-        document.getElementById('sum-total').textContent = fmt(total);
-        document.getElementById('subtotalDisplay').textContent = fmt(total);
+        document.getElementById('sum-items-content').innerHTML    = html;
+        document.getElementById('sum-total').textContent          = fmt(total);
+        document.getElementById('subtotalDisplay').textContent    = fmt(total);
     }
 
-    // ─── Toggle Logic ─────────────────────────────────────────────────────────
+    // ─── Toggle Logic ──────────────────────────────────────────────────────────
     const toggle       = document.getElementById('adminFillToggle');
     const toggleCard   = document.getElementById('toggleCard');
     const toggleDesc   = document.getElementById('toggleDesc');
@@ -1153,12 +1306,12 @@
         if (isAdmin) {
             toggleDesc.textContent = 'Aktif — Admin memilih paket layanan langsung pada form ini.';
             document.getElementById('infoBoxText').innerHTML = 'Order dibuat dengan status <strong>Draft</strong>. Paket layanan dipilih langsung oleh admin pada form ini.';
-            document.getElementById('sum-mode').innerHTML = '<span class="mode-badge admin">Admin mengisi</span>';
+            document.getElementById('sum-mode').innerHTML   = '<span class="mode-badge admin">Admin mengisi</span>';
             updateSummary();
         } else {
             toggleDesc.textContent = 'Nonaktif — Customer akan mengisi item sendiri melalui halaman keranjang menggunakan token.';
             document.getElementById('infoBoxText').innerHTML = 'Order dibuat dengan status <strong>Draft</strong> dan token otomatis dibuat. Item layanan masih kosong dan akan dipilih oleh customer (guest) saat membuka halaman keranjang menggunakan token tersebut.';
-            document.getElementById('sum-mode').innerHTML = '<span class="mode-badge guest">Guest mengisi sendiri</span>';
+            document.getElementById('sum-mode').innerHTML   = '<span class="mode-badge guest">Guest mengisi sendiri</span>';
             document.getElementById('sum-items-content').innerHTML = '<div style="font-size:12.5px;color:#6b7280;line-height:1.8;"><em>Akan diisi oleh customer melalui halaman keranjang (guest).</em></div>';
             document.getElementById('sum-total').textContent = '—';
         }
@@ -1166,7 +1319,7 @@
 
     toggle.addEventListener('change', function () { applyToggleState(this.checked); });
 
-    // ─── Submit: inject hidden inputs & validasi ───────────────────────────────
+    // ─── Submit ────────────────────────────────────────────────────────────────
     document.getElementById('orderForm').addEventListener('submit', function (e) {
         if (!document.getElementById('hidden_company_id').value) {
             e.preventDefault();
@@ -1180,6 +1333,12 @@
             CB.contact.input.focus();
             return;
         }
+        if (!document.getElementById('hidden_pic_id').value) {
+            e.preventDefault();
+            alert('Pilih PIC Internal terlebih dahulu.');
+            CB.pic.input.focus();
+            return;
+        }
         if (!toggle.checked) return;
 
         const keys = Object.keys(selected);
@@ -1189,14 +1348,13 @@
             return;
         }
 
-        // Inject hidden inputs paket
         this.querySelectorAll('input[data-pkg-hidden]').forEach(el => el.remove());
         keys.forEach((pkgId, i) => {
             const it = selected[pkgId];
             [['package_id', pkgId], ['qty', it.qty], ['custom_price', it.price]].forEach(([k, v]) => {
                 const inp = document.createElement('input');
-                inp.type = 'hidden';
-                inp.name = `items[${i}][${k}]`;
+                inp.type  = 'hidden';
+                inp.name  = `items[${i}][${k}]`;
                 inp.value = v;
                 inp.dataset.pkgHidden = '1';
                 this.appendChild(inp);
@@ -1204,7 +1362,7 @@
         });
     });
 
-    // ─── CSS spin keyframe untuk loading icon ─────────────────────────────────
+    // ─── CSS spin keyframe ─────────────────────────────────────────────────────
     const spinStyle = document.createElement('style');
     spinStyle.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
     document.head.appendChild(spinStyle);
