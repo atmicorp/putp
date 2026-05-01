@@ -507,7 +507,7 @@
                             <div class="doc-panel-title">Surat Permohonan Kerjasama (PKS)</div>
                             <div class="doc-panel-desc">Dokumen permohonan kerjasama dari kontak untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                        <a href="{{ route('admin.orders.permohonan_kerjasama', $order) }}" target="_blank" class="btn-open-pdf">
+                            <a href="{{ route('orders.guest.permohonan_kerjasama', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -528,7 +528,7 @@
                             <div class="doc-panel-title">Perjanjian Kerjasama</div>
                             <div class="doc-panel-desc">Dokumen perjanjian kerjasama resmi untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                        <a href="{{ route('admin.orders.perjanjian_kerjasama', $order) }}" target="_blank" class="btn-open-pdf">
+                        <a href="{{ route('orders.guest.perjanjian_kerjasama', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -549,7 +549,7 @@
                             <div class="doc-panel-title">Surat Kesanggupan Kerjasama</div>
                             <div class="doc-panel-desc">Dokumen pernyataan kesanggupan pelaksanaan kerjasama untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                        <a href="{{ route('admin.orders.kesanggupan_kerjasama', $order) }}" target="_blank" class="btn-open-pdf">
+                        <a href="{{ route('orders.guest.kesanggupan_kerjasama', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -570,7 +570,7 @@
                             <div class="doc-panel-title">Berita Acara Penyelesaian</div>
                             <div class="doc-panel-desc">Dokumen BAP sebagai bukti selesainya pekerjaan untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                        <a href="{{ route('admin.orders.bap', $order) }}" target="_blank" class="btn-open-pdf">
+                        <a href="{{ route('orders.guest.bap', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -591,7 +591,7 @@
                             <div class="doc-panel-title">Laporan Kegiatan Kerjasama</div>
                             <div class="doc-panel-desc">Dokumen laporan hasil kegiatan kerjasama untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                        <a href="{{ route('admin.orders.laporan_kegiatan_kerjasama', $order) }}" target="_blank" class="btn-open-pdf">
+                        <a href="{{ route('orders.guest.laporan_kegiatan', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>

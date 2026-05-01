@@ -42,17 +42,19 @@ Route::middleware(['web', 'auth'])->prefix('admin')->group(function () {
 
 // Guest route (tanpa login)
 Route::middleware(['web', 'throttle:30,1'])->group(function () {
-    Route::get('/orders/{slug}/{token}',
-        [GuestOrderController::class, 'show'])->name('orders.guest.show');
+    Route::get('/orders/{slug}/{token}/permohonan-kerjasama', [GuestOrderController::class, 'PermohonanKerjasama'])->name('orders.guest.permohonan_kerjasama');
+    Route::get('/orders/{slug}/{token}/perjanjian-kerjasama', [GuestOrderController::class, 'PerjanjianKerjasama'])->name('orders.guest.perjanjian_kerjasama');
+    Route::get('/orders/{slug}/{token}/kesanggupan-kerjasama', [GuestOrderController::class, 'KesanggupanKerjasama'])->name('orders.guest.kesanggupan_kerjasama');
+    Route::get('/orders/{slug}/{token}/bap', [GuestOrderController::class, 'bap'])->name('orders.guest.bap');
+    Route::get('/orders/{slug}/{token}/laporan-kegiatan', [GuestOrderController::class, 'LaporanKegiatanKerjasama'])->name('orders.guest.laporan_kegiatan');
 
-    Route::post('/orders/{slug}/{token}/approve',
-        [GuestOrderController::class, 'approve'])->name('orders.guest.approve');
-
-    Route::post('/orders/{slug}/{token}/reject',
-        [GuestOrderController::class, 'reject'])->name('orders.guest.reject');
-    Route::post('/orders/{slug}/{token}/sign',   
-        [GuestOrderController::class, 'sign'])->name('orders.guest.sign');
+    // Taruh show SETELAH route dokumen
+    Route::get('/orders/{slug}/{token}', [GuestOrderController::class, 'show'])->name('orders.guest.show');
+    Route::post('/orders/{slug}/{token}/approve', [GuestOrderController::class, 'approve'])->name('orders.guest.approve');
+    Route::post('/orders/{slug}/{token}/reject', [GuestOrderController::class, 'reject'])->name('orders.guest.reject');
+    Route::post('/orders/{slug}/{token}/sign', [GuestOrderController::class, 'sign'])->name('orders.guest.sign');
 });
+
 
 Route::post('companies/quick-create', [AdminOrderController::class, 'quickCreateCompany'])->name('admin.companies.quick-create');
 Route::post('contacts/quick-create',  [AdminOrderController::class, 'quickCreateContact']) ->name('admin.contacts.quick-create');

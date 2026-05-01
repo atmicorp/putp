@@ -1,14 +1,13 @@
 <?php
 
 namespace Modules\Order\Http\Controllers\Guest;
-
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Package;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
-
 class OrderController extends Controller
 {
     /**
@@ -265,7 +264,7 @@ class OrderController extends Controller
         ]);
 
         $order = Order::where('access_token', $data['token'])
-            ->with(['offer.details.package'])
+            ->with(['offer.details.package.category', 'company', 'contact', 'creator'])
             ->first();
 
         if (! $order) {
@@ -278,5 +277,89 @@ class OrderController extends Controller
             'order' => $order,
             'token' => $data['token'],
         ]);
+    }
+
+    // ─── Helper ───────────────────────────────────────────────────────────────
+
+    private function resolveOrder(string $slug, string $token): Order
+    {
+        $order = Order::where('access_token', $token)
+            ->with(['company', 'contact', 'creator', 'offer.details.package.category'])
+            ->firstOrFail();
+
+        if ($slug !== $order->company->slug) {
+            abort(404);
+        }
+
+        return $order;
+    }
+
+    private function categoryLabel(Order $order): string
+    {
+        $categories = $order->offer->details
+            ->map(fn($detail) => $detail->package->category->nama_category)
+            ->unique()
+            ->values();
+
+        return $categories->count() === 1
+            ? $categories->first()
+            : $categories->slice(0, -1)->implode(', ') . ' dan ' . $categories->last();
+    }
+
+    // ─── PDF Documents ────────────────────────────────────────────────────────
+
+    public function PermohonanKerjasama(string $slug, string $token)
+    {
+        $order         = $this->resolveOrder($slug, $token);
+        $categoryLabel = $this->categoryLabel($order);
+        $totalQty      = $order->offer->details->sum('qty');
+
+        return Pdf::loadView('order::orders.documents.permohonan_kerjasama', compact('order', 'categoryLabel', 'totalQty'))
+            ->setPaper('a4', 'portrait')
+            ->stream("PermohonanKerjasama-{$order->order_code}.pdf");
+    }
+
+    public function PerjanjianKerjasama(string $slug, string $token)
+    {
+        $order         = $this->resolveOrder($slug, $token);
+        $categoryLabel = $this->categoryLabel($order);
+        $totalQty      = $order->offer->details->sum('qty');
+
+        return Pdf::loadView('order::orders.documents.perjanjian_kerjasama', compact('order', 'categoryLabel', 'totalQty'))
+            ->setPaper('a4', 'portrait')
+            ->stream("PerjanjianKerjasama-{$order->order_code}.pdf");
+    }
+
+    public function KesanggupanKerjasama(string $slug, string $token)
+    {
+        $order         = $this->resolveOrder($slug, $token);
+        $categoryLabel = $this->categoryLabel($order);
+        $totalQty      = $order->offer->details->sum('qty');
+
+        return Pdf::loadView('order::orders.documents.kesanggupan_kerjasama', compact('order', 'categoryLabel', 'totalQty'))
+            ->setPaper('a4', 'portrait')
+            ->stream("KesanggupanKerjasama-{$order->order_code}.pdf");
+    }
+
+    public function bap(string $slug, string $token)
+    {
+        $order         = $this->resolveOrder($slug, $token);
+        $categoryLabel = $this->categoryLabel($order);
+        $totalQty      = $order->offer->details->sum('qty');
+
+        return Pdf::loadView('order::orders.documents.bap', compact('order', 'categoryLabel', 'totalQty'))
+            ->setPaper('a4', 'portrait')
+            ->stream("bap-{$order->order_code}.pdf");
+    }
+
+    public function LaporanKegiatanKerjasama(string $slug, string $token)
+    {
+        $order         = $this->resolveOrder($slug, $token);
+        $categoryLabel = $this->categoryLabel($order);
+        $totalQty      = $order->offer->details->sum('qty');
+
+        return Pdf::loadView('order::orders.documents.laporan_kegiatan_kerjasama', compact('order', 'categoryLabel', 'totalQty'))
+            ->setPaper('a4', 'portrait')
+            ->stream("LaporanKegiatanKerjasama-{$order->order_code}.pdf");
     }
 }

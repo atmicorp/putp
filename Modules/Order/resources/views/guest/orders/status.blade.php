@@ -680,11 +680,11 @@
                     </div>
                     <div class="field-item">
                         <div class="field-label">Customer</div>
-                        <div class="field-val">{{ $order->customer_name }}</div>
+                        <div class="field-val">{{ $order->contact->name }}</div>
                     </div>
                     <div class="field-item">
                         <div class="field-label">Email</div>
-                        <div class="field-val" style="font-size:12px;font-weight:500;color:var(--slate);">{{ $order->customer_email ?: '—' }}</div>
+                        <div class="field-val" style="font-size:12px;font-weight:500;color:var(--slate);">{{ $order->contact->email  ?: '—' }}</div>
                     </div>
                 </div>
             </div>
@@ -857,6 +857,54 @@
 
         </div>
     </div>
+
+    {{-- Dokumen Kerjasama --}}
+    @if($order->offer && $order->offer->details->count())
+    <div class="timeline-card" style="margin-top:20px;">
+        <div class="timeline-card-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span class="timeline-card-title">Dokumen Kerjasama</span>
+        </div>
+        <div class="timeline-card-body" style="padding:16px 22px;display:flex;flex-direction:column;gap:10px;">
+
+            @php
+                $slug  = $order->company->slug;
+                $token = $order->access_token;
+                $docs  = [
+                    ['route' => 'orders.guest.permohonan_kerjasama', 'label' => 'Surat Permohonan Kerjasama',  'color' => '#2563eb'],
+                    ['route' => 'orders.guest.perjanjian_kerjasama', 'label' => 'Perjanjian Kerjasama',        'color' => '#ea580c'],
+                    ['route' => 'orders.guest.kesanggupan_kerjasama','label' => 'Surat Kesanggupan Kerjasama', 'color' => '#7c3aed'],
+                    ['route' => 'orders.guest.bap',                  'label' => 'Berita Acara Penyelesaian',   'color' => '#16a34a'],
+                    ['route' => 'orders.guest.laporan_kegiatan',     'label' => 'Laporan Kegiatan Kerjasama',  'color' => '#0d9488'],
+                ];
+            @endphp
+
+            @foreach($docs as $doc)
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1.5px solid var(--border);border-radius:12px;background:#fafafa;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:36px;height:36px;border-radius:8px;background:{{ $doc['color'] }}18;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{ $doc['color'] }}" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <span style="font-size:13px;font-weight:600;color:var(--dark);">{{ $doc['label'] }}</span>
+                </div>
+                <a href="{{ route($doc['route'], [$slug, $token]) }}"
+                target="_blank"
+                style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:{{ $doc['color'] }};color:white;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;flex-shrink:0;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                    Buka PDF
+                </a>
+            </div>
+            @endforeach
+
+        </div>
+    </div>
+    @endif
 
     {{-- CTA Hubungi --}}
     <div style="text-align:center;margin-top:8px;padding:24px;background:white;border:1.5px solid var(--border);border-radius:16px;">
