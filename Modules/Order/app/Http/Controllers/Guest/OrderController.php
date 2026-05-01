@@ -91,6 +91,7 @@ class OrderController extends Controller
      */
     public function submit(Request $request)
     {
+        // 1. Validasi Input
         $data = $request->validate([
             'token'              => ['required', 'string'],
             'items'              => ['required', 'array', 'min:1'],
@@ -102,8 +103,13 @@ class OrderController extends Controller
                     ->whereNull('deleted_at'),
             ],
             'items.*.qty'        => ['required', 'integer', 'min:1'],
+            // Kolom tambahan dari modal form
+            'tujuan_pengujian'    => ['nullable', 'string'],
+            'waktu_diharapkan'    => ['nullable', 'string'],
+            'keterangan_tambahan' => ['nullable', 'string'],
         ]);
 
+        // 2. Cari Order berdasarkan Token
         $order = Order::where('access_token', $data['token'])
             ->whereIn('status', [
                 Order::STATUS_DRAFT,
@@ -119,10 +125,11 @@ class OrderController extends Controller
             ], 422);
         }
 
+        // 3. Kelola OrderOffer (Penawaran)
         // Buat offer jika belum ada
         $offer = $order->offer ?? $order->offer()->create([]);
 
-        // Hapus detail lama, ganti dengan pilihan baru
+        // Hapus detail lama, ganti dengan pilihan baru dari keranjang
         $offer->details()->delete();
 
         foreach ($data['items'] as $item) {
@@ -145,9 +152,13 @@ class OrderController extends Controller
             ]);
         }
 
-        // Kunci token — ubah status ke form_required agar tidak bisa disubmit ulang
+        // 4. Update Data Utama di Model Order
+        // Simpan status baru dan data dari modal form
         $order->update([
-            'status' => Order::STATUS_SUBMIT,
+            'status'              => Order::STATUS_SUBMIT,
+            'tujuan_pengujian'    => $data['tujuan_pengujian'] ?? null,
+            'waktu_diharapkan'    => $data['waktu_diharapkan'] ?? null,
+            'keterangan_tambahan' => $data['keterangan_tambahan'] ?? null,
         ]);
 
         return response()->json([
@@ -156,6 +167,7 @@ class OrderController extends Controller
             'message'    => 'Pilihan berhasil disimpan. Admin akan segera memproses order Anda.',
         ]);
     }
+
 
     public function show(string $slug, string $token)
     {

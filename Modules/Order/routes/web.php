@@ -15,8 +15,29 @@ Route::middleware(['web', 'auth'])->prefix('admin')->group(function () {
     Route::post('/orders/{order}/send-offer', [AdminOrderController::class, 'sendOffer'])->name('admin.orders.sendOffer');
     Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
      ->name('admin.orders.updateStatus');
+    
+    // Permohonan Kerjasama
     Route::get('orders/{order}/permohonan-kerjasama', [AdminOrderController::class, 'PermohonanKerjasama'])
     ->name('admin.orders.permohonan_kerjasama');
+
+    //Perjanjian Kerjasama
+    Route::get('orders/{order}/perjanjian-kerjasama', [AdminOrderController::class, 'PerjanjianKerjasama'])
+    ->name('admin.orders.perjanjian_kerjasama');
+
+    //Surat Kesanggupan Kerjasama
+    Route::get('orders/{order}/kesanggupan-kerjasama', [AdminOrderController::class, 'KesanggupanKerjasama'])
+    ->name('admin.orders.kesanggupan_kerjasama');
+
+    //Berita Acara Penyelesaian Kerjasama
+    Route::get('orders/{order}/bap', [AdminOrderController::class, 'bap'])
+    ->name('admin.orders.bap');
+
+    //Laporan Kegiatan Kerjasama
+    Route::get('orders/{order}/laporan-kegiatan-kerjasama', [AdminOrderController::class, 'LaporanKegiatanKerjasama'])
+    ->name('admin.orders.laporan_kegiatan_kerjasama');
+
+    Route::patch('orders/{order}/execution', [AdminOrderController::class, 'updateExecution'])
+    ->name('orders.update-execution');
 });
 
 // Guest route (tanpa login)

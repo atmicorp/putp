@@ -24,12 +24,19 @@ class Order extends Model
         'sent_at',
         'pic_id',
         'created_by',
+        'tujuan_pengujian',    
+        'waktu_diharapkan',    
+        'keterangan_tambahan', 
+        'waktu_pelaksanaan',  
+        'lokasi_pelaksanaan',  
     ];
 
     protected function casts(): array
     {
         return [
             'sent_at' => 'datetime',
+            'waktu_diharapkan' => 'date',
+            'waktu_pelaksanaan' => 'date',
         ];
     }
 

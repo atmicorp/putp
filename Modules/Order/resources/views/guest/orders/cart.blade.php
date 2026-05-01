@@ -679,6 +679,36 @@
             .step-label { display: none; }
             .step-line { margin: 0 6px; }
         }
+
+        .swal-custom-popup {
+            border-radius: 20px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            padding-bottom: 0 !important;
+        }
+        .swal-custom-title {
+            font-family: 'DM Serif Display', serif !important;
+            font-size: 20px !important;
+            color: #1A0F00 !important;
+            padding-bottom: 8px !important;
+            border-bottom: 1px solid #E2E8F0 !important;
+        }
+        .swal-custom-html {
+            text-align: left !important;
+            padding: 20px 26px 4px !important;
+        }
+        .swal2-actions {
+            border-top: 1px solid #E2E8F0;
+            padding: 14px 20px !important;
+            margin-top: 0 !important;
+            gap: 8px !important;
+            background: #F8FAFC;
+        }
+        .swal2-confirm, .swal2-cancel {
+            border-radius: 10px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            padding: 11px 20px !important;
+        }
     </style>
 </head>
 <body>
@@ -1202,19 +1232,64 @@
         normalizeCart();
         if (cart.length === 0) { showToast('Keranjang masih kosong.', 'error'); return; }
 
-        const result = await Swal.fire({
-            title: 'Konfirmasi Pilihan',
-            html: `Anda akan mengirim <strong>${cart.length} layanan</strong>.<br>Setelah dikirim, pilihan <strong>tidak dapat diubah lagi</strong>.`,
-            icon: 'question',
+        // Tampilkan Modal Form Tambahan menggunakan SweetAlert2
+        const { value: formValues } = await Swal.fire({
+            title: 'Informasi Tambahan',
+            html: `
+                <div style="text-align:left; padding: 4px 0;">
+                    <div style="margin-bottom:18px;">
+                        <label style="display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:#64748B; margin-bottom:8px;">Tujuan Pengujian</label>
+                        <textarea id="swal-tujuan" class="swal2-textarea" style="margin:0; width:100%; border:1.5px solid #E2E8F0; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; color:#1A0F00; resize:none;" placeholder="Contoh: Untuk sertifikasi produk..."></textarea>
+                    </div>
+                    <div style="margin-bottom:18px;">
+                        <label style="display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:#64748B; margin-bottom:8px;">Waktu Diharapkan</label>
+                        <input id="swal-waktu" type="date" class="swal2-input" 
+                            style="margin:0; width:100%; border:1.5px solid #E2E8F0; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; color:#1A0F00;"
+                            min="{{ now()->toDateString() }}">
+                    </div>
+                    <div style="margin-bottom:4px;">
+                        <label style="display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:#64748B; margin-bottom:8px;">Keterangan Tambahan</label>
+                        <textarea id="swal-keterangan" class="swal2-textarea" style="margin:0; width:100%; border:1.5px solid #E2E8F0; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; color:#1A0F00; resize:none;" placeholder="Catatan lainnya untuk admin..."></textarea>
+                    </div>
+                </div>
+            `,
+            focusConfirm: false,
             showCancelButton: true,
+            confirmButtonText: 'Konfirmasi & Kirim',
+            cancelButtonText: 'Batal',
             confirmButtonColor: '#EA580C',
             cancelButtonColor: '#64748B',
-            confirmButtonText: 'Ya, kirim sekarang',
-            cancelButtonText: 'Batal',
+            // Styling tambahan via customClass
+            customClass: {
+                popup: 'swal-custom-popup',
+                title: 'swal-custom-title',
+                htmlContainer: 'swal-custom-html',
+            },
+            didOpen: () => {
+                // Focus ring saat input aktif
+                document.querySelectorAll('.swal2-textarea, .swal2-input').forEach(el => {
+                    el.addEventListener('focus', e => {
+                        e.target.style.borderColor = '#EA580C';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(234,88,12,.1)';
+                        e.target.style.outline = 'none';
+                    });
+                    el.addEventListener('blur', e => {
+                        e.target.style.borderColor = '#E2E8F0';
+                        e.target.style.boxShadow = 'none';
+                    });
+                });
+            },
+            preConfirm: () => ({
+                tujuan_pengujian: document.getElementById('swal-tujuan').value,
+                waktu_diharapkan: document.getElementById('swal-waktu').value, // format: YYYY-MM-DD
+                keterangan_tambahan: document.getElementById('swal-keterangan').value,
+            })
         });
 
-        if (!result.isConfirmed) return;
+        // Jika user klik batal atau menutup modal
+        if (!formValues) return;
 
+        // Lanjut ke proses pengiriman data
         showLoading(true);
         document.getElementById('submitBtn').disabled = true;
         setStep(3);
@@ -1231,33 +1306,29 @@
                 body: JSON.stringify({
                     token: currentToken,
                     items: cart.map(c => ({ package_id: c.package_id, qty: c.qty })),
+                    // Tambahkan data dari form modal ke dalam body request
+                    tujuan_pengujian: formValues.tujuan_pengujian,
+                    waktu_diharapkan: formValues.waktu_diharapkan,
+                    keterangan_tambahan: formValues.keterangan_tambahan,
                 }),
             });
+
             const raw = await res.text();
             let data;
             try { data = JSON.parse(raw); } catch { data = null; }
 
             if (!res.ok || !data || !data.success) {
-                let msg;
-                if (data && data.message) {
-                    msg = data.message;
-                } else if (!data && raw) {
-                    const snippet = raw.replace(/\s+/g, ' ').trim().slice(0, 140);
-                    msg = `Gagal menyimpan. (HTTP ${res.status}) — ${snippet}`;
-                } else {
-                    msg = `Gagal menyimpan. (HTTP ${res.status})`;
-                }
+                let msg = (data && data.message) ? data.message : `Gagal menyimpan. (HTTP ${res.status})`;
                 Swal.fire({ title: 'Gagal!', text: msg, icon: 'error', confirmButtonColor: '#EA580C' });
                 setStep(2);
                 document.getElementById('submitBtn').disabled = false;
                 return;
             }
 
-            // Clear cart
+            // Sukses
             cart = [];
             saveCart();
 
-            // Show success
             document.getElementById('browsePanel').style.display = 'none';
             document.getElementById('sidebarPanel').style.display = 'none';
             document.getElementById('stepsHeader').style.display = 'none';

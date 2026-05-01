@@ -53,7 +53,7 @@
             @csrf
             @method('PUT')
 
-            <div class="card">
+            {{-- <div class="card">
                 <div class="card-header">
                     <div>
                         <div class="card-title">Informasi Customer</div>
@@ -78,7 +78,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             <div class="card">
                 <div class="card-header">

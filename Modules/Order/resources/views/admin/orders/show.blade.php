@@ -290,7 +290,7 @@
                     <div class="order-hero">
                         <div>
                             <div class="order-code-big">{{ $order->order_code }}</div>
-                            <div class="order-meta">Dibuat {{ $order->created_at->format('d M Y, H:i') }} || PIC : {{ $order->pic->name }}</div>
+                            <div class="order-meta">Dibuat {{ $order->created_at->format('d M Y, H:i') }} || PIC : {{ $order->pic->name ?? '-' }}</div>
                         </div>
                         <span class="badge badge-{{ $order->status }}">
                             <span class="dot dot-{{ $order->status }}"></span>
@@ -321,7 +321,57 @@
                         <div class="info-block">
                             <div class="info-label">Access Token</div>
                             <div class="info-val" style="font-size:11px;font-family:monospace;color:#6b7280;word-break:break-all;">
-                                {{ Str::limit($order->access_token, 24) }}...
+                                {{ Str::limit($order->access_token, 24) }}
+                            </div>
+                        </div>
+                        <div class="info-block">
+                            <div class="info-label">Tujuan Pengujian</div>
+                            <div class="info-val" style="font-size:13px;">
+                                {{ $order->tujuan_pengujian ?? '-' }}
+                            </div>
+                        </div>
+                        <div class="info-block">
+                            <div class="info-label">Waktu Pelaksanaan yang diharapkan</div>
+                            <div class="info-val" style="font-size:13px;">
+                                {{ $order->waktu_diharapkan 
+                                    ? \Carbon\Carbon::parse($order->waktu_diharapkan)->translatedFormat('l - d F Y') 
+                                    : '-' }}
+                            </div>
+                        </div>
+                        {{-- Waktu Pelaksanaan --}}
+                        <div class="info-block">
+                            <div class="info-label">Waktu Pelaksanaan</div>
+                            <div class="info-val" id="waktu-display" style="display:flex; align-items:center; gap:8px;">
+                                <span id="waktu-text" style="font-size:13px;">
+                                    {{ $order->waktu_pelaksanaan
+                                        ? \Carbon\Carbon::parse($order->waktu_pelaksanaan)->translatedFormat('l - d F Y')
+                                        : '-' }}
+                                </span>
+                                <button class="btn btn-xs btn-outline-secondary" onclick="toggleEdit('waktu')">Edit</button>
+                            </div>
+                            <div id="waktu-form" style="display:none; margin-top:4px; gap:6px; align-items:center; flex-wrap:wrap;">
+                                <input type="date" id="waktu-input" class="form-control form-control-sm" style="width:auto;"
+                                    value="{{ $order->waktu_pelaksanaan ? \Carbon\Carbon::parse($order->waktu_pelaksanaan)->format('Y-m-d') : '' }}">
+                                <button class="btn btn-xs btn-primary" onclick="saveField('waktu')">Simpan</button>
+                                <button class="btn btn-xs btn-secondary" onclick="cancelEdit('waktu')">Batal</button>
+                            </div>
+                        </div>
+
+                        {{-- Lokasi Pelaksanaan --}}
+                        <div class="info-block">
+                            <div class="info-label">Lokasi Pelaksanaan</div>
+                            <div class="info-val" id="lokasi-display" style="display:flex; align-items:center; gap:8px;">
+                                <span id="lokasi-text" style="font-size:13px;">
+                                    {{ $order->lokasi_pelaksanaan ?? '-' }}
+                                </span>
+                                <button class="btn btn-xs btn-outline-secondary" onclick="toggleEdit('lokasi')">Edit</button>
+                            </div>
+                            <div id="lokasi-form" style="display:none; margin-top:4px; gap:6px; align-items:center; flex-wrap:wrap;">
+                                <input type="text" id="lokasi-input" class="form-control form-control-sm" style="width:auto;"
+                                    placeholder="Masukkan lokasi..."
+                                    value="{{ $order->lokasi_pelaksanaan ?? '' }}">
+                                <button class="btn btn-xs btn-primary" onclick="saveField('lokasi')">Simpan</button>
+                                <button class="btn btn-xs btn-secondary" onclick="cancelEdit('lokasi')">Batal</button>
                             </div>
                         </div>
                     </div>
@@ -478,7 +528,7 @@
                             <div class="doc-panel-title">Perjanjian Kerjasama</div>
                             <div class="doc-panel-desc">Dokumen perjanjian kerjasama resmi untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                        <a href="#" target="_blank" class="btn-open-pdf">
+                        <a href="{{ route('admin.orders.perjanjian_kerjasama', $order) }}" target="_blank" class="btn-open-pdf">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -499,7 +549,7 @@
                             <div class="doc-panel-title">Surat Kesanggupan Kerjasama</div>
                             <div class="doc-panel-desc">Dokumen pernyataan kesanggupan pelaksanaan kerjasama untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                        <a href="#" target="_blank" class="btn-open-pdf">
+                        <a href="{{ route('admin.orders.kesanggupan_kerjasama', $order) }}" target="_blank" class="btn-open-pdf">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -520,7 +570,7 @@
                             <div class="doc-panel-title">Berita Acara Penyelesaian</div>
                             <div class="doc-panel-desc">Dokumen BAP sebagai bukti selesainya pekerjaan untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                        <a href="#" target="_blank" class="btn-open-pdf">
+                        <a href="{{ route('admin.orders.bap', $order) }}" target="_blank" class="btn-open-pdf">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -541,7 +591,7 @@
                             <div class="doc-panel-title">Laporan Kegiatan Kerjasama</div>
                             <div class="doc-panel-desc">Dokumen laporan hasil kegiatan kerjasama untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                        <a href="#" target="_blank" class="btn-open-pdf">
+                        <a href="{{ route('admin.orders.laporan_kegiatan_kerjasama', $order) }}" target="_blank" class="btn-open-pdf">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -844,6 +894,57 @@
             // Update active tab button
             document.querySelectorAll('.doc-tab').forEach(btn => btn.classList.remove('active'));
             event.currentTarget.classList.add('active');
+        }
+    </script>
+
+    {{-- edit waktu dan lokasi pelaksanaan --}}
+    <script>
+        const updateUrl = "{{ route('orders.update-execution', $order) }}";
+        const csrfToken = "{{ csrf_token() }}";
+
+        function toggleEdit(field) {
+            document.getElementById(field + '-display').style.display = 'none';
+            document.getElementById(field + '-form').style.display = 'flex';
+            document.getElementById(field + '-input').focus();
+        }
+
+        function cancelEdit(field) {
+            document.getElementById(field + '-display').style.display = 'flex';
+            document.getElementById(field + '-form').style.display = 'none';
+        }
+
+        async function saveField(field) {
+            const input = document.getElementById(field + '-input').value;
+            const body = {};
+
+            if (field === 'waktu') body.waktu_pelaksanaan = input || null;
+            if (field === 'lokasi') body.lokasi_pelaksanaan = input || null;
+
+            try {
+                const res = await fetch(updateUrl, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(body),
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    if (field === 'waktu') {
+                        document.getElementById('waktu-text').textContent = data.waktu_pelaksanaan;
+                    }
+                    if (field === 'lokasi') {
+                        document.getElementById('lokasi-text').textContent = data.lokasi_pelaksanaan;
+                    }
+                    cancelEdit(field);
+                }
+            } catch (e) {
+                alert('Gagal menyimpan. Coba lagi.');
+            }
         }
     </script>
 </x-app-sidebar>

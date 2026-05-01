@@ -166,6 +166,24 @@ class OrderController extends Controller
         return view('order::admin.orders.show', compact('order', 'guestLink'));
     }
 
+    public function updateExecution(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'waktu_pelaksanaan' => 'nullable|date',
+            'lokasi_pelaksanaan' => 'nullable|string|max:255',
+        ]);
+
+        $order->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'waktu_pelaksanaan' => $order->waktu_pelaksanaan
+                ? \Carbon\Carbon::parse($order->waktu_pelaksanaan)->translatedFormat('l - d F Y')
+                : '-',
+            'lokasi_pelaksanaan' => $order->lokasi_pelaksanaan ?? '-',
+        ]);
+    }
+
     public function edit(Order $order)
     {
         $order->load(['company', 'contact', 'offer.details.package', 'creator']);
@@ -331,11 +349,111 @@ class OrderController extends Controller
 
     public function PermohonanKerjasama(Order $order)
     {
-        $order->load(['company', 'contact', 'creator', 'offer.details.package']);
+        $order->load(['company', 'contact', 'creator', 'offer.details.package.category']);
 
-        $pdf = Pdf::loadView('order::admin.orders.permohonan_kerjasama', compact('order'))
+        $categories = $order->offer->details
+            ->map(fn($detail) => $detail->package->category->nama_category)
+            ->unique()
+            ->values();
+
+        $categoryLabel = $categories->count() === 1
+            ? $categories->first()
+            : $categories->slice(0, -1)->implode(', ') . ' dan ' . $categories->last();
+
+        // Total qty dari semua detail
+        $totalQty = $order->offer->details->sum('qty');
+
+        $pdf = Pdf::loadView('order::admin.orders.permohonan_kerjasama', compact('order', 'categoryLabel', 'totalQty'))
             ->setPaper('a4', 'portrait');
 
         return $pdf->stream("PermohonanKerjasama-{$order->order_code}.pdf");
+    }
+
+    public function PerjanjianKerjasama(Order $order)
+    {
+        $order->load(['company', 'contact', 'creator', 'offer.details.package.category']);
+
+        $categories = $order->offer->details
+            ->map(fn($detail) => $detail->package->category->nama_category)
+            ->unique()
+            ->values();
+
+        $categoryLabel = $categories->count() === 1
+            ? $categories->first()
+            : $categories->slice(0, -1)->implode(', ') . ' dan ' . $categories->last();
+
+        // Total qty dari semua detail
+        $totalQty = $order->offer->details->sum('qty');
+
+        $pdf = Pdf::loadView('order::admin.orders.perjanjian_kerjasama', compact('order', 'categoryLabel', 'totalQty'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->stream("PerjanjianKerjasama-{$order->order_code}.pdf");
+    }
+
+    public function KesanggupanKerjasama(Order $order)
+    {
+        $order->load(['company', 'contact', 'creator', 'offer.details.package.category']);
+
+        $categories = $order->offer->details
+            ->map(fn($detail) => $detail->package->category->nama_category)
+            ->unique()
+            ->values();
+
+        $categoryLabel = $categories->count() === 1
+            ? $categories->first()
+            : $categories->slice(0, -1)->implode(', ') . ' dan ' . $categories->last();
+
+        // Total qty dari semua detail
+        $totalQty = $order->offer->details->sum('qty');
+
+        $pdf = Pdf::loadView('order::admin.orders.kesanggupan_kerjasama', compact('order', 'categoryLabel', 'totalQty'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->stream("KesanggupanKerjasama-{$order->order_code}.pdf");
+    }
+
+    public function bap(Order $order)
+    {
+        $order->load(['company', 'contact', 'creator', 'offer.details.package.category']);
+
+        $categories = $order->offer->details
+            ->map(fn($detail) => $detail->package->category->nama_category)
+            ->unique()
+            ->values();
+
+        $categoryLabel = $categories->count() === 1
+            ? $categories->first()
+            : $categories->slice(0, -1)->implode(', ') . ' dan ' . $categories->last();
+
+        // Total qty dari semua detail
+        $totalQty = $order->offer->details->sum('qty');
+
+        $pdf = Pdf::loadView('order::admin.orders.bap', compact('order', 'categoryLabel', 'totalQty'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->stream("bap-{$order->order_code}.pdf");
+    }
+
+    public function LaporanKegiatanKerjasama(Order $order)
+    {
+        $order->load(['company', 'contact', 'creator', 'offer.details.package.category']);
+
+        $categories = $order->offer->details
+            ->map(fn($detail) => $detail->package->category->nama_category)
+            ->unique()
+            ->values();
+
+        $categoryLabel = $categories->count() === 1
+            ? $categories->first()
+            : $categories->slice(0, -1)->implode(', ') . ' dan ' . $categories->last();
+
+        // Total qty dari semua detail
+        $totalQty = $order->offer->details->sum('qty');
+
+        $pdf = Pdf::loadView('order::admin.orders.laporan_kegiatan_kerjasama', compact('order', 'categoryLabel', 'totalQty'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->stream("LaporanKegiatanKerjasama-{$order->order_code}.pdf");
     }
 }
