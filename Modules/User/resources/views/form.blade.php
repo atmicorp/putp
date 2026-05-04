@@ -93,6 +93,7 @@
             color: #1c1917;
             outline: none;
             transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+            box-sizing: border-box;
         }
 
         input:focus {
@@ -168,7 +169,6 @@
             box-shadow: 0 4px 14px rgba(234,88,12,0.25);
         }
 
-        /* Samakan style input & select */
         .field input,
         .field select {
             width: 100%;
@@ -178,22 +178,20 @@
             font-size: 14px;
             background-color: #fff;
             transition: all 0.2s ease;
+            box-sizing: border-box;
         }
 
-        /* Focus style */
         .field input:focus,
         .field select:focus {
-            border-color: #6366f1; /* sesuaikan warna primary kamu */
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+            border-color: #ea580c;
+            box-shadow: 0 0 0 3px rgba(234,88,12,0.1);
             outline: none;
         }
 
-        /* Invalid */
         .field .is-invalid {
             border-color: #ef4444;
         }
 
-        /* Custom arrow biar lebih modern */
         .select-wrapper {
             position: relative;
         }
@@ -214,6 +212,68 @@
             pointer-events: none;
             font-size: 14px;
             color: #666;
+        }
+
+        /* ── Signature Dropzone ─────────────────────────── */
+        .signature-upload-area {
+            border: 2px dashed #e5e7eb;
+            border-radius: 10px;
+            padding: 28px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f9fafb;
+        }
+
+        .signature-upload-area:hover,
+        .signature-upload-area.drag-over {
+            border-color: #ea580c;
+            background: #fff7ed;
+        }
+
+        .signature-upload-area.has-file {
+            border-color: #10b981;
+            background: #f0fdf4;
+            cursor: default;
+        }
+
+        .signature-upload-area.is-invalid {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .dropzone-icon {
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        .dropzone-label-main {
+            margin: 0 0 4px;
+            font-size: 13px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .dropzone-label-sub {
+            font-size: 12px;
+            color: #9ca3af;
+            margin: 0;
+        }
+
+        .signature-current-preview {
+            margin-bottom: 14px;
+            padding: 12px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            background: #f9fafb;
+            display: inline-block;
+        }
+
+        .signature-current-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
         }
     </style>
 
@@ -236,8 +296,10 @@
                 </div>
             </div>
 
+            {{-- enctype wajib untuk upload file --}}
             <form action="{{ isset($user) ? route('users.update', $user->id) : route('users.store') }}"
-                  method="POST">
+                  method="POST"
+                  enctype="multipart/form-data">
                 @csrf
                 @if(isset($user)) @method('PUT') @endif
 
@@ -362,6 +424,88 @@
                     @endif
                 </div>
 
+                {{-- Tanda Tangan --}}
+                <div class="form-section">
+                    <div class="section-title">Tanda Tangan</div>
+
+                    {{-- Preview tanda tangan yang sudah ada (hanya di edit) --}}
+                    @if(isset($user) && $user->hasSignature())
+                        <div class="field">
+                            <p class="signature-current-label">Tanda tangan saat ini:</p>
+                            <div class="signature-current-preview">
+                                <img
+                                    src="{{ route('signature.show', $user->id) }}"
+                                    alt="Tanda Tangan {{ $user->name }}"
+                                    style="max-height:80px; max-width:240px; display:block;"
+                                >
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="field">
+                        <label for="signature">
+                            {{ isset($user) && $user->hasSignature() ? 'Ganti Tanda Tangan' : 'Upload Tanda Tangan' }}
+                        </label>
+
+                        {{-- Dropzone area --}}
+                        <div
+                            class="signature-upload-area {{ $errors->has('signature') ? 'is-invalid' : '' }}"
+                            id="signatureDropzone"
+                        >
+                            {{-- Hidden file input --}}
+                            <input
+                                type="file"
+                                id="signature"
+                                name="signature"
+                                accept="image/png,image/jpeg,image/jpg"
+                                style="display:none;"
+                            >
+
+                            {{-- Default state --}}
+                            <div id="dropzoneContent">
+                                <div class="dropzone-icon">
+                                    <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                                    </svg>
+                                </div>
+                                <p class="dropzone-label-main">Klik untuk upload atau drag &amp; drop</p>
+                                <p class="dropzone-label-sub">PNG, JPG — maks. 2MB</p>
+                            </div>
+
+                            {{-- Preview state (hidden by default) --}}
+                            <div id="dropzonePreview" style="display:none;">
+                                <img
+                                    id="previewImg"
+                                    style="max-height:80px; max-width:240px; display:block; margin:0 auto; border-radius:6px;"
+                                    alt="Preview tanda tangan"
+                                >
+                                <p style="margin:10px 0 4px; font-size:13px; color:#10b981; font-weight:600;">
+                                    ✓ File siap diupload
+                                </p>
+                                <button
+                                    type="button"
+                                    id="removeSig"
+                                    style="font-size:12px;color:#ef4444;background:none;border:none;cursor:pointer;font-weight:500;padding:0;"
+                                >
+                                    ✕ Hapus pilihan
+                                </button>
+                            </div>
+                        </div>
+
+                        @error('signature')
+                            <div class="error-msg">
+                                <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                        <p class="hint">
+                            Tanda tangan disimpan secara private dan hanya dapat diakses oleh admin.
+                            {{ isset($user) && $user->hasSignature() ? 'Upload baru akan menggantikan tanda tangan sebelumnya.' : '' }}
+                        </p>
+                    </div>
+                </div>
+
                 {{-- Footer --}}
                 <div class="form-footer">
                     <a href="{{ route('users.index') }}" class="back-link">
@@ -379,16 +523,102 @@
     </div>
 
     <script>
-        const colors = ['#6366f1','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444'];
+        // ── Avatar live preview ──────────────────────────────────
+        const colors     = ['#6366f1','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444'];
         const nameInput  = document.getElementById('name');
         const avatarEl   = document.getElementById('avatarEl');
         const avatarName = document.getElementById('avatarName');
 
         nameInput.addEventListener('input', function () {
             const v = this.value.trim();
-            avatarEl.textContent   = v ? v[0].toUpperCase() : '?';
-            avatarName.textContent = v || 'New User';
+            avatarEl.textContent      = v ? v[0].toUpperCase() : '?';
+            avatarName.textContent    = v || 'New User';
             avatarEl.style.background = v ? colors[v.charCodeAt(0) % colors.length] : '#4f46e5';
+        });
+
+        // ── Signature dropzone ───────────────────────────────────
+        const dropzone    = document.getElementById('signatureDropzone');
+        const sigInput    = document.getElementById('signature');
+        const dropContent = document.getElementById('dropzoneContent');
+        const dropPreview = document.getElementById('dropzonePreview');
+        const previewImg  = document.getElementById('previewImg');
+        const removeSig   = document.getElementById('removeSig');
+
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                previewImg.src = e.target.result;
+                dropContent.style.display = 'none';
+                dropPreview.style.display = 'block';
+                dropzone.classList.add('has-file');
+                dropzone.classList.remove('is-invalid');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetDropzone() {
+            sigInput.value            = '';
+            previewImg.src            = '';
+            dropContent.style.display = 'block';
+            dropPreview.style.display = 'none';
+            dropzone.classList.remove('has-file');
+        }
+
+        // Klik area → buka file picker (hanya jika belum ada file)
+        dropzone.addEventListener('click', function (e) {
+            if (e.target === removeSig) return;
+            if (!dropzone.classList.contains('has-file')) {
+                sigInput.click();
+            }
+        });
+
+        // File dipilih via input
+        sigInput.addEventListener('change', function () {
+            if (this.files[0]) showPreview(this.files[0]);
+        });
+
+        // Hapus pilihan
+        removeSig.addEventListener('click', function (e) {
+            e.stopPropagation();
+            resetDropzone();
+        });
+
+        // Drag & drop
+        dropzone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            if (!this.classList.contains('has-file')) {
+                this.classList.add('drag-over');
+            }
+        });
+
+        dropzone.addEventListener('dragleave', function () {
+            this.classList.remove('drag-over');
+        });
+
+        dropzone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+
+            const file = e.dataTransfer.files[0];
+            if (!file) return;
+
+            const allowed = ['image/png', 'image/jpeg', 'image/jpg'];
+            if (!allowed.includes(file.type)) {
+                alert('Format tidak didukung. Gunakan PNG atau JPG.');
+                return;
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Ukuran file melebihi 2MB.');
+                return;
+            }
+
+            // Assign file ke input agar ikut tersubmit form
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            sigInput.files = dt.files;
+
+            showPreview(file);
         });
     </script>
 </x-app-sidebar>

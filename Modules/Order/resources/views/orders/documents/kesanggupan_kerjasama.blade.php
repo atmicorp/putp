@@ -149,9 +149,16 @@
                     </div>
                     <div class="ttd-title">Hormat kami,</div>
 
-                    <div style="height: 55px; line-height: 55px; font-size: 9pt;">
-                        (..........)
-                    </div>
+                    @if(optional($manager)->signature_path)
+                        <div style="margin-bottom: 4px;">
+                            <img
+                                src="{{ Storage::disk('private')->path($manager->signature_path) }}"
+                                style="height: 55px; object-fit: contain;"
+                            >
+                        </div>
+                    @else
+                        <div style="height: 55px;"></div>
+                    @endif
 
                     <div>
                         <span class="ttd-line">

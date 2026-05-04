@@ -20,10 +20,18 @@ class UserSeeder extends Seeder
 
         // Staff
         User::create([
+            'name'     => 'Ir. Bondan Wiratmoko BS, S.T., M.Eng',
+            'email'    => 'bondan.wiratmoko@atmi.ac.id',
+            'password' => Hash::make('password'),
+            'role'     => User::ROLE_MANAGER,
+        ]);
+
+        // Manager
+        User::create([
             'name'     => 'Budi Santoso',
             'email'    => 'budi@example.com',
             'password' => Hash::make('password'),
-            'role'     => User::ROLE_STAFF,
+            'role'     => User::ROLE_MANAGER,
         ]);
 
         // Operator users

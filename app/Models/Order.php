@@ -121,4 +121,62 @@ class Order extends Model
     {
         return $this->belongsTo(User::class, 'pic_id');
     }
+
+    public function canOpenPermohonanPdf(): bool
+    {
+        // Kondisi 1: order offer harus sudah ada
+        if (!$this->relationLoaded('offer')) {
+            $this->load('offer.details');
+        }
+
+        if (!$this->offer) {
+            return false;
+        }
+
+        // Kondisi 2: offer harus punya minimal 1 detail
+        if ($this->offer->details->isEmpty()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function canOpenMouKesanggupanPdf(): bool
+    {
+        // Kondisi 0: status harus approved
+        if ($this->status !== self::STATUS_APPROVED) {
+            return false;
+        }
+
+        // Kondisi tambahan: waktu & lokasi harus ada
+        if (blank($this->waktu_pelaksanaan) || blank($this->lokasi_pelaksanaan)) {
+            return false;
+        }
+
+        // Kondisi 1: order offer harus sudah ada
+        if (!$this->relationLoaded('offer')) {
+            $this->load('offer.details');
+        }
+
+        if (!$this->offer) {
+            return false;
+        }
+
+        // Kondisi 2: offer harus punya minimal 1 detail
+        if ($this->offer->details->isEmpty()) {
+            return false;
+        }
+        
+        return true;
+    }
+
+    public function canOpenBapPdf(): bool
+    {
+        return $this->status === self::STATUS_DONE;
+    }
+
+    public function canOpenLaporanKegiatanPdf(): bool
+    {
+        return $this->status === self::STATUS_DONE;
+    }
 }

@@ -75,7 +75,7 @@
         <tr>
             <td class="label">Nama Pelaksana Kegiatan</td>
             <td class="sep">:</td>
-            <td class="value">{{ $order->pelaksana ?? '-' }}</td>
+            <td class="value">{{ $order->pic->name ?? '-' }}</td>
         </tr>
         <tr>
             <td class="label">Jenis Kegiatan</td>
@@ -165,25 +165,39 @@
             {{-- DISETUJUI OLEH --}}
             <td>
                 <div class="ttd-title">Disetujui oleh,</div>
-                <div style="height: 55px; line-height: 55px; font-size: 9pt;">
-                    (......)
-                </div>
+                 @if(optional($manager)->signature_path)
+                    <div style="margin-bottom: 4px;">
+                        <img
+                            src="{{ Storage::disk('private')->path($manager->signature_path) }}"
+                            style="height: 55px; object-fit: contain;"
+                        >
+                    </div>
+                @else
+                    <div style="height: 55px;"></div>
+                @endif
                 <div>
-                    <span class="ttd-line">{{ $order->disetujui_oleh ?? '[Nama Lengkap]' }}</span>
+                    <span class="ttd-line">Ir. Bondan Wiratmoko BS, S.T., M.Eng</span>
                 </div>
-                <div class="ttd-role">{{ $order->jabatan_penyetuju ?? '[Jabatan]' }}</div>
+                <div class="ttd-role">Manajer PUTP Politeknik ATMI Surakarta</div>
             </td>
 
             {{-- DIBUAT OLEH --}}
             <td>
                 <div class="ttd-title">Dibuat oleh,</div>
-                <div style="height: 55px; line-height: 55px; font-size: 9pt;">
-                    (......)
-                </div>
+                 @if(optional($order)->pic->signature_path)
+                    <div style="margin-bottom: 4px;">
+                        <img
+                            src="{{ Storage::disk('private')->path($order->pic->signature_path) }}"
+                            style="height: 55px; object-fit: contain;"
+                        >
+                    </div>
+                @else
+                    <div style="height: 55px;"></div>
+                @endif
                 <div>
-                    <span class="ttd-line">{{ $order->pelaksana ?? '[Nama Lengkap Pelaksana]' }}</span>
+                    <span class="ttd-line">{{ $order->pic->name ?? '[Nama Lengkap Pelaksana]' }}</span>
                 </div>
-                <div class="ttd-role">{{ $order->jabatan_pelaksana ?? '[Jabatan]' }}</div>
+                <div class="ttd-role">{{ $order->pic->jabatan ?? '[Jabatan]' }}</div>
             </td>
         </tr>
     </table>

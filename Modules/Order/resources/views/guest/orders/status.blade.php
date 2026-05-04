@@ -710,8 +710,10 @@
                             <tr>
                                 <th>Paket Layanan</th>
                                 <th class="text-right">Qty</th>
-                                <th class="text-right">Harga</th>
-                                <th class="text-right">Subtotal</th>
+                                @if(!in_array($order->status, ['draft', 'submit']))
+                                    <th class="text-right">Harga</th>
+                                    <th class="text-right">Subtotal</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -719,39 +721,41 @@
                                 <tr>
                                     <td>{{ $detail->package?->name ?? 'Paket dihapus' }}</td>
                                     <td class="text-right">{{ $detail->qty }}</td>
-                                    <td class="text-right" style="white-space:nowrap;color:var(--slate);">
-                                        Rp {{ number_format($detail->price, 0, ',', '.') }}
-                                    </td>
-                                    <td class="text-right" style="white-space:nowrap;font-weight:600;">
-                                        Rp {{ number_format($detail->price * $detail->qty, 0, ',', '.') }}
-                                    </td>
+                                    @if(!in_array($order->status, ['draft', 'submit']))
+                                        <td class="text-right" style="white-space:nowrap;color:var(--slate);">
+                                            Rp {{ number_format($detail->price, 0, ',', '.') }}
+                                        </td>
+                                        <td class="text-right" style="white-space:nowrap;font-weight:600;">
+                                            Rp {{ number_format($detail->price * $detail->qty, 0, ',', '.') }}
+                                        </td>
+                                    @endif
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
 
-                    {{-- Total --}}
-                    <div style="
-                        display:flex;
-                        align-items:center;
-                        justify-content:space-between;
-                        padding:14px 10px 18px;
-                        border-top:1.5px dashed var(--border);
-                        margin-top:4px;
-                    ">
-                        <div style="display:flex;align-items:center;gap:6px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);">Total Estimasi</span>
-                        </div>
+                    {{-- Total — sembunyikan jika draft/submit --}}
+                    @if(!in_array($order->status, ['draft', 'submit']))
+                        @php
+                            $grandTotal = $order->offer->details->sum(fn($d) => $d->price * $d->qty);
+                        @endphp
                         <div style="
-                            font-family:'DM Serif Display',serif;
-                            font-size:18px;
-                            color:var(--teal);
-                            letter-spacing:-.5px;
+                            display:flex;
+                            align-items:center;
+                            justify-content:space-between;
+                            padding:14px 10px 18px;
+                            border-top:1.5px dashed var(--border);
+                            margin-top:4px;
                         ">
-                            Rp {{ number_format($grandTotal, 0, ',', '.') }}
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);">Total Estimasi</span>
+                            </div>
+                            <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--teal);letter-spacing:-.5px;">
+                                Rp {{ number_format($grandTotal, 0, ',', '.') }}
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 @else
                     <div class="empty-items" style="padding-bottom:20px;">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 10px;display:block;opacity:.3"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
@@ -873,11 +877,36 @@
                 $slug  = $order->company->slug;
                 $token = $order->access_token;
                 $docs  = [
-                    ['route' => 'orders.guest.permohonan_kerjasama', 'label' => 'Surat Permohonan Kerjasama',  'color' => '#2563eb'],
-                    ['route' => 'orders.guest.perjanjian_kerjasama', 'label' => 'Perjanjian Kerjasama',        'color' => '#ea580c'],
-                    ['route' => 'orders.guest.kesanggupan_kerjasama','label' => 'Surat Kesanggupan Kerjasama', 'color' => '#7c3aed'],
-                    ['route' => 'orders.guest.bap',                  'label' => 'Berita Acara Penyelesaian',   'color' => '#16a34a'],
-                    ['route' => 'orders.guest.laporan_kegiatan',     'label' => 'Laporan Kegiatan Kerjasama',  'color' => '#0d9488'],
+                    [
+                        'route'  => 'orders.guest.permohonan_kerjasama',
+                        'label'  => 'Surat Permohonan Kerjasama',
+                        'color'  => '#2563eb',
+                        'can'    => $order->canOpenPermohonanPdf(),
+                    ],
+                    [
+                        'route'  => 'orders.guest.perjanjian_kerjasama',
+                        'label'  => 'Perjanjian Kerjasama',
+                        'color'  => '#ea580c',
+                        'can'    => $order->canOpenMouKesanggupanPdf(),
+                    ],
+                    [
+                        'route'  => 'orders.guest.kesanggupan_kerjasama',
+                        'label'  => 'Surat Kesanggupan Kerjasama',
+                        'color'  => '#7c3aed',
+                        'can'    => $order->canOpenMouKesanggupanPdf(),
+                    ],
+                    [
+                        'route'  => 'orders.guest.bap',
+                        'label'  => 'Berita Acara Penyelesaian',
+                        'color'  => '#16a34a',
+                        'can'    => $order->canOpenBapPdf(),
+                    ],
+                    [
+                        'route'  => 'orders.guest.laporan_kegiatan',
+                        'label'  => 'Laporan Kegiatan Kerjasama',
+                        'color'  => '#0d9488',
+                        'can'    => $order->canOpenLaporanKegiatanPdf(),
+                    ],
                 ];
             @endphp
 
@@ -891,14 +920,24 @@
                     </div>
                     <span style="font-size:13px;font-weight:600;color:var(--dark);">{{ $doc['label'] }}</span>
                 </div>
-                <a href="{{ route($doc['route'], [$slug, $token]) }}"
-                target="_blank"
-                style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:{{ $doc['color'] }};color:white;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;flex-shrink:0;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                    </svg>
-                    Buka PDF
-                </a>
+
+                @if($doc['can'])
+                    <a href="{{ route($doc['route'], [$slug, $token]) }}"
+                    target="_blank"
+                    style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:{{ $doc['color'] }};color:white;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;flex-shrink:0;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                        Buka PDF
+                    </a>
+                @else
+                    <span style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#f1f5f9;color:#94a3b8;border-radius:8px;font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0;cursor:not-allowed;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m0 0v2m0-2h2m-2 0H10m9-7V8a7 7 0 10-14 0v2M5 21h14a1 1 0 001-1v-7a1 1 0 00-1-1H5a1 1 0 00-1 1v7a1 1 0 001 1z"/>
+                        </svg>
+                        Belum Tersedia
+                    </span>
+                @endif
             </div>
             @endforeach
 

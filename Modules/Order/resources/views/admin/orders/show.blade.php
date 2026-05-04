@@ -507,12 +507,26 @@
                             <div class="doc-panel-title">Surat Permohonan Kerjasama (PKS)</div>
                             <div class="doc-panel-desc">Dokumen permohonan kerjasama dari kontak untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                            <a href="{{ route('orders.guest.permohonan_kerjasama', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                            </svg>
-                            Buka PDF
-                        </a>
+
+                        @php $canOpen = $order->canOpenPermohonanPdf(); @endphp
+
+                        @if ($canOpen)
+                            <a href="{{ route('orders.guest.permohonan_kerjasama', [$order->company->slug, $order->access_token]) }}"
+                            target="_blank"
+                            class="btn-open-pdf">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                Buka PDF
+                            </a>
+                        @else
+                            <span class="btn-open-pdf btn-open-pdf--disabled" title="Dokumen belum tersedia">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                Buka PDF
+                            </span>
+                        @endif
                     </div>
                 </div>
 
@@ -524,16 +538,55 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
+
                         <div class="doc-panel-text">
                             <div class="doc-panel-title">Perjanjian Kerjasama</div>
-                            <div class="doc-panel-desc">Dokumen perjanjian kerjasama resmi untuk order <strong>{{ $order->order_code }}</strong>.</div>
+                            <div class="doc-panel-desc">
+                                Dokumen perjanjian kerjasama resmi untuk order <strong>{{ $order->order_code }}</strong>.
+                            </div>
                         </div>
-                        <a href="{{ route('orders.guest.perjanjian_kerjasama', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                            </svg>
-                            Buka PDF
-                        </a>
+
+                        @php 
+                            $canOpen = $order->canOpenMouKesanggupanPdf(); 
+
+                            $reason = null;
+
+                            if ($order->status !== \App\Models\Order::STATUS_APPROVED) {
+                                $reason = 'Menunggu approval';
+                            } elseif (blank($order->waktu_pelaksanaan)) {
+                                $reason = 'Waktu pelaksanaan belum diisi';
+                            } elseif (blank($order->lokasi_pelaksanaan)) {
+                                $reason = 'Lokasi pelaksanaan belum diisi';
+                            } elseif (!$order->offer || $order->offer->details->isEmpty()) {
+                                $reason = 'Detail penawaran belum tersedia';
+                            }
+                        @endphp
+
+                        @if ($canOpen)
+                            <a id="btn-pdf-perjanjian"
+                            href="{{ route('orders.guest.perjanjian_kerjasama', [$order->company->slug, $order->access_token]) }}"
+                            target="_blank"
+                            class="btn-open-pdf">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                Buka PDF
+                            </a>
+                        @else
+                            <div id="pdf-reason-perjanjian" class="doc-panel-desc text-orange-600 text-sm mb-2">
+                                ⚠ {{ $reason ?? 'Dokumen belum tersedia' }}
+                            </div>
+
+                            <span id="btn-pdf-perjanjian"
+                                data-href="{{ route('orders.guest.perjanjian_kerjasama', [$order->company->slug, $order->access_token]) }}"
+                                class="btn-open-pdf btn-open-pdf--disabled"
+                                title="{{ $reason }}">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                Buka PDF
+                            </span>
+                        @endif
                     </div>
                 </div>
 
@@ -545,16 +598,55 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
+
                         <div class="doc-panel-text">
                             <div class="doc-panel-title">Surat Kesanggupan Kerjasama</div>
-                            <div class="doc-panel-desc">Dokumen pernyataan kesanggupan pelaksanaan kerjasama untuk order <strong>{{ $order->order_code }}</strong>.</div>
+                            <div class="doc-panel-desc">
+                                Dokumen pernyataan kesanggupan pelaksanaan kerjasama untuk order <strong>{{ $order->order_code }}</strong>.
+                            </div>
                         </div>
-                        <a href="{{ route('orders.guest.kesanggupan_kerjasama', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                            </svg>
-                            Buka PDF
-                        </a>
+
+                        @php 
+                            $canOpen = $order->canOpenMouKesanggupanPdf(); 
+
+                            $reason = null;
+
+                            if ($order->status !== \App\Models\Order::STATUS_APPROVED) {
+                                $reason = 'Menunggu approval';
+                            } elseif (blank($order->waktu_pelaksanaan)) {
+                                $reason = 'Waktu pelaksanaan belum diisi';
+                            } elseif (blank($order->lokasi_pelaksanaan)) {
+                                $reason = 'Lokasi pelaksanaan belum diisi';
+                            } elseif (!$order->offer || $order->offer->details->isEmpty()) {
+                                $reason = 'Detail penawaran belum tersedia';
+                            }
+                        @endphp
+
+                        @if ($canOpen)
+                            <a id="btn-pdf-kesanggupan"
+                            href="{{ route('orders.guest.kesanggupan_kerjasama', [$order->company->slug, $order->access_token]) }}"
+                            target="_blank"
+                            class="btn-open-pdf">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                Buka PDF
+                            </a>
+                        @else
+                            <div id="pdf-reason-kesanggupan" class="doc-panel-desc text-orange-600 text-sm mb-2">
+                                ⚠ {{ $reason ?? 'Dokumen belum tersedia' }}
+                            </div>
+
+                            <span id="btn-pdf-kesanggupan"
+                                data-href="{{ route('orders.guest.kesanggupan_kerjasama', [$order->company->slug, $order->access_token]) }}"
+                                class="btn-open-pdf btn-open-pdf--disabled"
+                                title="{{ $reason }}">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                Buka PDF
+                            </span>
+                        @endif
                     </div>
                 </div>
 
@@ -570,12 +662,26 @@
                             <div class="doc-panel-title">Berita Acara Penyelesaian</div>
                             <div class="doc-panel-desc">Dokumen BAP sebagai bukti selesainya pekerjaan untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                        <a href="{{ route('orders.guest.bap', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                            </svg>
-                            Buka PDF
-                        </a>
+
+                        @php $canOpen = $order->canOpenBapPdf(); @endphp
+
+                        @if ($canOpen)
+                            <a href="{{ route('orders.guest.bap', [$order->company->slug, $order->access_token]) }}"
+                            target="_blank"
+                            class="btn-open-pdf">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                Buka PDF
+                            </a>
+                        @else
+                            <span class="btn-open-pdf btn-open-pdf--disabled" title="Dokumen belum tersedia">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                Buka PDF
+                            </span>
+                        @endif
                     </div>
                 </div>
 
@@ -591,12 +697,26 @@
                             <div class="doc-panel-title">Laporan Kegiatan Kerjasama</div>
                             <div class="doc-panel-desc">Dokumen laporan hasil kegiatan kerjasama untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-                        <a href="{{ route('orders.guest.laporan_kegiatan', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                            </svg>
-                            Buka PDF
-                        </a>
+
+                        @php $canOpen = $order->canOpenLaporanKegiatanPdf(); @endphp
+
+                        @if ($canOpen)
+                            <a href="{{ route('orders.guest.laporan_kegiatan', [$order->company->slug, $order->access_token]) }}"
+                            target="_blank"
+                            class="btn-open-pdf">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                Buka PDF
+                            </a>
+                        @else
+                            <span class="btn-open-pdf btn-open-pdf--disabled" title="Dokumen belum tersedia">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                Buka PDF
+                            </span>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -934,12 +1054,51 @@
                 const data = await res.json();
 
                 if (data.success) {
+                    // update tampilan field
                     if (field === 'waktu') {
                         document.getElementById('waktu-text').textContent = data.waktu_pelaksanaan;
                     }
                     if (field === 'lokasi') {
                         document.getElementById('lokasi-text').textContent = data.lokasi_pelaksanaan;
                     }
+
+                    if (data.can_open_pdf) {
+
+                        // =========================
+                        // PERJANJIAN
+                        // =========================
+                        const btn1 = document.getElementById('btn-pdf-perjanjian');
+                        if (btn1) {
+                            const newBtn1 = document.createElement('a');
+                            newBtn1.id = 'btn-pdf-perjanjian';
+                            newBtn1.href = btn1.dataset.href;
+                            newBtn1.target = '_blank';
+                            newBtn1.className = 'btn-open-pdf';
+                            newBtn1.innerHTML = btn1.innerHTML;
+                            btn1.replaceWith(newBtn1);
+
+                            const reason1 = document.getElementById('pdf-reason-perjanjian');
+                            if (reason1) reason1.remove();
+                        }
+
+                        // =========================
+                        // KESANGGUPAN
+                        // =========================
+                        const btn2 = document.getElementById('btn-pdf-kesanggupan');
+                        if (btn2) {
+                            const newBtn2 = document.createElement('a');
+                            newBtn2.id = 'btn-pdf-kesanggupan';
+                            newBtn2.href = btn2.dataset.href;
+                            newBtn2.target = '_blank';
+                            newBtn2.className = 'btn-open-pdf';
+                            newBtn2.innerHTML = btn2.innerHTML;
+                            btn2.replaceWith(newBtn2);
+
+                            const reason2 = document.getElementById('pdf-reason-kesanggupan');
+                            if (reason2) reason2.remove();
+                        }
+                    }
+
                     cancelEdit(field);
                 }
             } catch (e) {

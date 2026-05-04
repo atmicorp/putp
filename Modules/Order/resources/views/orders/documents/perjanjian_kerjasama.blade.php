@@ -169,8 +169,8 @@
             <td class="label">Waktu Pelaksanaan</td>
             <td class="sep">:</td>
             <td class="value">
-                {{ $order->waktu_diharapkan
-                    ? \Carbon\Carbon::parse($order->waktu_diharapkan)->translatedFormat('l - d F Y')
+                {{ $order->waktu_pelaksanaan
+                    ? \Carbon\Carbon::parse($order->waktu_pelaksanaan)->translatedFormat('l - d F Y')
                     : '-' }}
             </td>
         </tr>
@@ -184,7 +184,7 @@
             <td class="no">6.</td>
             <td class="label">Lokasi Pelaksanaan</td>
             <td class="sep">:</td>
-            <td class="value">Politeknik ATMI Surakarta</td>
+            <td class="value">{{ $order->lokasi_pelaksanaan ?? '-' }}</td>
         </tr>
     </table>
 
@@ -208,12 +208,20 @@
     {{-- TANDA TANGAN --}}
     <table class="ttd-table">
         <tr>
-            {{-- Pihak Pertama --}}
+            {{-- Pihak Pertama (Manager) --}}
             <td>
                 <div class="ttd-title">Pihak Pertama,</div>
 
-                {{-- Ruang TTD Kosong (admin isi manual) --}}
-                <div style="height: 55px;"></div>
+                @if(optional($manager)->signature_path)
+                    <div style="margin-bottom: 4px;">
+                        <img
+                            src="{{ Storage::disk('private')->path($manager->signature_path) }}"
+                            style="height: 55px; object-fit: contain;"
+                        >
+                    </div>
+                @else
+                    <div style="height: 55px;"></div>
+                @endif
 
                 <div>
                     <span class="ttd-line">Ir. Bondan Wiratmoko BS, S.T., M.Eng</span>
@@ -221,15 +229,16 @@
                 <div class="ttd-role">Manajer PUTP Politeknik ATMI Surakarta</div>
             </td>
 
-            {{-- Pihak Kedua --}}
+            {{-- Pihak Kedua (Contact) --}}
             <td>
                 <div class="ttd-title">Pihak Kedua,</div>
 
-                {{-- Gambar TTD --}}
                 @if(optional($order->contact)->signature_path)
                     <div style="margin-bottom: 4px;">
-                        <img src="{{ storage_path('app/private/' . $order->contact->signature_path) }}"
-                             style="height: 55px; object-fit: contain;">
+                        <img
+                            src="{{ Storage::disk('private')->path($order->contact->signature_path) }}"
+                            style="height: 55px; object-fit: contain;"
+                        >
                     </div>
                 @else
                     <div style="height: 55px;"></div>

@@ -4,10 +4,12 @@ namespace Modules\Order\Http\Controllers\Guest;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Package;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+
 class OrderController extends Controller
 {
     /**
@@ -324,8 +326,12 @@ class OrderController extends Controller
         $order         = $this->resolveOrder($slug, $token);
         $categoryLabel = $this->categoryLabel($order);
         $totalQty      = $order->offer->details->sum('qty');
+        $manager       = User::where('role', User::ROLE_MANAGER)->first();
 
-        return Pdf::loadView('order::orders.documents.perjanjian_kerjasama', compact('order', 'categoryLabel', 'totalQty'))
+        return Pdf::loadView(
+                'order::orders.documents.perjanjian_kerjasama',
+                compact('order', 'categoryLabel', 'totalQty', 'manager')
+            )
             ->setPaper('a4', 'portrait')
             ->stream("PerjanjianKerjasama-{$order->order_code}.pdf");
     }
@@ -335,8 +341,9 @@ class OrderController extends Controller
         $order         = $this->resolveOrder($slug, $token);
         $categoryLabel = $this->categoryLabel($order);
         $totalQty      = $order->offer->details->sum('qty');
+        $manager       = User::where('role', User::ROLE_MANAGER)->first();
 
-        return Pdf::loadView('order::orders.documents.kesanggupan_kerjasama', compact('order', 'categoryLabel', 'totalQty'))
+        return Pdf::loadView('order::orders.documents.kesanggupan_kerjasama', compact('order', 'categoryLabel', 'totalQty','manager'))
             ->setPaper('a4', 'portrait')
             ->stream("KesanggupanKerjasama-{$order->order_code}.pdf");
     }
@@ -346,8 +353,9 @@ class OrderController extends Controller
         $order         = $this->resolveOrder($slug, $token);
         $categoryLabel = $this->categoryLabel($order);
         $totalQty      = $order->offer->details->sum('qty');
+        $manager       = User::where('role', User::ROLE_MANAGER)->first();
 
-        return Pdf::loadView('order::orders.documents.bap', compact('order', 'categoryLabel', 'totalQty'))
+        return Pdf::loadView('order::orders.documents.bap', compact('order', 'categoryLabel', 'totalQty','manager'))
             ->setPaper('a4', 'portrait')
             ->stream("bap-{$order->order_code}.pdf");
     }
@@ -357,8 +365,8 @@ class OrderController extends Controller
         $order         = $this->resolveOrder($slug, $token);
         $categoryLabel = $this->categoryLabel($order);
         $totalQty      = $order->offer->details->sum('qty');
-
-        return Pdf::loadView('order::orders.documents.laporan_kegiatan_kerjasama', compact('order', 'categoryLabel', 'totalQty'))
+        $manager       = User::where('role', User::ROLE_MANAGER)->first();
+        return Pdf::loadView('order::orders.documents.laporan_kegiatan_kerjasama', compact('order', 'categoryLabel', 'totalQty','manager'))
             ->setPaper('a4', 'portrait')
             ->stream("LaporanKegiatanKerjasama-{$order->order_code}.pdf");
     }

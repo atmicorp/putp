@@ -19,6 +19,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'signature_path',
     ];
 
     protected $hidden = [
@@ -38,6 +39,7 @@ class User extends Authenticatable
     public const ROLE_ADMIN = 'admin';
     public const ROLE_OPERATOR = 'operator';
     public const ROLE_PIC = 'pic';
+    public const ROLE_MANAGER = 'manager';
 
     public function hasRole(string $role): bool
     {
@@ -60,6 +62,22 @@ class User extends Authenticatable
         // Pastikan nanti tabel orders punya kolom created_by
         return $this->hasMany(Order::class, 'created_by');
     }
+
+    public function getSignatureUrlAttribute(): ?string
+    {
+        if (!$this->signature_path) {
+            return null;
+        }
+
+        // Menggunakan route untuk serve file private
+        return route('signature.show', ['user' => $this->id]);
+    }
+
+    public function hasSignature(): bool
+    {
+        return !is_null($this->signature_path);
+    }
+    
 
     
 }
