@@ -136,6 +136,66 @@
         .ts-item { display: flex; flex-direction: column; gap: 2px; }
         .ts-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.4px; }
         .ts-value { font-size: 12.5px; color: #6b7280; }
+
+          /* Mobile cards */
+        .od-mobile  { display: block; }
+        .od-desktop { display: none; }
+
+        .od-card {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .od-card:last-child { border-bottom: none; }
+
+        .od-card-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        .od-num {
+            font-size: 11.5px;
+            color: #d1d5db;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .od-order {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #1c1917;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .od-price {
+            font-size: 14px;
+            font-weight: 800;
+            color: #ea580c;
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+        }
+        .od-card-bot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .od-meta {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        .od-meta strong {
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        @media (min-width: 640px) {
+            .od-mobile  { display: none; }
+            .od-desktop { display: block; }
+    }
     </style>
 
     {{-- Summary Bar --}}
@@ -278,18 +338,37 @@
                     <div class="empty-inline-text">Package ini belum digunakan di penawaran manapun</div>
                 </div>
             @else
-                <table class="offers-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Order / Penawaran</th>
-                            <th>Qty</th>
-                            <th>Harga</th>
-                            <th>Tanggal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($package->offerDetails as $detail)
+                {{-- ===== MOBILE CARDS ===== --}}
+                <div class="od-mobile">
+                    @foreach($package->offerDetails as $detail)
+                    <div class="od-card">
+                        <div class="od-card-top">
+                            <span class="od-num">#{{ $loop->iteration }}</span>
+                            <span class="od-order">{{ $detail->order?->order_code ?? '#'.$detail->id }}</span>
+                            <span class="od-price">Rp {{ number_format($detail->price ?? $package->base_price, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="od-card-bot">
+                            <span class="od-meta">Qty: <strong>{{ $detail->qty ?? '-' }}</strong></span>
+                            <span class="od-meta">{{ $detail->created_at->format('d M Y') }}</span>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+
+                {{-- ===== DESKTOP TABLE ===== --}}
+                <div class="od-desktop">
+                    <table class="offers-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Order / Penawaran</th>
+                                <th>Qty</th>
+                                <th>Harga</th>
+                                <th>Tanggal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($package->offerDetails as $detail)
                             <tr>
                                 <td style="color:#9ca3af;font-size:12.5px;">{{ $loop->iteration }}</td>
                                 <td style="font-weight:500;">{{ $detail->order?->order_code ?? '#'.$detail->id }}</td>
@@ -299,9 +378,10 @@
                                 </td>
                                 <td style="color:#9ca3af;font-size:12.5px;">{{ $detail->created_at->format('d M Y') }}</td>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @endif
         </div>
 

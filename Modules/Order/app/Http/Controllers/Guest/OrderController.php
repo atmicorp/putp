@@ -32,13 +32,16 @@ class OrderController extends Controller
         ]);
 
         $order = Order::where('access_token', $request->token)
-            ->whereIn('status', [
-                Order::STATUS_DRAFT,
-                Order::STATUS_OFFERED,
-                Order::STATUS_FORM_REQUIRED,
-            ])
-            ->with(['offer.details.package.category'])
-            ->first();
+                ->whereIn('status', [
+                    Order::STATUS_DRAFT,
+                    Order::STATUS_OFFERED,
+                    Order::STATUS_FORM_REQUIRED,
+                ])
+                ->with([
+                    'offer.details.package.category',
+                    'contact' 
+                ])
+                ->first();
 
         if (! $order) {
             return response()->json([
@@ -74,8 +77,8 @@ class OrderController extends Controller
         return response()->json([
             'valid'          => true,
             'order_code'     => $order->order_code,
-            'customer_name'  => $order->customer_name,
-            'customer_email' => $order->customer_email,
+            'customer_name'  => $order->contact?->name,
+            'customer_email' => $order->contact?->email,
             'status'         => $order->status,
             'existing_items' => $existingItems,
             'packages'       => $packages,

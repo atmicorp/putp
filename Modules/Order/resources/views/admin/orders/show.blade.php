@@ -1,5 +1,5 @@
 <x-app-sidebar>
-    <x-slot name="title">Order</x-slot>
+   <x-slot name="title">Order</x-slot>
 
     <x-slot name="breadcrumb">
         <span>Order</span>
@@ -10,115 +10,279 @@
     </x-slot>
 
     <style>
-        * { box-sizing: border-box; }
+        /* ── Reset & Base ── */
+        *, *::before, *::after { box-sizing: border-box; }
 
-        .back-link {
-            display: inline-flex; align-items: center; gap: 6px;
-            font-size: 13px; color: #6b7280; text-decoration: none;
-            margin-bottom: 24px; font-weight: 500; transition: color 0.15s;
+        /* ── Alerts ── */
+        .alert {
+            padding: 12px 16px; border-radius: 10px; font-size: 13px;
+            margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+            font-weight: 500;
         }
-        .back-link:hover { color: #ea580c; }
-
-        .alert { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; font-weight: 500; }
         .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
         .alert-danger  { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
 
-        .detail-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+        /* ── Back Link ── */
+        .back-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; color: #6b7280; text-decoration: none;
+            margin-bottom: 20px; font-weight: 500; transition: color 0.15s;
+            padding: 6px 0;
+        }
+        .back-link:hover { color: #ea580c; }
 
-        .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
+        /* ── Layout ── */
+        .detail-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        .detail-main { width: 100%; }
+        .detail-sidebar { width: 100%; }
+
+        @media (min-width: 960px) {
+            .detail-layout {
+                display: grid;
+                grid-template-columns: 1fr 340px;
+                gap: 20px;
+                align-items: start;
+            }
+            .detail-sidebar {
+                position: sticky;
+                top: 20px;
+            }
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
         .card:last-child { margin-bottom: 0; }
+
         .card-header {
-            padding: 18px 24px; border-bottom: 1px solid #f3f4f6;
-            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .card-header-left { display: flex; align-items: center; gap: 12px; }
+        .card-header-left { display: flex; align-items: center; gap: 10px; }
         .card-icon {
-            width: 36px; height: 36px; border-radius: 9px;
-            display: flex; align-items: center; justify-content: center; background: #fff7ed;
+            width: 34px; height: 34px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            background: #fff7ed; flex-shrink: 0;
         }
-        .card-title    { font-size: 14px; font-weight: 700; color: #1c1917; }
-        .card-subtitle { font-size: 12px; color: #9ca3af; margin-top: 1px; }
-        .card-body     { padding: 24px; }
+        .card-title    { font-size: 13.5px; font-weight: 700; color: #1c1917; }
+        .card-subtitle { font-size: 11.5px; color: #9ca3af; margin-top: 1px; }
+        .card-body     { padding: 18px; }
 
-        /* Order header */
+        /* ── Order Hero ── */
         .order-hero {
-            display: flex; align-items: flex-start; justify-content: space-between;
-            flex-wrap: wrap; gap: 16px; margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
         }
-        .order-code-big { font-size: 26px; font-weight: 800; color: #1c1917; letter-spacing: -0.5px; font-family: monospace; }
-        .order-meta     { font-size: 13px; color: #9ca3af; margin-top: 4px; }
+        .order-code-big {
+            font-size: 22px; font-weight: 800; color: #1c1917;
+            letter-spacing: -0.5px; font-family: monospace;
+            word-break: break-all;
+        }
+        .order-meta { font-size: 12px; color: #9ca3af; margin-top: 4px; line-height: 1.5; }
 
+        @media (max-width: 480px) {
+            .order-code-big { font-size: 19px; }
+        }
+
+        /* ── Badges ── */
         .badge {
             display: inline-flex; align-items: center; gap: 5px;
-            padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;
+            padding: 5px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 700;
+            white-space: nowrap; flex-shrink: 0;
         }
-        .badge-draft      { background: #f3f4f6; color: #6b7280; }
-        .badge-offered    { background: #eff6ff; color: #2563eb; }
-        .badge-approved   { background: #f0fdf4; color: #16a34a; }
-        .badge-rejected   { background: #fef2f2; color: #dc2626; }
-        .badge-processing { background: #fff7ed; color: #ea580c; }
-        .badge-done       { background: #f0fdf4; color: #15803d; }
-        .badge-form_required { background: #fefce8; color: #ca8a04; }
+        .badge-draft        { background: #f3f4f6; color: #6b7280; }
+        .badge-offered      { background: #eff6ff; color: #2563eb; }
+        .badge-approved     { background: #f0fdf4; color: #16a34a; }
+        .badge-rejected     { background: #fef2f2; color: #dc2626; }
+        .badge-processing   { background: #fff7ed; color: #ea580c; }
+        .badge-done         { background: #f0fdf4; color: #15803d; }
+        .badge-form_required{ background: #fefce8; color: #ca8a04; }
         .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-        .dot-draft      { background: #9ca3af; }
-        .dot-offered    { background: #3b82f6; }
-        .dot-approved   { background: #16a34a; }
-        .dot-rejected   { background: #dc2626; }
-        .dot-processing { background: #ea580c; }
-        .dot-done       { background: #15803d; }
-        .dot-form_required { background: #ca8a04; }
+        .dot-draft        { background: #9ca3af; }
+        .dot-offered      { background: #3b82f6; }
+        .dot-approved     { background: #16a34a; }
+        .dot-rejected     { background: #dc2626; }
+        .dot-processing   { background: #ea580c; }
+        .dot-done         { background: #15803d; }
+        .dot-form_required{ background: #ca8a04; }
 
-        /* Info grid */
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .info-block {}
-        .info-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #9ca3af; margin-bottom: 5px; }
-        .info-val   { font-size: 14px; font-weight: 600; color: #1c1917; }
-        .info-sub   { font-size: 12px; color: #9ca3af; margin-top: 2px; }
-
-        /* Items table */
-        .items-table { width: 100%; border-collapse: collapse; }
-        .items-table th {
-            padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600;
-            text-transform: uppercase; letter-spacing: 0.5px; color: #9ca3af;
-            background: #fafafa; border-bottom: 1px solid #f3f4f6;
+        /* ── Info Grid ── */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
-        .items-table td { padding: 14px 16px; border-bottom: 1px solid #f9fafb; font-size: 13.5px; }
+        @media (max-width: 540px) {
+            .info-grid { grid-template-columns: 1fr; gap: 14px; }
+        }
+        .info-label {
+            font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.5px; color: #9ca3af; margin-bottom: 4px;
+        }
+        .info-val { font-size: 13.5px; font-weight: 600; color: #1c1917; }
+        .info-sub { font-size: 11.5px; color: #9ca3af; margin-top: 2px; }
+
+        /* ── Inline Edit ── */
+        .edit-display {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        }
+        .edit-form {
+            display: none; margin-top: 6px;
+            display: none; flex-wrap: wrap; gap: 6px; align-items: center;
+        }
+
+        /* ── Items Table ── */
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .items-table { width: 100%; border-collapse: collapse; min-width: 520px; }
+        .items-table th {
+            padding: 10px 14px; text-align: left; font-size: 10.5px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px; color: #9ca3af;
+            background: #fafafa; border-bottom: 1px solid #f3f4f6; white-space: nowrap;
+        }
+        .items-table td { padding: 12px 14px; border-bottom: 1px solid #f9fafb; font-size: 13px; }
         .items-table tr:last-child td { border-bottom: none; }
         .items-table tbody tr:hover { background: #fffbf7; }
-
-        .pkg-name  { font-weight: 600; color: #1c1917; }
-        .pkg-info  { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+        .pkg-name { font-weight: 600; color: #1c1917; }
+        .pkg-info { font-size: 11.5px; color: #9ca3af; margin-top: 2px; }
         .text-right { text-align: right; }
         .price-cell { font-weight: 600; color: #1c1917; }
 
-        .total-section { padding: 16px 16px; border-top: 2px solid #f3f4f6; }
-        .total-line { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 13px; color: #6b7280; }
-        .total-line.grand { font-size: 16px; font-weight: 700; color: #1c1917; padding-top: 12px; border-top: 1px solid #f3f4f6; margin-top: 8px; }
-        .total-line.grand .val { color: #ea580c; }
-
-        /* Notes block */
-        .notes-block { background: #fafafa; border: 1px solid #f3f4f6; border-radius: 8px; padding: 14px 16px; font-size: 13.5px; color: #374151; line-height: 1.6; white-space: pre-wrap; }
-
-        /* Right sidebar */
-        .sidebar-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
-        .sidebar-card:last-child { margin-bottom: 0; }
-        .sidebar-card-header { padding: 14px 18px; border-bottom: 1px solid #f3f4f6; font-size: 13px; font-weight: 700; color: #1c1917; display: flex; align-items: center; gap: 8px; }
-        .sidebar-card-body   { padding: 18px; }
-
-        /* Link box */
-        .link-box {
-            background: #fafafa; border: 1px solid #e5e7eb; border-radius: 8px;
-            padding: 12px 14px; font-size: 12px; color: #6b7280;
-            word-break: break-all; line-height: 1.5; margin-bottom: 12px;
-            font-family: monospace;
+        /* Mobile card style for items */
+        @media (max-width: 600px) {
+            .items-table th { padding: 8px 12px; font-size: 10px; }
+            .items-table td { padding: 10px 12px; }
         }
 
+        /* ── Total Section ── */
+        .total-section { padding: 14px 18px; border-top: 2px solid #f3f4f6; }
+        .total-line {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 4px 0; font-size: 13px; color: #6b7280;
+        }
+        .total-line.grand {
+            font-size: 15px; font-weight: 700; color: #1c1917;
+            padding-top: 10px; border-top: 1px solid #f3f4f6; margin-top: 6px;
+        }
+        .total-line.grand .val { color: #ea580c; }
+
+        /* ── Notes ── */
+        .notes-block {
+            background: #fafafa; border: 1px solid #f3f4f6; border-radius: 8px;
+            padding: 12px 14px; font-size: 13px; color: #374151;
+            line-height: 1.6; white-space: pre-wrap;
+        }
+
+        /* ── Doc Tabs ── */
+        .doc-tabs {
+            display: flex;
+            border-bottom: 1px solid #f0ede9;
+            padding: 0 12px;
+            gap: 2px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .doc-tabs::-webkit-scrollbar { display: none; }
+        .doc-tab {
+            display: flex; align-items: center; gap: 5px;
+            padding: 10px 12px; border: none; background: transparent;
+            font-size: 12px; font-weight: 500; color: #9ca3af;
+            cursor: pointer; border-bottom: 2px solid transparent;
+            margin-bottom: -1px; white-space: nowrap; transition: color 0.15s;
+        }
+        .doc-tab:hover { color: #374151; }
+        .doc-tab.active { color: #ea580c; border-bottom-color: #ea580c; }
+
+        /* ── Doc Panel ── */
+        .doc-panel { padding: 16px; }
+        .doc-panel-inner {
+            display: flex; align-items: center; gap: 14px;
+            background: #fafaf9; border: 1px solid #f0ede9;
+            border-radius: 10px; padding: 14px 16px;
+            flex-wrap: wrap;
+        }
+        .doc-icon-wrap {
+            flex-shrink: 0; width: 46px; height: 46px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .doc-icon-blue   { background: #eff6ff; }
+        .doc-icon-orange { background: #fff7ed; }
+        .doc-icon-purple { background: #f5f3ff; }
+        .doc-icon-green  { background: #f0fdf4; }
+        .doc-icon-teal   { background: #f0fdfa; }
+        .doc-panel-text { flex: 1; min-width: 0; }
+        .doc-panel-title { font-size: 13.5px; font-weight: 600; color: #1c1917; margin-bottom: 3px; }
+        .doc-panel-desc  { font-size: 12px; color: #78716c; line-height: 1.5; }
+
+        .btn-open-pdf {
+            flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 14px; background: #1c1917; color: #fff; border-radius: 7px;
+            font-size: 12.5px; font-weight: 500; text-decoration: none;
+            transition: background 0.15s; white-space: nowrap;
+        }
+        .btn-open-pdf:hover { background: #374151; }
+        .btn-open-pdf--disabled {
+            background: #e5e7eb !important; color: #9ca3af !important;
+            cursor: not-allowed; pointer-events: none;
+        }
+
+        @media (max-width: 500px) {
+            .doc-panel-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .btn-open-pdf { width: 100%; justify-content: center; }
+            .doc-icon-wrap { width: 40px; height: 40px; }
+        }
+
+        /* ── Sidebar Cards ── */
+        .sidebar-card {
+            background: #fff; border: 1px solid #e5e7eb;
+            border-radius: 14px; overflow: hidden; margin-bottom: 12px;
+        }
+        .sidebar-card:last-child { margin-bottom: 0; }
+        .sidebar-card-header {
+            padding: 13px 16px; border-bottom: 1px solid #f3f4f6;
+            font-size: 13px; font-weight: 700; color: #1c1917;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .sidebar-card-body { padding: 16px; }
+
+        /* ── Sidebar Grid (mobile: 2 cols for small cards) ── */
+        .sidebar-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        @media (min-width: 540px) and (max-width: 959px) {
+            .sidebar-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .sidebar-grid .sidebar-card-full { grid-column: span 2; }
+        }
+
+        /* ── Buttons ── */
         .btn-copy {
             width: 100%; padding: 10px; background: #fff; color: #1c1917;
             border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-weight: 600;
-            cursor: pointer; font-family: 'Sora', sans-serif; transition: all 0.15s;
+            cursor: pointer; transition: all 0.15s;
             display: flex; align-items: center; justify-content: center; gap: 7px;
-            margin-bottom: 8px;
+            margin-bottom: 8px; min-height: 44px;
         }
         .btn-copy:hover { border-color: #ea580c; color: #ea580c; }
         .btn-copy.copied { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
@@ -126,8 +290,9 @@
         .btn-send {
             width: 100%; padding: 12px; background: #ea580c; color: #fff;
             border: none; border-radius: 8px; font-size: 13px; font-weight: 700;
-            cursor: pointer; font-family: 'Sora', sans-serif; transition: all 0.15s;
+            cursor: pointer; transition: all 0.15s;
             display: flex; align-items: center; justify-content: center; gap: 7px;
+            min-height: 44px;
         }
         .btn-send:hover { background: #c2410c; box-shadow: 0 4px 14px rgba(234,88,12,0.3); }
         .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -135,134 +300,105 @@
         .btn-open {
             width: 100%; padding: 9px; background: #fff; color: #374151;
             border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 12.5px; font-weight: 600;
-            cursor: pointer; font-family: 'Sora', sans-serif; transition: all 0.15s;
+            cursor: pointer; transition: all 0.15s;
             display: flex; align-items: center; justify-content: center; gap: 7px;
-            text-decoration: none; margin-top: 8px;
+            text-decoration: none; margin-top: 8px; min-height: 40px;
         }
         .btn-open:hover { border-color: #6b7280; }
 
-        .sent-info { font-size: 12px; color: #6b7280; text-align: center; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 5px; }
-
-        .doc-tabs {
-            display: flex;
-            border-bottom: 1px solid #f0ede9;
-            padding: 0 16px;
-            gap: 2px;
-            overflow-x: auto;
-            scrollbar-width: none;
+        .btn-edit-sm {
+            padding: 3px 10px; font-size: 11.5px; font-weight: 500;
+            border: 1px solid #d1d5db; background: #fff; color: #374151;
+            border-radius: 6px; cursor: pointer; transition: all 0.15s;
+            white-space: nowrap; min-height: 28px;
         }
-        .doc-tabs::-webkit-scrollbar { display: none; }
+        .btn-edit-sm:hover { border-color: #ea580c; color: #ea580c; }
 
-        .doc-tab {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 14px;
-            border: none;
-            background: transparent;
-            font-size: 12.5px;
-            font-weight: 500;
-            color: #9ca3af;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -1px;
-            white-space: nowrap;
-            transition: color 0.15s, border-color 0.15s;
+        .btn-save-sm {
+            padding: 5px 12px; font-size: 12px; font-weight: 600;
+            border: none; background: #ea580c; color: #fff;
+            border-radius: 6px; cursor: pointer; min-height: 32px;
         }
-        .doc-tab:hover { color: #374151; }
-        .doc-tab.active {
-            color: #ea580c;
-            border-bottom-color: #ea580c;
+        .btn-cancel-sm {
+            padding: 5px 10px; font-size: 12px; font-weight: 500;
+            border: 1px solid #d1d5db; background: #fff; color: #6b7280;
+            border-radius: 6px; cursor: pointer; min-height: 32px;
         }
 
-        /* ── Document Panel ── */
-        .doc-panel { padding: 20px 16px; }
-
-        .doc-panel-inner {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            background: #fafaf9;
-            border: 1px solid #f0ede9;
-            border-radius: 10px;
-            padding: 16px 20px;
+        /* ── Link & Token Box ── */
+        .link-box {
+            background: #fafafa; border: 1px solid #e5e7eb; border-radius: 8px;
+            padding: 10px 12px; font-size: 11.5px; color: #6b7280;
+            word-break: break-all; line-height: 1.5; margin-bottom: 10px;
+            font-family: monospace;
         }
-
-        .doc-icon-wrap {
-            flex-shrink: 0;
-            width: 52px;
-            height: 52px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .doc-icon-blue   { background: #eff6ff; }
-        .doc-icon-orange { background: #fff7ed; }
-        .doc-icon-green  { background: #f0fdf4; }
-
-        .doc-panel-text { flex: 1; min-width: 0; }
-
-        .doc-panel-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1c1917;
-            margin-bottom: 3px;
-        }
-        .doc-panel-desc {
-            font-size: 12.5px;
-            color: #78716c;
-            line-height: 1.5;
-        }
-
-        .btn-open-pdf {
-            flex-shrink: 0;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            background: #1c1917;
-            color: #fff;
-            border-radius: 7px;
-            font-size: 12.5px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: background 0.15s, opacity 0.15s;
-            white-space: nowrap;
-        }
-        .btn-open-pdf:hover { background: #374151; }
-
-        @media (max-width: 600px) {
-            .doc-panel-inner { flex-wrap: wrap; }
-            .btn-open-pdf { width: 100%; justify-content: center; }
-        }
-
-        /* Token box */
         .token-box {
-            background: #1c1917; border-radius: 8px; padding: 12px 14px;
-            font-family: monospace; font-size: 11px; color: #fbbf24;
-            word-break: break-all; letter-spacing: 0.5px; margin-bottom: 12px;
+            background: #1c1917; border-radius: 8px; padding: 10px 12px;
+            font-family: monospace; font-size: 10.5px; color: #fbbf24;
+            word-break: break-all; letter-spacing: 0.5px; margin-bottom: 10px;
         }
 
-        .divider { border: none; border-top: 1px solid #f3f4f6; margin: 16px 0; }
+        /* ── Sent Info ── */
+        .sent-info {
+            font-size: 12px; color: #6b7280; text-align: center;
+            margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
 
-        /* Timeline */
+        /* ── Timeline ── */
         .timeline { }
         .tl-item { display: flex; gap: 12px; margin-bottom: 14px; }
         .tl-item:last-child { margin-bottom: 0; }
-        .tl-dot { width: 8px; height: 8px; border-radius: 50%; background: #e5e7eb; flex-shrink: 0; margin-top: 5px; }
+        .tl-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #e5e7eb;
+            flex-shrink: 0; margin-top: 4px;
+        }
         .tl-dot.active { background: #ea580c; }
         .tl-key { font-size: 12px; font-weight: 600; color: #374151; }
         .tl-val { font-size: 11.5px; color: #9ca3af; margin-top: 1px; }
 
-        @media (max-width: 900px) {
-            .detail-layout { grid-template-columns: 1fr; }
-            .info-grid { grid-template-columns: 1fr; }
+        /* ── Sent Badge ── */
+        .sent-badge {
+            display: flex; align-items: center; gap: 6px;
+            background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
+            padding: 10px 12px; font-size: 12.5px; color: #1d4ed8; margin-bottom: 12px;
         }
+
+        /* ── Status badge - not available ── */
+        .status-note {
+            font-size: 12.5px; color: #6b7280; text-align: center; padding: 8px 0;
+        }
+
+        /* ── Divider ── */
+        .divider { border: none; border-top: 1px solid #f3f4f6; margin: 14px 0; }
+
+        /* ── Mobile sidebar order ── */
+        @media (max-width: 959px) {
+            .detail-sidebar { margin-top: 0; }
+            /* Show sidebar between hero and main on mobile — handled by DOM order */
+        }
+
+        /* ── input form ── */
+        .form-control-sm {
+            padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px;
+            font-size: 13px; outline: none; transition: border-color 0.15s;
+            min-height: 36px;
+        }
+        .form-control-sm:focus { border-color: #ea580c; }
+
+        /* ── Responsive table scroll hint ── */
+        .scroll-hint {
+            display: none;
+            font-size: 11px; color: #9ca3af; text-align: right;
+            padding: 4px 16px 0; align-items: center; gap: 4px; justify-content: flex-end;
+        }
+        @media (max-width: 640px) { .scroll-hint { display: flex; } }
     </style>
 
+    {{-- Back --}}
     <a href="{{ route('admin.orders.index') }}" class="back-link">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
         Kembali ke Order List
     </a>
 
@@ -272,7 +408,6 @@
             {{ session('success') }}
         </div>
     @endif
-
     @if(session('error'))
         <div class="alert alert-danger">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -282,15 +417,21 @@
 
     <div class="detail-layout">
 
-        {{-- LEFT --}}
-        <div>
-            {{-- Order Summary --}}
+        {{-- ═══════════════ LEFT / MAIN ═══════════════ --}}
+        <div class="detail-main">
+
+            {{-- ── Order Summary ── --}}
             <div class="card">
                 <div class="card-body">
+
+                    {{-- Hero --}}
                     <div class="order-hero">
                         <div>
                             <div class="order-code-big">{{ $order->order_code }}</div>
-                            <div class="order-meta">Dibuat {{ $order->created_at->format('d M Y, H:i') }} || PIC : {{ $order->pic->name ?? '-' }}</div>
+                            <div class="order-meta">
+                                Dibuat {{ $order->created_at->format('d M Y, H:i') }}<br>
+                                PIC: {{ $order->pic->name ?? '-' }}
+                            </div>
                         </div>
                         <span class="badge badge-{{ $order->status }}">
                             <span class="dot dot-{{ $order->status }}"></span>
@@ -298,136 +439,146 @@
                         </span>
                     </div>
 
+                    {{-- Info Grid --}}
                     <div class="info-grid">
-                        <div class="info-block">
+                        <div>
                             <div class="info-label">Nama Perusahaan</div>
                             <div class="info-val">{{ $order->company->name }}</div>
                         </div>
-                        <div class="info-block">
+                        <div>
                             <div class="info-label">Nama Kontak</div>
                             <div class="info-val">{{ $order->contact->name }}</div>
                         </div>
-                        <div class="info-block">
+                        <div>
                             <div class="info-label">Email Kontak</div>
-                            <div class="info-val" style="font-size:13px;">{{ $order->contact->email }}</div>
+                            <div class="info-val" style="font-size:13px;word-break:break-all;">{{ $order->contact->email }}</div>
                         </div>
                         @if($order->sent_at)
-                        <div class="info-block">
+                        <div>
                             <div class="info-label">Terkirim pada</div>
                             <div class="info-val">{{ $order->sent_at->format('d M Y, H:i') }}</div>
                             <div class="info-sub">Email penawaran dikirim</div>
                         </div>
                         @endif
-                        <div class="info-block">
+                        <div>
                             <div class="info-label">Access Token</div>
                             <div class="info-val" style="font-size:11px;font-family:monospace;color:#6b7280;word-break:break-all;">
                                 {{ Str::limit($order->access_token, 24) }}
                             </div>
                         </div>
-                        <div class="info-block">
+                        <div>
                             <div class="info-label">Tujuan Pengujian</div>
-                            <div class="info-val" style="font-size:13px;">
-                                {{ $order->tujuan_pengujian ?? '-' }}
-                            </div>
+                            <div class="info-val" style="font-size:13px;">{{ $order->tujuan_pengujian ?? '-' }}</div>
                         </div>
-                        <div class="info-block">
-                            <div class="info-label">Waktu Pelaksanaan yang diharapkan</div>
+                        <div>
+                            <div class="info-label">Waktu yang Diharapkan</div>
                             <div class="info-val" style="font-size:13px;">
-                                {{ $order->waktu_diharapkan 
-                                    ? \Carbon\Carbon::parse($order->waktu_diharapkan)->translatedFormat('l - d F Y') 
+                                {{ $order->waktu_diharapkan
+                                    ? \Carbon\Carbon::parse($order->waktu_diharapkan)->translatedFormat('l - d F Y')
                                     : '-' }}
                             </div>
                         </div>
+
                         {{-- Waktu Pelaksanaan --}}
-                        <div class="info-block">
+                        <div>
                             <div class="info-label">Waktu Pelaksanaan</div>
-                            <div class="info-val" id="waktu-display" style="display:flex; align-items:center; gap:8px;">
-                                <span id="waktu-text" style="font-size:13px;">
+                            <div id="waktu-display" class="edit-display">
+                                <span id="waktu-text" class="info-val" style="font-size:13px;">
                                     {{ $order->waktu_pelaksanaan
                                         ? \Carbon\Carbon::parse($order->waktu_pelaksanaan)->translatedFormat('l - d F Y')
                                         : '-' }}
                                 </span>
-                                <button class="btn btn-xs btn-outline-secondary" onclick="toggleEdit('waktu')">Edit</button>
+                                <button class="btn-edit-sm" onclick="toggleEdit('waktu')">Edit</button>
                             </div>
-                            <div id="waktu-form" style="display:none; margin-top:4px; gap:6px; align-items:center; flex-wrap:wrap;">
-                                <input type="date" id="waktu-input" class="form-control form-control-sm" style="width:auto;"
+                            <div id="waktu-form" style="display:none; margin-top:8px; display:none; flex-wrap:wrap; gap:6px; align-items:center;">
+                                <input type="date" id="waktu-input" class="form-control-sm"
                                     value="{{ $order->waktu_pelaksanaan ? \Carbon\Carbon::parse($order->waktu_pelaksanaan)->format('Y-m-d') : '' }}">
-                                <button class="btn btn-xs btn-primary" onclick="saveField('waktu')">Simpan</button>
-                                <button class="btn btn-xs btn-secondary" onclick="cancelEdit('waktu')">Batal</button>
+                                <button class="btn-save-sm" onclick="saveField('waktu')">Simpan</button>
+                                <button class="btn-cancel-sm" onclick="cancelEdit('waktu')">Batal</button>
                             </div>
                         </div>
 
                         {{-- Lokasi Pelaksanaan --}}
-                        <div class="info-block">
+                        <div>
                             <div class="info-label">Lokasi Pelaksanaan</div>
-                            <div class="info-val" id="lokasi-display" style="display:flex; align-items:center; gap:8px;">
-                                <span id="lokasi-text" style="font-size:13px;">
+                            <div id="lokasi-display" class="edit-display">
+                                <span id="lokasi-text" class="info-val" style="font-size:13px;">
                                     {{ $order->lokasi_pelaksanaan ?? '-' }}
                                 </span>
-                                <button class="btn btn-xs btn-outline-secondary" onclick="toggleEdit('lokasi')">Edit</button>
+                                <button class="btn-edit-sm" onclick="toggleEdit('lokasi')">Edit</button>
                             </div>
-                            <div id="lokasi-form" style="display:none; margin-top:4px; gap:6px; align-items:center; flex-wrap:wrap;">
-                                <input type="text" id="lokasi-input" class="form-control form-control-sm" style="width:auto;"
+                            <div id="lokasi-form" style="display:none; margin-top:8px; flex-wrap:wrap; gap:6px; align-items:center;">
+                                <input type="text" id="lokasi-input" class="form-control-sm"
                                     placeholder="Masukkan lokasi..."
                                     value="{{ $order->lokasi_pelaksanaan ?? '' }}">
-                                <button class="btn btn-xs btn-primary" onclick="saveField('lokasi')">Simpan</button>
-                                <button class="btn btn-xs btn-secondary" onclick="cancelEdit('lokasi')">Batal</button>
+                                <button class="btn-save-sm" onclick="saveField('lokasi')">Simpan</button>
+                                <button class="btn-cancel-sm" onclick="cancelEdit('lokasi')">Batal</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Offer Items --}}
+            {{-- ── Offer Items ── --}}
             @if($order->offer && $order->offer->details->count())
                 <div class="card">
                     <div class="card-header">
                         <div class="card-header-left">
                             <div class="card-icon">
-                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
                             </div>
                             <div>
                                 <div class="card-title">Item Penawaran</div>
                                 <div class="card-subtitle">{{ $order->offer->details->count() }} paket dipilih</div>
                             </div>
                         </div>
-                        <a href="{{ route('admin.orders.edit', $order) }}" class="btn-open" style="margin:0;">
-                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-                            Edit Harga / Upload File
+                        <a href="{{ route('admin.orders.edit', $order) }}" class="btn-open" style="margin:0;width:auto;font-size:12px;padding:7px 12px;">
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/>
+                            </svg>
+                            Edit Harga
                         </a>
                     </div>
-                    <table class="items-table">
-                        <thead>
-                            <tr>
-                                <th>Paket</th>
-                                <th>Qty</th>
-                                <th class="text-right">Harga Satuan</th>
-                                <th class="text-right">Subtotal</th>
-                                <th class="text-right">Nama Mahasiswa</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php $grandTotal = 0; @endphp
-                            @foreach($order->offer->details as $detail)
-                                @php
-                                    $sub = $detail->qty * $detail->price;
-                                    $grandTotal += $sub;
-                                @endphp
+
+                    <div class="scroll-hint">
+                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        Geser untuk lihat selengkapnya
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="items-table">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <div class="pkg-name">{{ $detail->package?->name ?? 'Paket dihapus' }}</div>
-                                        @if($detail->package?->machine)
-                                            <div class="pkg-info">Mesin: {{ $detail->package->machine->name }}</div>
-                                        @endif
-                                    </td>
-                                    <td>{{ $detail->qty }}</td>
-                                    <td class="price-cell">Rp {{ number_format($detail->price, 0, ',', '.') }}</td>
-                                    <td class="price-cell">Rp {{ number_format($sub, 0, ',', '.') }}</td>
-                                    <td class="price-cell">{{ $detail->nama_mahasiswa ?? '-' }}</td>
+                                    <th>Paket</th>
+                                    <th>Qty</th>
+                                    <th class="text-right">Harga Satuan</th>
+                                    <th class="text-right">Subtotal</th>
+                                    <th class="text-right">Nama Mahasiswa</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @php $grandTotal = 0; @endphp
+                                @foreach($order->offer->details as $detail)
+                                    @php $sub = $detail->qty * $detail->price; $grandTotal += $sub; @endphp
+                                    <tr>
+                                        <td>
+                                            <div class="pkg-name">{{ $detail->package?->name ?? 'Paket dihapus' }}</div>
+                                            @if($detail->package?->machine)
+                                                <div class="pkg-info">Mesin: {{ $detail->package->machine->name }}</div>
+                                            @endif
+                                        </td>
+                                        <td>{{ $detail->qty }}</td>
+                                        <td class="text-right price-cell">Rp {{ number_format($detail->price, 0, ',', '.') }}</td>
+                                        <td class="text-right price-cell">Rp {{ number_format($sub, 0, ',', '.') }}</td>
+                                        <td class="text-right price-cell">{{ $detail->nama_mahasiswa ?? '-' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
                     <div class="total-section">
                         <div class="total-line grand">
                             <span>Total</span>
@@ -437,20 +588,20 @@
                 </div>
             @else
                 <div class="card">
-                    <div class="card-body" style="text-align:center;padding:40px 20px;color:#9ca3af;font-size:13px;">
-                        <div style="font-size:32px;margin-bottom:10px;">📭</div>
+                    <div class="card-body" style="text-align:center;padding:36px 20px;color:#9ca3af;font-size:13px;">
+                        <div style="font-size:30px;margin-bottom:10px;">📭</div>
                         <div style="font-weight:600;color:#374151;">Belum ada item penawaran</div>
                         <div style="margin-top:4px;">Order ini belum memiliki penawaran.</div>
                     </div>
                 </div>
             @endif
 
-            {{-- Document Tabs --}}
+            {{-- ── Document Tabs ── --}}
             <div class="card">
                 <div class="card-header">
                     <div class="card-header-left">
                         <div class="card-icon">
-                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2">
+                            <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                             </svg>
                         </div>
@@ -461,273 +612,210 @@
                     </div>
                 </div>
 
-                {{-- Tab Buttons --}}
                 <div class="doc-tabs">
                     <button type="button" class="doc-tab active" onclick="switchDocTab('permintaan')">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
-                        Surat Permohonan Kerjasama (PKS)
+                        PKS
                     </button>
                     <button type="button" class="doc-tab" onclick="switchDocTab('perjanjian')">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        Perjanjian Kerjasama
+                        Perjanjian
                     </button>
                     <button type="button" class="doc-tab" onclick="switchDocTab('kesanggupan')">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        Surat Kesanggupan Kerjasama
+                        Kesanggupan
                     </button>
                     <button type="button" class="doc-tab" onclick="switchDocTab('bap')">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M15 11l-3 3-1.5-1.5"/>
                         </svg>
-                        Berita Acara Penyelesaian
+                        BAP
                     </button>
                     <button type="button" class="doc-tab" onclick="switchDocTab('laporan')">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M15 11l-3 3-1.5-1.5"/>
                         </svg>
-                        Laporan Kegiatan Kerjasama
+                        Laporan
                     </button>
                 </div>
 
-                {{-- Panel: Surat Permohonan Kerjasama --}}
+                {{-- Panel: PKS --}}
                 <div id="docPanelPermintaan" class="doc-panel">
                     <div class="doc-panel-inner">
                         <div class="doc-icon-wrap doc-icon-blue">
-                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#2563eb" stroke-width="1.5">
+                            <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#2563eb" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
                         </div>
                         <div class="doc-panel-text">
                             <div class="doc-panel-title">Surat Permohonan Kerjasama (PKS)</div>
-                            <div class="doc-panel-desc">Dokumen permohonan kerjasama dari kontak untuk order <strong>{{ $order->order_code }}</strong>.</div>
+                            <div class="doc-panel-desc">Dokumen permohonan untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-
                         @php $canOpen = $order->canOpenPermohonanPdf(); @endphp
-
                         @if ($canOpen)
-                            <a href="{{ route('orders.guest.permohonan_kerjasama', [$order->company->slug, $order->access_token]) }}"
-                            target="_blank"
-                            class="btn-open-pdf">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
+                            <a href="{{ route('orders.guest.permohonan_kerjasama', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                 Buka PDF
                             </a>
                         @else
-                            <span class="btn-open-pdf btn-open-pdf--disabled" title="Dokumen belum tersedia">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
-                                Buka PDF
+                            <span class="btn-open-pdf btn-open-pdf--disabled">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                Belum Tersedia
                             </span>
                         @endif
                     </div>
                 </div>
 
-                {{-- Panel: Perjanjian Kerjasama --}}
+                {{-- Panel: Perjanjian --}}
                 <div id="docPanelPerjanjian" class="doc-panel" style="display:none;">
                     <div class="doc-panel-inner">
                         <div class="doc-icon-wrap doc-icon-orange">
-                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="1.5">
+                            <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
-
                         <div class="doc-panel-text">
                             <div class="doc-panel-title">Perjanjian Kerjasama</div>
+                            @php
+                                $canOpen = $order->canOpenMouKesanggupanPdf();
+                                $reason = null;
+                                if ($order->status !== \App\Models\Order::STATUS_APPROVED)       $reason = 'Menunggu approval';
+                                elseif (blank($order->waktu_pelaksanaan))                         $reason = 'Waktu pelaksanaan belum diisi';
+                                elseif (blank($order->lokasi_pelaksanaan))                        $reason = 'Lokasi pelaksanaan belum diisi';
+                                elseif (!$order->offer || $order->offer->details->isEmpty())      $reason = 'Detail penawaran belum tersedia';
+                            @endphp
                             <div class="doc-panel-desc">
-                                Dokumen perjanjian kerjasama resmi untuk order <strong>{{ $order->order_code }}</strong>.
+                                @if(!$canOpen && $reason)
+                                    <span style="color:#ea580c;">⚠ {{ $reason }}</span>
+                                @else
+                                    Dokumen perjanjian resmi untuk order <strong>{{ $order->order_code }}</strong>.
+                                @endif
                             </div>
                         </div>
-
-                        @php 
-                            $canOpen = $order->canOpenMouKesanggupanPdf(); 
-
-                            $reason = null;
-
-                            if ($order->status !== \App\Models\Order::STATUS_APPROVED) {
-                                $reason = 'Menunggu approval';
-                            } elseif (blank($order->waktu_pelaksanaan)) {
-                                $reason = 'Waktu pelaksanaan belum diisi';
-                            } elseif (blank($order->lokasi_pelaksanaan)) {
-                                $reason = 'Lokasi pelaksanaan belum diisi';
-                            } elseif (!$order->offer || $order->offer->details->isEmpty()) {
-                                $reason = 'Detail penawaran belum tersedia';
-                            }
-                        @endphp
-
                         @if ($canOpen)
-                            <a id="btn-pdf-perjanjian"
-                            href="{{ route('orders.guest.perjanjian_kerjasama', [$order->company->slug, $order->access_token]) }}"
-                            target="_blank"
-                            class="btn-open-pdf">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
+                            <a href="{{ route('orders.guest.perjanjian_kerjasama', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                 Buka PDF
                             </a>
                         @else
-                            <div id="pdf-reason-perjanjian" class="doc-panel-desc text-orange-600 text-sm mb-2">
-                                ⚠ {{ $reason ?? 'Dokumen belum tersedia' }}
-                            </div>
-
-                            <span id="btn-pdf-perjanjian"
-                                data-href="{{ route('orders.guest.perjanjian_kerjasama', [$order->company->slug, $order->access_token]) }}"
-                                class="btn-open-pdf btn-open-pdf--disabled"
-                                title="{{ $reason }}">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
-                                Buka PDF
+                            <span class="btn-open-pdf btn-open-pdf--disabled" title="{{ $reason }}">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                Belum Tersedia
                             </span>
                         @endif
                     </div>
                 </div>
 
-                {{-- Panel: Surat Kesanggupan Kerjasama --}}
+                {{-- Panel: Kesanggupan --}}
                 <div id="docPanelKesanggupan" class="doc-panel" style="display:none;">
                     <div class="doc-panel-inner">
                         <div class="doc-icon-wrap doc-icon-purple">
-                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#7c3aed" stroke-width="1.5">
+                            <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#7c3aed" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
-
                         <div class="doc-panel-text">
                             <div class="doc-panel-title">Surat Kesanggupan Kerjasama</div>
+                            @php
+                                $canOpen = $order->canOpenMouKesanggupanPdf();
+                                $reason = null;
+                                if ($order->status !== \App\Models\Order::STATUS_APPROVED)       $reason = 'Menunggu approval';
+                                elseif (blank($order->waktu_pelaksanaan))                         $reason = 'Waktu pelaksanaan belum diisi';
+                                elseif (blank($order->lokasi_pelaksanaan))                        $reason = 'Lokasi pelaksanaan belum diisi';
+                                elseif (!$order->offer || $order->offer->details->isEmpty())      $reason = 'Detail penawaran belum tersedia';
+                            @endphp
                             <div class="doc-panel-desc">
-                                Dokumen pernyataan kesanggupan pelaksanaan kerjasama untuk order <strong>{{ $order->order_code }}</strong>.
+                                @if(!$canOpen && $reason)
+                                    <span style="color:#ea580c;">⚠ {{ $reason }}</span>
+                                @else
+                                    Dokumen kesanggupan pelaksanaan untuk order <strong>{{ $order->order_code }}</strong>.
+                                @endif
                             </div>
                         </div>
-
-                        @php 
-                            $canOpen = $order->canOpenMouKesanggupanPdf(); 
-
-                            $reason = null;
-
-                            if ($order->status !== \App\Models\Order::STATUS_APPROVED) {
-                                $reason = 'Menunggu approval';
-                            } elseif (blank($order->waktu_pelaksanaan)) {
-                                $reason = 'Waktu pelaksanaan belum diisi';
-                            } elseif (blank($order->lokasi_pelaksanaan)) {
-                                $reason = 'Lokasi pelaksanaan belum diisi';
-                            } elseif (!$order->offer || $order->offer->details->isEmpty()) {
-                                $reason = 'Detail penawaran belum tersedia';
-                            }
-                        @endphp
-
                         @if ($canOpen)
-                            <a id="btn-pdf-kesanggupan"
-                            href="{{ route('orders.guest.kesanggupan_kerjasama', [$order->company->slug, $order->access_token]) }}"
-                            target="_blank"
-                            class="btn-open-pdf">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
+                            <a href="{{ route('orders.guest.kesanggupan_kerjasama', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                 Buka PDF
                             </a>
                         @else
-                            <div id="pdf-reason-kesanggupan" class="doc-panel-desc text-orange-600 text-sm mb-2">
-                                ⚠ {{ $reason ?? 'Dokumen belum tersedia' }}
-                            </div>
-
-                            <span id="btn-pdf-kesanggupan"
-                                data-href="{{ route('orders.guest.kesanggupan_kerjasama', [$order->company->slug, $order->access_token]) }}"
-                                class="btn-open-pdf btn-open-pdf--disabled"
-                                title="{{ $reason }}">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
-                                Buka PDF
+                            <span class="btn-open-pdf btn-open-pdf--disabled" title="{{ $reason }}">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                Belum Tersedia
                             </span>
                         @endif
                     </div>
                 </div>
 
-                {{-- Panel: Berita Acara Penyelesaian --}}
+                {{-- Panel: BAP --}}
                 <div id="docPanelBap" class="doc-panel" style="display:none;">
                     <div class="doc-panel-inner">
                         <div class="doc-icon-wrap doc-icon-green">
-                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="1.5">
+                            <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M15 11l-3 3-1.5-1.5"/>
                             </svg>
                         </div>
                         <div class="doc-panel-text">
                             <div class="doc-panel-title">Berita Acara Penyelesaian</div>
-                            <div class="doc-panel-desc">Dokumen BAP sebagai bukti selesainya pekerjaan untuk order <strong>{{ $order->order_code }}</strong>.</div>
+                            <div class="doc-panel-desc">Bukti penyelesaian pekerjaan untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-
                         @php $canOpen = $order->canOpenBapPdf(); @endphp
-
                         @if ($canOpen)
-                            <a href="{{ route('orders.guest.bap', [$order->company->slug, $order->access_token]) }}"
-                            target="_blank"
-                            class="btn-open-pdf">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
+                            <a href="{{ route('orders.guest.bap', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                 Buka PDF
                             </a>
                         @else
-                            <span class="btn-open-pdf btn-open-pdf--disabled" title="Dokumen belum tersedia">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
-                                Buka PDF
+                            <span class="btn-open-pdf btn-open-pdf--disabled">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                Belum Tersedia
                             </span>
                         @endif
                     </div>
                 </div>
 
-                {{-- Panel: Laporan Kegiatan Kerjasama --}}
+                {{-- Panel: Laporan --}}
                 <div id="docPanelLaporan" class="doc-panel" style="display:none;">
                     <div class="doc-panel-inner">
                         <div class="doc-icon-wrap doc-icon-teal">
-                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#0d9488" stroke-width="1.5">
+                            <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#0d9488" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M15 11l-3 3-1.5-1.5"/>
                             </svg>
                         </div>
                         <div class="doc-panel-text">
                             <div class="doc-panel-title">Laporan Kegiatan Kerjasama</div>
-                            <div class="doc-panel-desc">Dokumen laporan hasil kegiatan kerjasama untuk order <strong>{{ $order->order_code }}</strong>.</div>
+                            <div class="doc-panel-desc">Laporan hasil kegiatan untuk order <strong>{{ $order->order_code }}</strong>.</div>
                         </div>
-
                         @php $canOpen = $order->canOpenLaporanKegiatanPdf(); @endphp
-
                         @if ($canOpen)
-                            <a href="{{ route('orders.guest.laporan_kegiatan', [$order->company->slug, $order->access_token]) }}"
-                            target="_blank"
-                            class="btn-open-pdf">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
+                            <a href="{{ route('orders.guest.laporan_kegiatan', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                 Buka PDF
                             </a>
                         @else
-                            <span class="btn-open-pdf btn-open-pdf--disabled" title="Dokumen belum tersedia">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
-                                Buka PDF
+                            <span class="btn-open-pdf btn-open-pdf--disabled">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                Belum Tersedia
                             </span>
                         @endif
                     </div>
                 </div>
             </div>
 
-            {{-- Notes & Terms --}}
+            {{-- ── Notes & Terms ── --}}
             @if($order->offer && ($order->offer->notes || $order->offer->terms))
                 <div class="card">
                     <div class="card-header">
                         <div class="card-header-left">
                             <div class="card-icon">
-                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
                             </div>
                             <div>
                                 <div class="card-title">Catatan & Syarat</div>
@@ -736,7 +824,7 @@
                     </div>
                     <div class="card-body">
                         @if($order->offer->notes)
-                            <div style="margin-bottom:16px;">
+                            <div style="margin-bottom:14px;">
                                 <div class="info-label" style="margin-bottom:8px;">Catatan</div>
                                 <div class="notes-block">{{ $order->offer->notes }}</div>
                             </div>
@@ -750,173 +838,169 @@
                     </div>
                 </div>
             @endif
-        </div>
 
-        {{-- RIGHT SIDEBAR --}}
-        <div style="position:sticky;top:20px;">
+        </div>{{-- end .detail-main --}}
 
-            {{-- Internal Notification --}}
-            <div class="sidebar-card">
-                <div class="sidebar-card-header">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                    Notifikasi Internal
-                </div>           
+
+        {{-- ═══════════════ RIGHT / SIDEBAR ═══════════════ --}}
+        <div class="detail-sidebar">
+            <div class="sidebar-grid">
+
+                {{-- Notifikasi Internal --}}
+                <div class="sidebar-card sidebar-card-full">
+                    <div class="sidebar-card-header">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        Notifikasi Internal
+                    </div>
                     <div class="sidebar-card-body">
-                        <p style="font-size:12.5px;color:#6b7280;line-height:1.6;margin:0 0 14px;">
-                            Kirim notifikasi ke user internal (id=2) untuk memproses order ini (buat penawaran & invoice manual).
+                        <p style="font-size:12px;color:#6b7280;line-height:1.6;margin:0 0 12px;">
+                            Kirim notifikasi ke user internal untuk memproses order ini.
                         </p>
                         <form id="notifyInternalForm" action="{{ route('admin.orders.notifyInternal', $order) }}" method="POST">
                             @csrf
-                            <button type="button" class="btn-send" 
-                                style="background:#111827;" 
-                                onmouseover="this.style.background='#000'" 
+                            <button type="button" class="btn-send"
+                                style="background:#111827;"
+                                onmouseover="this.style.background='#000'"
                                 onmouseout="this.style.background='#111827'"
                                 onclick="confirmNotifyInternal()">
-                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                                 Kirim Notifikasi
                             </button>
                         </form>
                     </div>
-            </div>
-
-            {{-- Send Offer --}}
-            <div class="sidebar-card">
-                <div class="sidebar-card-header">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                    Kirim Penawaran
                 </div>
-                <div class="sidebar-card-body">
-                    @if($order->status === 'submit')
-                        <p style="font-size:12.5px;color:#6b7280;line-height:1.6;margin:0 0 14px;">
-                            Kirim email ke <strong style="color:#1c1917;">{{ $order->customer_email }}</strong> berisi link penawaran.
-                        </p>
-                        <form id="sendOfferForm" action="{{ route('admin.orders.sendOffer', $order) }}" method="POST">
-                            @csrf
-                            <button type="button" class="btn-send" onclick="confirmSendOffer()">
-                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                Kirim Email Penawaran
-                            </button>
-                        </form>
-                    @elseif($order->status === 'offered')
-                        <div style="display:flex;align-items:center;gap:6px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;font-size:12.5px;color:#1d4ed8;margin-bottom:14px;">
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                            Email berhasil dikirim
-                        </div>
-                        <form id="sendOfferForm" action="{{ route('admin.orders.sendOffer', $order) }}" method="POST">
-                            @csrf
-                            <button type="button" class="btn-send" style="background:#3b82f6;" 
-                                onmouseover="this.style.background='#1d4ed8'" 
-                                onmouseout="this.style.background='#3b82f6'"
-                                onclick="confirmResendOffer()">
-                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                Kirim Ulang
-                            </button>
-                        </form>
-                        @if($order->sent_at)
-                            <div class="sent-info">
-                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                Terkirim {{ $order->sent_at->diffForHumans() }}
+
+                {{-- Kirim Penawaran --}}
+                <div class="sidebar-card sidebar-card-full">
+                    <div class="sidebar-card-header">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        Kirim Penawaran
+                    </div>
+                    <div class="sidebar-card-body">
+                        @if($order->status === 'submit')
+                            <p style="font-size:12px;color:#6b7280;line-height:1.6;margin:0 0 12px;">
+                                Kirim ke <strong style="color:#1c1917;">{{ $order->customer_email }}</strong>
+                            </p>
+                            <form id="sendOfferForm" action="{{ route('admin.orders.sendOffer', $order) }}" method="POST">
+                                @csrf
+                                <button type="button" class="btn-send" onclick="confirmSendOffer()">
+                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                    Kirim Email Penawaran
+                                </button>
+                            </form>
+                        @elseif($order->status === 'offered')
+                            <div class="sent-badge">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                Email berhasil dikirim
+                            </div>
+                            <form id="sendOfferForm" action="{{ route('admin.orders.sendOffer', $order) }}" method="POST">
+                                @csrf
+                                <button type="button" class="btn-send" style="background:#3b82f6;"
+                                    onmouseover="this.style.background='#1d4ed8'"
+                                    onmouseout="this.style.background='#3b82f6'"
+                                    onclick="confirmResendOffer()">
+                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    Kirim Ulang
+                                </button>
+                            </form>
+                            @if($order->sent_at)
+                                <div class="sent-info">
+                                    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    Terkirim {{ $order->sent_at->diffForHumans() }}
+                                </div>
+                            @endif
+                        @else
+                            <div class="status-note">
+                                Status <strong>{{ ucfirst(str_replace('_', ' ', $order->status)) }}</strong><br>
+                                <span style="font-size:11.5px;">Tidak bisa kirim ulang.</span>
                             </div>
                         @endif
-                    @else
-                        <div style="font-size:12.5px;color:#6b7280;text-align:center;padding:8px 0;">
-                            Status <strong>{{ ucfirst(str_replace('_',' ',$order->status)) }}</strong> — tidak bisa kirim ulang.
-                        </div>
-                    @endif
+                    </div>
                 </div>
-            </div>
 
+                {{-- Link Customer --}}
+                <div class="sidebar-card sidebar-card-full">
+                    <div class="sidebar-card-header">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                        Link Customer
+                    </div>
+                    <div class="sidebar-card-body">
+                        <div style="font-size:11px;color:#9ca3af;margin-bottom:6px;font-weight:600;letter-spacing:0.3px;">URL PENAWARAN</div>
+                        <div class="link-box" id="guestLinkBox">{{ $guestLink }}</div>
+                        <button type="button" class="btn-copy" id="copyLinkBtn" onclick="copyLink()">
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                            <span id="copyLinkText">Salin Link</span>
+                        </button>
+                        <a href="{{ $guestLink }}" target="_blank" class="btn-open">
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            Buka di Tab Baru
+                        </a>
+                    </div>
+                </div>
 
-            {{-- Guest Link --}}
-            <div class="sidebar-card">
-                <div class="sidebar-card-header">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                    Link Customer
+                {{-- Access Token --}}
+                <div class="sidebar-card sidebar-card-full">
+                    <div class="sidebar-card-header">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                        Access Token
+                    </div>
+                    <div class="sidebar-card-body">
+                        <div class="token-box">{{ $order->access_token }}</div>
+                        <button type="button" class="btn-copy" id="copyTokenBtn" onclick="copyToken()">
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                            <span id="copyTokenText">Salin Token</span>
+                        </button>
+                        <p style="font-size:11px;color:#9ca3af;margin:8px 0 0;line-height:1.5;">
+                            Token autentikasi akses customer tanpa login.
+                        </p>
+                    </div>
                 </div>
-                <div class="sidebar-card-body">
-                    <div style="font-size:11.5px;color:#9ca3af;margin-bottom:8px;font-weight:600;letter-spacing:0.3px;">URL PENAWARAN</div>
-                    <div class="link-box" id="guestLinkBox">{{ $guestLink }}</div>
-                    <button type="button" class="btn-copy" id="copyLinkBtn" onclick="copyLink()">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                        <span id="copyLinkText">Salin Link</span>
-                    </button>
-                    <a href="{{ $guestLink }}" target="_blank" class="btn-open">
-                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                        Buka di Tab Baru
-                    </a>
-                </div>
-            </div>
 
-            {{-- Access Token --}}
-            <div class="sidebar-card">
-                <div class="sidebar-card-header">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-                    Access Token
-                </div>
-                <div class="sidebar-card-body">
-                    <div class="token-box">{{ $order->access_token }}</div>
-                    <button type="button" class="btn-copy" id="copyTokenBtn" onclick="copyToken()">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                        <span id="copyTokenText">Salin Token</span>
-                    </button>
-                    <p style="font-size:11.5px;color:#9ca3af;margin:10px 0 0;line-height:1.5;">
-                        Token ini digunakan untuk autentikasi akses customer tanpa login.
-                    </p>
-                </div>
-            </div>
-
-            {{-- Timeline --}}
-            <div class="sidebar-card">
-                <div class="sidebar-card-header">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    Timeline
-                </div>
-                <div class="sidebar-card-body">
-                    <div class="timeline">
-                        <div class="tl-item">
-                            <div class="tl-dot active"></div>
-                            <div>
-                                <div class="tl-key">Order dibuat</div>
-                                <div class="tl-val">{{ $order->created_at->format('d M Y, H:i') }}</div>
-                            </div>
-                        </div>
-                        @if($order->sent_at)
+                {{-- Timeline --}}
+                <div class="sidebar-card sidebar-card-full">
+                    <div class="sidebar-card-header">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Timeline
+                    </div>
+                    <div class="sidebar-card-body">
+                        <div class="timeline">
                             <div class="tl-item">
                                 <div class="tl-dot active"></div>
                                 <div>
-                                    <div class="tl-key">Penawaran dikirim</div>
-                                    <div class="tl-val">{{ $order->sent_at->format('d M Y, H:i') }}</div>
+                                    <div class="tl-key">Order dibuat</div>
+                                    <div class="tl-val">{{ $order->created_at->format('d M Y, H:i') }}</div>
                                 </div>
                             </div>
-                        @else
-                         <div class="tl-item">
-                                <div class="tl-dot"></div>
+                            <div class="tl-item">
+                                <div class="tl-dot {{ $order->sent_at ? 'active' : '' }}"></div>
                                 <div>
                                     <div class="tl-key">Penawaran dikirim</div>
-                                    <div class="tl-val">Menunggu...</div>
+                                    <div class="tl-val">{{ $order->sent_at ? $order->sent_at->format('d M Y, H:i') : 'Menunggu...' }}</div>
                                 </div>
                             </div>
-                        @endif
-                        <div class="tl-item">
-                            <div class="tl-dot {{ in_array($order->status, ['approved','processing','done']) ? 'active' : '' }}"></div>
-                            <div>
-                                <div class="tl-key">Disetujui customer</div>
-                                <div class="tl-val">{{ in_array($order->status, ['approved','processing','done']) ? 'Selesai' : 'Menunggu...' }}</div>
+                            <div class="tl-item">
+                                <div class="tl-dot {{ in_array($order->status, ['approved','processing','done']) ? 'active' : '' }}"></div>
+                                <div>
+                                    <div class="tl-key">Disetujui customer</div>
+                                    <div class="tl-val">{{ in_array($order->status, ['approved','processing','done']) ? 'Selesai' : 'Menunggu...' }}</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="tl-item">
-                            <div class="tl-dot {{ $order->status === 'done' ? 'active' : '' }}"></div>
-                            <div>
-                                <div class="tl-key">Done</div>
-                                <div class="tl-val">{{ $order->status === 'done' ? 'Selesai' : 'Menunggu...' }}</div>
+                            <div class="tl-item">
+                                <div class="tl-dot {{ $order->status === 'done' ? 'active' : '' }}"></div>
+                                <div>
+                                    <div class="tl-key">Done</div>
+                                    <div class="tl-val">{{ $order->status === 'done' ? 'Selesai' : 'Menunggu...' }}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-        </div>
-    </div>
+            </div>{{-- end .sidebar-grid --}}
+        </div>{{-- end .detail-sidebar --}}
+
+    </div>{{-- end .detail-layout --}}
+
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -936,6 +1020,7 @@
                 }
             });
         }
+
         function confirmSendOffer() {
             Swal.fire({
                 title: 'Kirim Penawaran?',
@@ -995,7 +1080,6 @@
         }
 
         function switchDocTab(tab) {
-            // Sembunyikan semua panel
             const panels = {
                 permintaan: 'docPanelPermintaan',
                 perjanjian: 'docPanelPerjanjian',
@@ -1008,10 +1092,8 @@
                 document.getElementById(id).style.display = 'none';
             });
 
-            // Tampilkan panel yang dipilih
             document.getElementById(panels[tab]).style.display = 'block';
 
-            // Update active tab button
             document.querySelectorAll('.doc-tab').forEach(btn => btn.classList.remove('active'));
             event.currentTarget.classList.add('active');
         }
@@ -1054,7 +1136,6 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    // update tampilan field
                     if (field === 'waktu') {
                         document.getElementById('waktu-text').textContent = data.waktu_pelaksanaan;
                     }
@@ -1063,10 +1144,7 @@
                     }
 
                     if (data.can_open_pdf) {
-
-                        // =========================
                         // PERJANJIAN
-                        // =========================
                         const btn1 = document.getElementById('btn-pdf-perjanjian');
                         if (btn1) {
                             const newBtn1 = document.createElement('a');
@@ -1081,9 +1159,7 @@
                             if (reason1) reason1.remove();
                         }
 
-                        // =========================
                         // KESANGGUPAN
-                        // =========================
                         const btn2 = document.getElementById('btn-pdf-kesanggupan');
                         if (btn2) {
                             const newBtn2 = document.createElement('a');
