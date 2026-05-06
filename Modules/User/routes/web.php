@@ -21,5 +21,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return response()->file(
             Storage::disk('private')->path($user->signature_path)
         );
-    })->name('signature.show');
+    })->name('customer.signature.show');
 });
