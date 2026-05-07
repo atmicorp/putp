@@ -1019,166 +1019,166 @@
 </div>
 
 <script>
-(function () {
-    'use strict';
+    (function () {
+        'use strict';
 
-    /* ── Elements ─────────────────────────────────────────────── */
-    const sidebar      = document.getElementById('sidebar');
-    const mainWrapper  = document.getElementById('main-wrapper');
-    const toggleIcon   = document.getElementById('toggle-icon');
-    const overlay      = document.getElementById('sidebar-overlay');
-    const mobileToggle = document.getElementById('mobile-toggle');
-    const mobileClose  = document.getElementById('sidebar-mobile-close');
-    const trigger      = document.getElementById('user-card-trigger');
-    const popup        = document.getElementById('user-popup');
-    const chevron      = document.getElementById('user-chevron');
+        /* ── Elements ─────────────────────────────────────────────── */
+        const sidebar      = document.getElementById('sidebar');
+        const mainWrapper  = document.getElementById('main-wrapper');
+        const toggleIcon   = document.getElementById('toggle-icon');
+        const overlay      = document.getElementById('sidebar-overlay');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const mobileClose  = document.getElementById('sidebar-mobile-close');
+        const trigger      = document.getElementById('user-card-trigger');
+        const popup        = document.getElementById('user-popup');
+        const chevron      = document.getElementById('user-chevron');
 
-    const ICON_COLLAPSE = `<path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7M18 19l-7-7 7-7"/>`;
-    const ICON_EXPAND   = `<path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M6 5l7 7-7 7"/>`;
+        const ICON_COLLAPSE = `<path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7M18 19l-7-7 7-7"/>`;
+        const ICON_EXPAND   = `<path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M6 5l7 7-7 7"/>`;
 
-    /* ── Breakpoint helpers ──────────────────────────────────── */
-    const isMobile  = () => window.innerWidth <= 640;
-    const isTablet  = () => window.innerWidth > 640 && window.innerWidth <= 1024;
-    const isDesktop = () => window.innerWidth > 1024;
+        /* ── Breakpoint helpers ──────────────────────────────────── */
+        const isMobile  = () => window.innerWidth <= 640;
+        const isTablet  = () => window.innerWidth > 640 && window.innerWidth <= 1024;
+        const isDesktop = () => window.innerWidth > 1024;
 
-    /* ── Desktop collapse state ──────────────────────────────── */
-    let isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+        /* ── Desktop collapse state ──────────────────────────────── */
+        let isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
 
-    function applyDesktopState (animate) {
-        if (!animate) {
-            sidebar.style.transition = 'none';
-            mainWrapper.style.transition = 'none';
+        function applyDesktopState (animate) {
+            if (!animate) {
+                sidebar.style.transition = 'none';
+                mainWrapper.style.transition = 'none';
+            }
+
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+                mainWrapper.classList.add('collapsed');
+                toggleIcon.innerHTML = ICON_EXPAND;
+            } else {
+                sidebar.classList.remove('collapsed');
+                mainWrapper.classList.remove('collapsed');
+                toggleIcon.innerHTML = ICON_COLLAPSE;
+            }
+
+            if (!animate) {
+                requestAnimationFrame(() => {
+                    sidebar.style.transition = '';
+                    mainWrapper.style.transition = '';
+                });
+            }
         }
 
-        if (isCollapsed) {
-            sidebar.classList.add('collapsed');
-            mainWrapper.classList.add('collapsed');
-            toggleIcon.innerHTML = ICON_EXPAND;
-        } else {
-            sidebar.classList.remove('collapsed');
-            mainWrapper.classList.remove('collapsed');
-            toggleIcon.innerHTML = ICON_COLLAPSE;
+        window.toggleSidebar = function () {
+            if (!isDesktop()) return;
+            isCollapsed = !isCollapsed;
+            localStorage.setItem('sidebar-collapsed', isCollapsed);
+            applyDesktopState(true);
+        };
+
+        /* ── Mobile sidebar ──────────────────────────────────────── */
+        function openMobileSidebar () {
+            sidebar.classList.add('open');
+            overlay.style.display = 'block';
+            requestAnimationFrame(() => overlay.classList.add('visible'));
+            mobileToggle.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden'; // prevent background scroll
         }
 
-        if (!animate) {
-            requestAnimationFrame(() => {
-                sidebar.style.transition = '';
-                mainWrapper.style.transition = '';
+        function closeMobileSidebar () {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('visible');
+            setTimeout(() => { overlay.style.display = 'none'; }, 250);
+            mobileToggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+
+        mobileToggle.addEventListener('click', openMobileSidebar);
+        mobileClose.addEventListener('click', closeMobileSidebar);
+        overlay.addEventListener('click', closeMobileSidebar);
+
+        /* Close sidebar when a nav link is tapped on mobile */
+        sidebar.querySelectorAll('.nav-item').forEach(link => {
+            link.addEventListener('click', () => {
+                if (isMobile()) closeMobileSidebar();
             });
-        }
-    }
-
-    window.toggleSidebar = function () {
-        if (!isDesktop()) return;
-        isCollapsed = !isCollapsed;
-        localStorage.setItem('sidebar-collapsed', isCollapsed);
-        applyDesktopState(true);
-    };
-
-    /* ── Mobile sidebar ──────────────────────────────────────── */
-    function openMobileSidebar () {
-        sidebar.classList.add('open');
-        overlay.style.display = 'block';
-        requestAnimationFrame(() => overlay.classList.add('visible'));
-        mobileToggle.setAttribute('aria-expanded', 'true');
-        document.body.style.overflow = 'hidden'; // prevent background scroll
-    }
-
-    function closeMobileSidebar () {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('visible');
-        setTimeout(() => { overlay.style.display = 'none'; }, 250);
-        mobileToggle.setAttribute('aria-expanded', 'false');
-        document.body.style.overflow = '';
-    }
-
-    mobileToggle.addEventListener('click', openMobileSidebar);
-    mobileClose.addEventListener('click', closeMobileSidebar);
-    overlay.addEventListener('click', closeMobileSidebar);
-
-    /* Close sidebar when a nav link is tapped on mobile */
-    sidebar.querySelectorAll('.nav-item').forEach(link => {
-        link.addEventListener('click', () => {
-            if (isMobile()) closeMobileSidebar();
         });
-    });
 
-    /* Escape key closes mobile sidebar */
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            if (isMobile() && sidebar.classList.contains('open')) closeMobileSidebar();
-            if (popup.style.display === 'block') closePopup();
+        /* Escape key closes mobile sidebar */
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (isMobile() && sidebar.classList.contains('open')) closeMobileSidebar();
+                if (popup.style.display === 'block') closePopup();
+            }
+        });
+
+        /* ── On resize: reset states properly ───────────────────── */
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (!isMobile()) {
+                    // Make sure mobile state is cleaned up
+                    closeMobileSidebar();
+                }
+                if (isDesktop()) {
+                    applyDesktopState(false);
+                }
+            }, 100);
+        });
+
+        /* ── Initial state (no flash) ────────────────────────────── */
+        if (isDesktop()) {
+            applyDesktopState(false);
         }
-    });
 
-    /* ── On resize: reset states properly ───────────────────── */
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            if (!isMobile()) {
-                // Make sure mobile state is cleaned up
-                closeMobileSidebar();
-            }
-            if (isDesktop()) {
-                applyDesktopState(false);
-            }
-        }, 100);
-    });
+        /* ── User Popup ──────────────────────────────────────────── */
+        function openPopup () {
+            popup.style.display = 'block';
+            chevron.style.transform = 'rotate(180deg)';
+            trigger.setAttribute('aria-expanded', 'true');
+        }
 
-    /* ── Initial state (no flash) ────────────────────────────── */
-    if (isDesktop()) {
-        applyDesktopState(false);
-    }
+        function closePopup () {
+            popup.style.display = 'none';
+            chevron.style.transform = 'rotate(0deg)';
+            trigger.setAttribute('aria-expanded', 'false');
+        }
 
-    /* ── User Popup ──────────────────────────────────────────── */
-    function openPopup () {
-        popup.style.display = 'block';
-        chevron.style.transform = 'rotate(180deg)';
-        trigger.setAttribute('aria-expanded', 'true');
-    }
-
-    function closePopup () {
-        popup.style.display = 'none';
-        chevron.style.transform = 'rotate(0deg)';
-        trigger.setAttribute('aria-expanded', 'false');
-    }
-
-    trigger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        popup.style.display === 'block' ? closePopup() : openPopup();
-    });
-
-    /* Keyboard accessibility for user card */
-    trigger.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
             popup.style.display === 'block' ? closePopup() : openPopup();
+        });
+
+        /* Keyboard accessibility for user card */
+        trigger.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                popup.style.display === 'block' ? closePopup() : openPopup();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!trigger.contains(e.target) && !popup.contains(e.target)) {
+                closePopup();
+            }
+        });
+
+        /* ── Live Clock ──────────────────────────────────────────── */
+        const DAYS = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+
+        function updateClock () {
+            const now = new Date();
+            const hh  = String(now.getHours()).padStart(2, '0');
+            const mm  = String(now.getMinutes()).padStart(2, '0');
+            const ss  = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('footer-day').textContent   = DAYS[now.getDay()];
+            document.getElementById('footer-clock').textContent = `${hh}:${mm}:${ss}`;
         }
-    });
 
-    document.addEventListener('click', (e) => {
-        if (!trigger.contains(e.target) && !popup.contains(e.target)) {
-            closePopup();
-        }
-    });
+        updateClock();
+        setInterval(updateClock, 1000);
 
-    /* ── Live Clock ──────────────────────────────────────────── */
-    const DAYS = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-
-    function updateClock () {
-        const now = new Date();
-        const hh  = String(now.getHours()).padStart(2, '0');
-        const mm  = String(now.getMinutes()).padStart(2, '0');
-        const ss  = String(now.getSeconds()).padStart(2, '0');
-        document.getElementById('footer-day').textContent   = DAYS[now.getDay()];
-        document.getElementById('footer-clock').textContent = `${hh}:${mm}:${ss}`;
-    }
-
-    updateClock();
-    setInterval(updateClock, 1000);
-
-})();
+    })();
 </script>
 
 </body>
