@@ -106,6 +106,49 @@
             cursor: pointer; font-family: 'Sora', sans-serif; transition: all 0.15s;
         }
         .btn-submit:hover { background: #c2410c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(234,88,12,0.25); }
+
+        .price-input-wrap {
+            display: flex;
+            align-items: stretch;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            background: #fff;
+        }
+        .price-input-wrap:focus-within {
+            border-color: #ea580c;
+            box-shadow: 0 0 0 3px rgba(234,88,12,0.08);
+        }
+        .price-input-wrap.is-invalid {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
+        }
+        .price-prefix {
+            padding: 0 12px;
+            background: #f9fafb;
+            border-right: 1px solid #e5e7eb;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .price-display {
+            flex: 1;
+            padding: 9px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1c1917;
+            font-family: 'Sora', sans-serif;
+            border: none;
+            outline: none;
+            background: transparent;
+            min-width: 0;
+        }
+        .price-display::placeholder { color: #c4c9d4; font-weight: 400; }
     </style>
 
     @if($errors->any())
@@ -129,34 +172,66 @@
                 </div>
             </div>
 
-            <div class="form-card-body">
+           <div class="form-card-body">
 
-                {{-- Nama & Mesin --}}
-                <div class="form-row" style="margin-bottom:20px;">
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label class="form-label" for="name">Nama Package <span class="req">*</span></label>
-                        <input type="text" id="name" name="name" value="{{ old('name') }}"
-                            class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}"
-                            placeholder="cth. Paket Bubut Standar" autofocus>
-                        @error('name')
-                            <div class="invalid-msg"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label class="form-label" for="machine_id">Mesin <span class="req">*</span></label>
-                        <select id="machine_id" name="machine_id" class="form-select-ctrl {{ $errors->has('machine_id') ? 'is-invalid' : '' }}">
-                            <option value="">-- Pilih Mesin --</option>
-                            @foreach($machines as $machine)
-                                <option value="{{ $machine->id }}" {{ old('machine_id') == $machine->id ? 'selected' : '' }}>
-                                    {{ $machine->name }} ({{ $machine->code }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('machine_id')
-                            <div class="invalid-msg"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{{ $message }}</div>
-                        @enderror
-                    </div>
+            {{-- Kategori, Nama & Mesin --}}
+            <div class="section-label">Informasi Dasar</div>
+
+            {{-- Baris 1: Kategori & Nama --}}
+            <div class="form-row" style="margin-bottom:20px;">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" for="category_id">Kategori <span class="req">*</span></label>
+                    <select id="category_id" name="category_id"
+                        class="form-select-ctrl {{ $errors->has('category_id') ? 'is-invalid' : '' }}">
+                        <option value="">-- Pilih Kategori --</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->category_id }}"
+                                {{ old('category_id') == $category->category_id ? 'selected' : '' }}>
+                                {{ $category->nama_category }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('category_id')
+                        <div class="invalid-msg">
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            {{ $message }}
+                        </div>
+                    @enderror
                 </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" for="name">Nama Package <span class="req">*</span></label>
+                    <input type="text" id="name" name="name" value="{{ old('name') }}"
+                        class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}"
+                        placeholder="cth. Paket Bubut Standar" autofocus>
+                    @error('name')
+                        <div class="invalid-msg">
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Baris 2: Mesin (full width supaya ada ruang) --}}
+            <div class="form-group">
+                <label class="form-label" for="machine_id">Mesin <span class="req">*</span></label>
+                <select id="machine_id" name="machine_id"
+                    class="form-select-ctrl {{ $errors->has('machine_id') ? 'is-invalid' : '' }}">
+                    <option value="">-- Pilih Mesin --</option>
+                    @foreach($machines as $machine)
+                        <option value="{{ $machine->id }}"
+                            {{ old('machine_id') == $machine->id ? 'selected' : '' }}>
+                            {{ $machine->name }} ({{ $machine->code }})
+                        </option>
+                    @endforeach
+                </select>
+                @error('machine_id')
+                    <div class="invalid-msg">
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {{ $message }}
+                    </div>
+                @enderror
+            </div>
 
                 {{-- Deskripsi --}}
                 <div class="form-group">
@@ -173,16 +248,30 @@
                 <div class="section-label">Harga & Penanggungjawab</div>
                 <div class="form-row" style="margin-bottom:20px;">
                     <div class="form-group" style="margin-bottom:0;">
-                        <label class="form-label" for="base_price">Base Price <span class="req">*</span></label>
-                        <div class="input-prefix-wrap" style="display:flex;">
-                            <span class="input-prefix">Rp</span>
-                            <input type="number" id="base_price" name="base_price" value="{{ old('base_price', '0') }}"
-                                class="form-control {{ $errors->has('base_price') ? 'is-invalid' : '' }}"
-                                placeholder="0" min="0" step="1000">
+                        <label class="form-label" for="base_price_display">
+                            Base Price <span class="req">*</span>
+                        </label>
+
+                        {{-- Hidden input yang dikirim ke server --}}
+                        <input type="hidden" id="base_price" name="base_price" value="{{ old('base_price', 0) }}">
+
+                        <div class="price-input-wrap {{ $errors->has('base_price') ? 'is-invalid' : '' }}">
+                            <span class="price-prefix">Rp</span>
+                            <input type="text" id="base_price_display"
+                                class="price-display"
+                                placeholder="0"
+                                inputmode="numeric"
+                                autocomplete="off"
+                                value="{{ old('base_price') ? number_format(old('base_price'), 0, ',', '.') : '' }}">
                         </div>
+
                         @error('base_price')
-                            <div class="invalid-msg"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{{ $message }}</div>
+                            <div class="invalid-msg">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                {{ $message }}
+                            </div>
                         @enderror
+                        <div class="form-hint">Masukkan harga dalam Rupiah, contoh: 1.500.000</div>
                     </div>
                     <div class="form-group" style="margin-bottom:0;">
                         <label class="form-label" for="pic_operator_id">PIC Operator</label>
@@ -292,5 +381,32 @@
             imagePreviewBox.style.display = 'none';
             imageDropzone.style.display   = '';
         });
+
+        // Base price formatter
+        const priceDisplay = document.getElementById('base_price_display');
+        const priceHidden  = document.getElementById('base_price');
+
+        function formatRupiah(val) {
+            const digits = val.replace(/\D/g, '');
+            return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        priceDisplay.addEventListener('input', function () {
+            const raw       = this.value.replace(/\D/g, '');
+            this.value      = raw ? formatRupiah(raw) : '';
+            priceHidden.value = raw || '0';
+        });
+
+        priceDisplay.addEventListener('blur', function () {
+            if (!this.value) {
+                this.value        = '';
+                priceHidden.value = '0';
+            }
+        });
+
+        // Init on page load (untuk old() value)
+        if (priceHidden.value && priceHidden.value !== '0') {
+            priceDisplay.value = formatRupiah(priceHidden.value);
+        }
     </script>
 </x-app-sidebar>

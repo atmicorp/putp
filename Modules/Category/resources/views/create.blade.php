@@ -64,25 +64,9 @@
         </div>
     @endif
 
-    <div class="form-card">
+   <div class="form-card">
         <form action="{{ route('category.store') }}" method="POST">
             @csrf
-
-            <div class="form-group">
-                <label class="form-label" for="category_id">Category ID</label>
-                <input
-                    type="text"
-                    id="category_id"
-                    name="category_id"
-                    class="form-control {{ $errors->has('category_id') ? 'is-invalid' : '' }}"
-                    value="{{ old('category_id') }}"
-                    placeholder="Contoh: CAT-001"
-                    autocomplete="off"
-                >
-                @error('category_id')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
 
             <div class="form-group">
                 <label class="form-label" for="nama_category">Nama Category</label>
@@ -102,7 +86,9 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-primary">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
                     Simpan Category
                 </button>
                 <a href="{{ route('category.index') }}" class="btn-secondary">Batal</a>

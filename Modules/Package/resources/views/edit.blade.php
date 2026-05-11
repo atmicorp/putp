@@ -176,30 +176,63 @@
 
             <div class="form-card-body">
 
+                <div class="section-label">Informasi Dasar</div>
+
+                {{-- Baris 1: Kategori & Nama --}}
                 <div class="form-row" style="margin-bottom:20px;">
                     <div class="form-group" style="margin-bottom:0;">
-                        <label class="form-label" for="name">Nama Package <span class="req">*</span></label>
-                        <input type="text" id="name" name="name" value="{{ old('name', $package->name) }}"
-                            class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}"
-                            placeholder="cth. Paket Bubut Standar" autofocus>
-                        @error('name')
-                            <div class="invalid-msg"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label class="form-label" for="machine_id">Mesin <span class="req">*</span></label>
-                        <select id="machine_id" name="machine_id" class="form-select-ctrl {{ $errors->has('machine_id') ? 'is-invalid' : '' }}">
-                            <option value="">-- Pilih Mesin --</option>
-                            @foreach($machines as $machine)
-                                <option value="{{ $machine->id }}" {{ old('machine_id', $package->machine_id) == $machine->id ? 'selected' : '' }}>
-                                    {{ $machine->name }} ({{ $machine->code }})
+                        <label class="form-label" for="category_id">Kategori <span class="req">*</span></label>
+                        <select id="category_id" name="category_id"
+                            class="form-select-ctrl {{ $errors->has('category_id') ? 'is-invalid' : '' }}">
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->category_id }}"
+                                    {{ old('category_id', $package->category_id) == $category->category_id ? 'selected' : '' }}>
+                                    {{ $category->nama_category }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('machine_id')
-                            <div class="invalid-msg"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{{ $message }}</div>
+                        @error('category_id')
+                            <div class="invalid-msg">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                {{ $message }}
+                            </div>
                         @enderror
                     </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label class="form-label" for="name">Nama Package <span class="req">*</span></label>
+                        <input type="text" id="name" name="name"
+                            value="{{ old('name', $package->name) }}"
+                            class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}"
+                            placeholder="cth. Paket Bubut Standar" autofocus>
+                        @error('name')
+                            <div class="invalid-msg">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- Baris 2: Mesin (full width) --}}
+                <div class="form-group">
+                    <label class="form-label" for="machine_id">Mesin <span class="req">*</span></label>
+                    <select id="machine_id" name="machine_id"
+                        class="form-select-ctrl {{ $errors->has('machine_id') ? 'is-invalid' : '' }}">
+                        <option value="">-- Pilih Mesin --</option>
+                        @foreach($machines as $machine)
+                            <option value="{{ $machine->id }}"
+                                {{ old('machine_id', $package->machine_id) == $machine->id ? 'selected' : '' }}>
+                                {{ $machine->name }} ({{ $machine->code }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('machine_id')
+                        <div class="invalid-msg">
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            {{ $message }}
+                        </div>
+                    @enderror
                 </div>
 
                 <div class="form-group">

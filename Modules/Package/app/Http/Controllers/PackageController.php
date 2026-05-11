@@ -48,13 +48,15 @@ class PackageController extends Controller
     {
         $machines  = Machine::where('is_active', true)->orderBy('name')->get();
         $operators = Operator::all()->sortBy(fn($o) => $o->getAttributes()[array_key_first($o->getAttributes())]);
+        $categories = Category::all();
 
-        return view('package::create', compact('machines', 'operators'));
+        return view('package::create', compact('machines', 'operators', 'categories'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'category_id' => 'required|exists:category,category_id',
             'machine_id'      => 'required|exists:machines,id',
             'pic_operator_id' => 'nullable|exists:operators,id',
             'name'            => 'required|string|max:255',
@@ -88,13 +90,15 @@ class PackageController extends Controller
     {
         $machines  = Machine::where('is_active', true)->orderBy('name')->get();
         $operators = Operator::all()->sortBy(fn($o) => $o->getAttributes()[array_key_first($o->getAttributes())]);
+        $categories = Category::orderBy('nama_category')->get();
 
-        return view('package::edit', compact('package', 'machines', 'operators'));
+        return view('package::edit', compact('package', 'machines', 'operators', 'categories'));
     }
 
     public function update(Request $request, Package $package)
     {
         $validated = $request->validate([
+            'category_id' => 'required|exists:category,category_id',
             'machine_id'      => 'required|exists:machines,id',
             'pic_operator_id' => 'nullable|exists:operators,id',
             'name'            => 'required|string|max:255',

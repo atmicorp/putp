@@ -34,13 +34,19 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category_id'   => 'required|string|max:50|unique:category,category_id',
             'nama_category' => 'required|string|max:255',
         ], [
-            'category_id.required'   => 'Category ID wajib diisi.',
-            'category_id.unique'     => 'Category ID sudah digunakan.',
             'nama_category.required' => 'Nama category wajib diisi.',
         ]);
+
+        // Ambil angka urutan terakhir dari category_id yang ada
+        $last = Category::orderByRaw("CAST(SUBSTRING(category_id, 5) AS UNSIGNED) DESC")
+            ->value('category_id');
+
+        // Ekstrak nomor urut, lalu increment
+        $nextNumber = $last ? ((int) substr($last, 4)) + 1 : 1;
+
+        $validated['category_id'] = 'CAT-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
         Category::create($validated);
 
