@@ -482,37 +482,91 @@
                         {{-- Waktu Pelaksanaan --}}
                         <div>
                             <div class="info-label">Waktu Pelaksanaan</div>
+
                             <div id="waktu-display" class="edit-display">
                                 <span id="waktu-text" class="info-val" style="font-size:13px;">
                                     {{ $order->waktu_pelaksanaan
                                         ? \Carbon\Carbon::parse($order->waktu_pelaksanaan)->translatedFormat('l - d F Y')
                                         : '-' }}
                                 </span>
-                                <button class="btn-edit-sm" onclick="toggleEdit('waktu')">Edit</button>
+
+                                <button
+                                    type="button"
+                                    class="btn-edit-sm"
+                                    onclick="toggleEdit('waktu')">
+                                    Edit
+                                </button>
                             </div>
-                            <div id="waktu-form" style="display:none; margin-top:8px; display:none; flex-wrap:wrap; gap:6px; align-items:center;">
-                                <input type="date" id="waktu-input" class="form-control-sm"
-                                    value="{{ $order->waktu_pelaksanaan ? \Carbon\Carbon::parse($order->waktu_pelaksanaan)->format('Y-m-d') : '' }}">
-                                <button class="btn-save-sm" onclick="saveField('waktu')">Simpan</button>
-                                <button class="btn-cancel-sm" onclick="cancelEdit('waktu')">Batal</button>
+
+                            <div
+                                id="waktu-form"
+                                style="display:none; margin-top:8px; flex-wrap:wrap; gap:6px; align-items:center;">
+
+                                <input
+                                    type="date"
+                                    id="waktu-input"
+                                    class="form-control-sm"
+                                    value="{{ $order->waktu_pelaksanaan
+                                        ? \Carbon\Carbon::parse($order->waktu_pelaksanaan)->format('Y-m-d')
+                                        : '' }}">
+
+                                <button
+                                    type="button"
+                                    class="btn-save-sm"
+                                    onclick="saveField('waktu')">
+                                    Simpan
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="btn-cancel-sm"
+                                    onclick="cancelEdit('waktu')">
+                                    Batal
+                                </button>
                             </div>
                         </div>
 
                         {{-- Lokasi Pelaksanaan --}}
                         <div>
                             <div class="info-label">Lokasi Pelaksanaan</div>
+
                             <div id="lokasi-display" class="edit-display">
                                 <span id="lokasi-text" class="info-val" style="font-size:13px;">
                                     {{ $order->lokasi_pelaksanaan ?? '-' }}
                                 </span>
-                                <button class="btn-edit-sm" onclick="toggleEdit('lokasi')">Edit</button>
+
+                                <button
+                                    type="button"
+                                    class="btn-edit-sm"
+                                    onclick="event.preventDefault(); toggleEdit('lokasi')">
+                                    Edit
+                                </button>
                             </div>
-                            <div id="lokasi-form" style="display:none; margin-top:8px; flex-wrap:wrap; gap:6px; align-items:center;">
-                                <input type="text" id="lokasi-input" class="form-control-sm"
+
+                            <div
+                                id="lokasi-form"
+                                style="display:none; margin-top:8px; flex-wrap:wrap; gap:6px; align-items:center;">
+
+                                <input
+                                    type="text"
+                                    id="lokasi-input"
+                                    class="form-control-sm"
                                     placeholder="Masukkan lokasi..."
                                     value="{{ $order->lokasi_pelaksanaan ?? '' }}">
-                                <button class="btn-save-sm" onclick="saveField('lokasi')">Simpan</button>
-                                <button class="btn-cancel-sm" onclick="cancelEdit('lokasi')">Batal</button>
+
+                                <button
+                                    type="button"
+                                    class="btn-save-sm"
+                                    onclick="event.preventDefault(); saveField('lokasi')">
+                                    Simpan
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="btn-cancel-sm"
+                                    onclick="event.preventDefault(); cancelEdit('lokasi')">
+                                    Batal
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -570,9 +624,9 @@
                                             @endif
                                         </td>
                                         <td>{{ $detail->qty }}</td>
-                                        <td class="text-right price-cell">Rp {{ number_format($detail->price, 0, ',', '.') }}</td>
-                                        <td class="text-right price-cell">Rp {{ number_format($sub, 0, ',', '.') }}</td>
-                                        <td class="text-right price-cell">{{ $detail->nama_mahasiswa ?? '-' }}</td>
+                                        <td class="price-cell">Rp {{ number_format($detail->price, 0, ',', '.') }}</td>
+                                        <td class="price-cell">Rp {{ number_format($sub, 0, ',', '.') }}</td>
+                                        <td class="price-cell">{{ $detail->nama_mahasiswa ?? '-' }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -690,7 +744,7 @@
                                 elseif (blank($order->lokasi_pelaksanaan))                        $reason = 'Lokasi pelaksanaan belum diisi';
                                 elseif (!$order->offer || $order->offer->details->isEmpty())      $reason = 'Detail penawaran belum tersedia';
                             @endphp
-                            <div class="doc-panel-desc">
+                            <div class="doc-panel-desc" id="perjanjian-desc">
                                 @if(!$canOpen && $reason)
                                     <span style="color:#ea580c;">⚠ {{ $reason }}</span>
                                 @else
@@ -698,17 +752,38 @@
                                 @endif
                             </div>
                         </div>
-                        @if ($canOpen)
-                            <a href="{{ route('orders.guest.perjanjian_kerjasama', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
-                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                Buka PDF
-                            </a>
-                        @else
-                            <span class="btn-open-pdf btn-open-pdf--disabled" title="{{ $reason }}">
-                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                Belum Tersedia
-                            </span>
-                        @endif
+                        <div class="doc-panel-action" id="perjanjian-action">
+
+                            @if ($canOpen)
+                                <a
+                                    href="{{ route('orders.guest.perjanjian_kerjasama', [$order->company->slug, $order->access_token]) }}"
+                                    target="_blank"
+                                    class="btn-open-pdf">
+
+                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+
+                                    Buka PDF
+                                </a>
+                            @else
+                                <span
+                                    class="btn-open-pdf btn-open-pdf--disabled"
+                                    title="{{ $reason }}">
+
+                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+
+                                    Belum Tersedia
+                                </span>
+                            @endif
+
+                        </div>
                     </div>
                 </div>
 
@@ -730,7 +805,7 @@
                                 elseif (blank($order->lokasi_pelaksanaan))                        $reason = 'Lokasi pelaksanaan belum diisi';
                                 elseif (!$order->offer || $order->offer->details->isEmpty())      $reason = 'Detail penawaran belum tersedia';
                             @endphp
-                            <div class="doc-panel-desc">
+                            <div class="doc-panel-desc" id="kesanggupan-desc">
                                 @if(!$canOpen && $reason)
                                     <span style="color:#ea580c;">⚠ {{ $reason }}</span>
                                 @else
@@ -738,17 +813,38 @@
                                 @endif
                             </div>
                         </div>
-                        @if ($canOpen)
-                            <a href="{{ route('orders.guest.kesanggupan_kerjasama', [$order->company->slug, $order->access_token]) }}" target="_blank" class="btn-open-pdf">
-                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                Buka PDF
-                            </a>
-                        @else
-                            <span class="btn-open-pdf btn-open-pdf--disabled" title="{{ $reason }}">
-                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                Belum Tersedia
-                            </span>
-                        @endif
+                        <div class="doc-panel-action" id="kesanggupan-action">
+
+                            @if ($canOpen)
+                                <a
+                                    href="{{ route('orders.guest.kesanggupan_kerjasama', [$order->company->slug, $order->access_token]) }}"
+                                    target="_blank"
+                                    class="btn-open-pdf">
+
+                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+
+                                    Buka PDF
+                                </a>
+                            @else
+                                <span
+                                    class="btn-open-pdf btn-open-pdf--disabled"
+                                    title="{{ $reason }}">
+
+                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+
+                                    Belum Tersedia
+                                </span>
+                            @endif
+
+                        </div>
                     </div>
                 </div>
 
@@ -1099,6 +1195,16 @@
         }
     </script>
 
+
+    <script>
+        const perjanjianPdfUrl =
+            "{{ route('orders.guest.perjanjian_kerjasama', [$order->company->slug, $order->access_token]) }}";
+
+        const kesanggupanPdfUrl =
+            "{{ route('orders.guest.kesanggupan_kerjasama', [$order->company->slug, $order->access_token]) }}";
+    </script>
+
+
     {{-- edit waktu dan lokasi pelaksanaan --}}
     <script>
         const updateUrl = "{{ route('orders.update-execution', $order) }}";
@@ -1107,7 +1213,12 @@
         function toggleEdit(field) {
             document.getElementById(field + '-display').style.display = 'none';
             document.getElementById(field + '-form').style.display = 'flex';
-            document.getElementById(field + '-input').focus();
+
+            const input = document.getElementById(field + '-input');
+
+            if (input) {
+                input.focus();
+            }
         }
 
         function cancelEdit(field) {
@@ -1116,13 +1227,23 @@
         }
 
         async function saveField(field) {
+
+            window.event?.preventDefault();
+
             const input = document.getElementById(field + '-input').value;
+
             const body = {};
 
-            if (field === 'waktu') body.waktu_pelaksanaan = input || null;
-            if (field === 'lokasi') body.lokasi_pelaksanaan = input || null;
+            if (field === 'waktu') {
+                body.waktu_pelaksanaan = input || null;
+            }
+
+            if (field === 'lokasi') {
+                body.lokasi_pelaksanaan = input || null;
+            }
 
             try {
+
                 const res = await fetch(updateUrl, {
                     method: 'PATCH',
                     headers: {
@@ -1133,52 +1254,96 @@
                     body: JSON.stringify(body),
                 });
 
+                if (!res.ok) {
+                    console.error(await res.text());
+                    throw new Error('Request gagal');
+                }
+
                 const data = await res.json();
 
+                console.log('updated:', data);
+
                 if (data.success) {
+
                     if (field === 'waktu') {
-                        document.getElementById('waktu-text').textContent = data.waktu_pelaksanaan;
+                        document.getElementById('waktu-text').textContent =
+                            data.waktu_pelaksanaan;
                     }
+
                     if (field === 'lokasi') {
-                        document.getElementById('lokasi-text').textContent = data.lokasi_pelaksanaan;
+                        document.getElementById('lokasi-text').textContent =
+                            data.lokasi_pelaksanaan;
                     }
 
                     if (data.can_open_pdf) {
-                        // PERJANJIAN
-                        const btn1 = document.getElementById('btn-pdf-perjanjian');
-                        if (btn1) {
-                            const newBtn1 = document.createElement('a');
-                            newBtn1.id = 'btn-pdf-perjanjian';
-                            newBtn1.href = btn1.dataset.href;
-                            newBtn1.target = '_blank';
-                            newBtn1.className = 'btn-open-pdf';
-                            newBtn1.innerHTML = btn1.innerHTML;
-                            btn1.replaceWith(newBtn1);
 
-                            const reason1 = document.getElementById('pdf-reason-perjanjian');
-                            if (reason1) reason1.remove();
+                        console.log('OPEN PDF ENABLED');
+
+                        const perjanjianDesc =
+                            document.getElementById('perjanjian-desc');
+
+                        if (perjanjianDesc) {
+
+                            perjanjianDesc.innerHTML =
+                                `Dokumen perjanjian resmi untuk order <strong>{{ $order->order_code }}</strong>.`;
                         }
 
-                        // KESANGGUPAN
-                        const btn2 = document.getElementById('btn-pdf-kesanggupan');
-                        if (btn2) {
-                            const newBtn2 = document.createElement('a');
-                            newBtn2.id = 'btn-pdf-kesanggupan';
-                            newBtn2.href = btn2.dataset.href;
-                            newBtn2.target = '_blank';
-                            newBtn2.className = 'btn-open-pdf';
-                            newBtn2.innerHTML = btn2.innerHTML;
-                            btn2.replaceWith(newBtn2);
+                        const kesanggupanDesc =
+                            document.getElementById('kesanggupan-desc');
 
-                            const reason2 = document.getElementById('pdf-reason-kesanggupan');
-                            if (reason2) reason2.remove();
+                        if (kesanggupanDesc) {
+
+                            kesanggupanDesc.innerHTML =
+                                `Dokumen kesanggupan pelaksanaan untuk order <strong>{{ $order->order_code }}</strong>.`;
+                        }
+
+                        // =========================
+                        // PERJANJIAN
+                        // =========================
+
+                        const perjanjianAction =
+                            document.getElementById('perjanjian-action');
+
+                        if (perjanjianAction) {
+
+                            perjanjianAction.innerHTML = `
+                                <a
+                                    href="${perjanjianPdfUrl}"
+                                    target="_blank"
+                                    class="btn-open-pdf">
+                                    Buka PDF
+                                </a>
+                            `;
+                        }
+
+                        // =========================
+                        // KESANGGUPAN
+                        // =========================
+
+                        const kesanggupanAction =
+                            document.getElementById('kesanggupan-action');
+
+                        if (kesanggupanAction) {
+
+                            kesanggupanAction.innerHTML = `
+                                <a
+                                    href="${kesanggupanPdfUrl}"
+                                    target="_blank"
+                                    class="btn-open-pdf">
+                                    Buka PDF
+                                </a>
+                            `;
                         }
                     }
 
                     cancelEdit(field);
                 }
+
             } catch (e) {
-                alert('Gagal menyimpan. Coba lagi.');
+
+                console.error('ERROR SAVE FIELD:', e);
+
+                alert(e.message);
             }
         }
     </script>

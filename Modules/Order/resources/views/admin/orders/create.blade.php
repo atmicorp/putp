@@ -534,6 +534,83 @@
                     </div>
                 </div>
 
+                {{-- Detail Pengujian (muncul hanya jika mode admin) --}}
+                <div class="card admin-only-card" id="pengujianCard" style="display:none;">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="#ea580c" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="card-title">Detail Pengujian</div>
+                            <div class="card-subtitle">Informasi tambahan terkait keperluan order ini</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        {{-- Tujuan Pengujian --}}
+                        <div class="form-group">
+                            <label>Tujuan Pengujian <span class="req">*</span></label>
+                            <textarea name="tujuan_pengujian" id="tujuan_pengujian" rows="3"
+                                placeholder="Contoh: Pengujian mutu produk untuk sertifikasi SNI…"
+                                class="{{ $errors->has('tujuan_pengujian') ? 'input-error' : '' }}"
+                                style="width:100%;resize:vertical;">{{ old('tujuan_pengujian') }}</textarea>
+                            @error('tujuan_pengujian')
+                                <div class="err-msg">
+                                    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        {{-- Waktu Diharapkan --}}
+                        <div class="form-group">
+                            <label>Waktu Penyelesaian Diharapkan <span class="req">*</span></label>
+                            <input type="date" name="waktu_diharapkan" id="waktu_diharapkan"
+                                value="{{ old('waktu_diharapkan') }}"
+                                min="{{ date('Y-m-d') }}"
+                                class="{{ $errors->has('waktu_diharapkan') ? 'input-error' : '' }}"
+                                style="width:100%;">
+                            @error('waktu_diharapkan')
+                                <div class="err-msg">
+                                    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        {{-- Keterangan Tambahan --}}
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Keterangan Tambahan</label>
+                            <textarea name="keterangan_tambahan" id="keterangan_tambahan" rows="3"
+                                placeholder="Catatan khusus, kondisi sampel, atau permintaan lainnya…"
+                                class="{{ $errors->has('keterangan_tambahan') ? 'input-error' : '' }}"
+                                style="width:100%;resize:vertical;">{{ old('keterangan_tambahan') }}</textarea>
+                            @error('keterangan_tambahan')
+                                <div class="err-msg">
+                                    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                    </div>
+                </div>
+
                 {{-- PIC Internal --}}
                 <div class="card">
                     <div class="card-header">
@@ -1374,20 +1451,37 @@
             toggleCard.classList.toggle('active', isAdmin);
             adminSection.classList.toggle('visible', isAdmin);
 
+            // Tampilkan/sembunyikan card detail pengujian
+            const pengujianCard = document.getElementById('pengujianCard');
+            if (pengujianCard) {
+                pengujianCard.style.display = isAdmin ? '' : 'none';
+            }
+
+            // Toggle required pada field pengujian
+            const tujuan  = document.getElementById('tujuan_pengujian');
+            const waktu   = document.getElementById('waktu_diharapkan');
+            if (tujuan) tujuan.required = isAdmin;
+            if (waktu)  waktu.required  = isAdmin;
+
             if (isAdmin) {
                 toggleDesc.textContent = 'Aktif — Admin memilih paket layanan langsung pada form ini.';
-                document.getElementById('infoBoxText').innerHTML = 'Order dibuat dengan status <strong>Draft</strong>. Paket layanan dipilih langsung oleh admin pada form ini.';
-                document.getElementById('sum-mode').innerHTML   = '<span class="mode-badge admin">Admin mengisi</span>';
+                document.getElementById('infoBoxText').innerHTML =
+                    'Order dibuat dengan status <strong>Draft</strong>. Paket layanan dipilih langsung oleh admin pada form ini.';
+                document.getElementById('sum-mode').innerHTML =
+                    '<span class="mode-badge admin">Admin mengisi</span>';
                 updateSummary();
             } else {
-                toggleDesc.textContent = 'Nonaktif — Customer akan mengisi item sendiri melalui halaman keranjang menggunakan token.';
-                document.getElementById('infoBoxText').innerHTML = 'Order dibuat dengan status <strong>Draft</strong> dan token otomatis dibuat. Item layanan masih kosong dan akan dipilih oleh customer (guest) saat membuka halaman keranjang menggunakan token tersebut.';
-                document.getElementById('sum-mode').innerHTML   = '<span class="mode-badge guest">Guest mengisi sendiri</span>';
-                document.getElementById('sum-items-content').innerHTML = '<div style="font-size:12.5px;color:#6b7280;line-height:1.8;"><em>Akan diisi oleh customer melalui halaman keranjang (guest).</em></div>';
+                toggleDesc.textContent =
+                    'Nonaktif — Customer akan mengisi item sendiri melalui halaman keranjang menggunakan token.';
+                document.getElementById('infoBoxText').innerHTML =
+                    'Order dibuat dengan status <strong>Draft</strong> dan token otomatis dibuat. Item layanan masih kosong dan akan dipilih oleh customer (guest) saat membuka halaman keranjang menggunakan token tersebut.';
+                document.getElementById('sum-mode').innerHTML =
+                    '<span class="mode-badge guest">Guest mengisi sendiri</span>';
+                document.getElementById('sum-items-content').innerHTML =
+                    '<div style="font-size:12.5px;color:#6b7280;line-height:1.8;"><em>Akan diisi oleh customer melalui halaman keranjang (guest).</em></div>';
                 document.getElementById('sum-total').textContent = '—';
             }
         }
-
         toggle.addEventListener('change', function () { applyToggleState(this.checked); });
 
         // ─── Submit ────────────────────────────────────────────────────────────────

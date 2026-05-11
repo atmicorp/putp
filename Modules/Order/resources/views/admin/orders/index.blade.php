@@ -221,6 +221,37 @@
             .stat-value { font-size: 22px; }
             .stat-card  { padding: 12px 12px; }
         }
+
+        /* Stats — 3-col on mobile, 6-col desktop */
+        .stats-row {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        @media (min-width: 900px) {
+            .stats-row { grid-template-columns: repeat(6, 1fr); }
+        }
+
+        /* Warna accent per type */
+        .stat-card:nth-child(1)::after { background: #ea580c; }
+        .stat-card:nth-child(2)::after { background: #6366f1; } /* external - indigo */
+        .stat-card:nth-child(3)::after { background: #0ea5e9; } /* internal - sky */
+        .stat-card:nth-child(4)::after { background: #f59e0b; }
+        .stat-card:nth-child(5)::after { background: #3b82f6; }
+        .stat-card:nth-child(6)::after { background: #10b981; }
+
+        /* Type Filter Tabs */
+        .type-filter {
+            display: flex; gap: 4px; flex-wrap: wrap;
+        }
+        .type-btn {
+            padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;
+            text-decoration: none; color: #6b7280; background: #f3f4f6;
+            border: 1.5px solid transparent; transition: all 0.15s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .type-btn:hover  { background: #e5e7eb; color: #1c1917; }
+        .type-btn.active { background: #fff7ed; color: #ea580c; border-color: #fed7aa; }
+        .type-btn.active-ext { background: #eef2ff; color: #4f46e5; border-color: #c7d2fe; }
+        .type-btn.active-int { background: #f0f9ff; color: #0284c7; border-color: #bae6fd; }
     </style>
 
     <div class="page-header">
@@ -245,22 +276,32 @@
     <div class="stats-row">
         <div class="stat-card">
             <div class="stat-label">Total Order</div>
-            <div class="stat-value">{{ $orders->total() }}</div>
+            <div class="stat-value">{{ $stats['total'] }}</div>
             <div class="stat-desc">Semua order</div>
+        </div>
+        <div class="stat-card stat-external">
+            <div class="stat-label">External</div>
+            <div class="stat-value">{{ $stats['external'] }}</div>
+            <div class="stat-desc">Order eksternal</div>
+        </div>
+        <div class="stat-card stat-internal">
+            <div class="stat-label">Internal</div>
+            <div class="stat-value">{{ $stats['internal'] }}</div>
+            <div class="stat-desc">Order internal</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Draft</div>
-            <div class="stat-value">{{ \App\Models\Order::where('status', 'draft')->count() }}</div>
+            <div class="stat-value">{{ $stats['draft'] }}</div>
             <div class="stat-desc">Belum dikirim</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Offered</div>
-            <div class="stat-value">{{ \App\Models\Order::where('status', 'offered')->count() }}</div>
+            <div class="stat-value">{{ $stats['offered'] }}</div>
             <div class="stat-desc">Penawaran terkirim</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Done</div>
-            <div class="stat-value">{{ \App\Models\Order::where('status', 'done')->count() }}</div>
+            <div class="stat-value">{{ $stats['done'] }}</div>
             <div class="stat-desc">Selesai</div>
         </div>
     </div>
@@ -271,6 +312,14 @@
             <div class="toolbar-top">
                 <div>
                     <div class="table-toolbar-title">Daftar Order</div>
+                </div>
+                <div class="type-filter">
+                    <a href="{{ route('admin.orders.index') }}"
+                    class="type-btn {{ !$type ? 'active' : '' }}">Semua</a>
+                    <a href="{{ route('admin.orders.index', ['type' => 'external']) }}"
+                    class="type-btn type-btn-ext {{ $type === 'external' ? 'active-ext' : '' }}">External</a>
+                    <a href="{{ route('admin.orders.index', ['type' => 'internal']) }}"
+                    class="type-btn type-btn-int {{ $type === 'internal' ? 'active-int' : '' }}">Internal</a>
                 </div>
                 <span class="record-count">{{ $orders->total() }} records</span>
             </div>

@@ -18,33 +18,44 @@ class DashboardController extends Controller
             ->pluck('total', 'status');
 
         $totalOrders  = Order::count();
-        $doneOrders   = $countByStatus[Order::STATUS_DONE]           ?? 0;
-        $activeOrders = ($countByStatus[Order::STATUS_OFFERED]       ?? 0)
-                      + ($countByStatus[Order::STATUS_APPROVED]      ?? 0)
-                      + ($countByStatus[Order::STATUS_PROCESSING]    ?? 0)
-                      + ($countByStatus[Order::STATUS_SUBMIT    ]    ?? 0);
+        $doneOrders   = $countByStatus[Order::STATUS_DONE]        ?? 0;
+        $activeOrders = ($countByStatus[Order::STATUS_OFFERED]    ?? 0)
+                    + ($countByStatus[Order::STATUS_APPROVED]   ?? 0)
+                    + ($countByStatus[Order::STATUS_PROCESSING] ?? 0)
+                    + ($countByStatus[Order::STATUS_SUBMIT]     ?? 0);
 
         $newThisMonth = Order::whereMonth('created_at', now()->month)
-                             ->whereYear('created_at',  now()->year)
-                             ->count();
+                            ->whereYear('created_at',  now()->year)
+                            ->count();
 
-        $recentOrders = Order::with('creator')->latest()->take(8)->get();
+        $externalOrders = Order::where('type', 'external')->count();
+        $internalOrders = Order::where('type', 'internal')->count();
+
+        $monthlyData     = $this->buildMonthlyData();
+        $monthlyExternal = $this->buildMonthlyData('external');
+        $monthlyInternal = $this->buildMonthlyData('internal');
+
+        $recentOrders = Order::with(['creator', 'company', 'contact'])->latest()->take(8)->get();
 
         $monthlyData = $this->buildMonthlyData();
 
         return view('dashboard', [
-            'statuses'      => $statuses,
-            'countByStatus' => $countByStatus,
-            'totalOrders'   => $totalOrders,
-            'doneOrders'    => $doneOrders,
-            'activeOrders'  => $activeOrders,
-            'newThisMonth'  => $newThisMonth,
-            'recentOrders'  => $recentOrders,
-            'chartLabels'   => $monthlyData->pluck('label')->toJson(),
-            'chartCounts'   => $monthlyData->pluck('count')->toJson(),
-            'statusLabels'  => collect($statuses)->pluck('label')->values()->toJson(),
-            'statusColors'  => collect($statuses)->pluck('color')->values()->toJson(),
-            'statusCounts'  => collect($statuses)->keys()
+            'statuses'       => $statuses,
+            'countByStatus'  => $countByStatus,
+            'totalOrders'    => $totalOrders,
+            'doneOrders'     => $doneOrders,
+            'activeOrders'   => $activeOrders,
+            'newThisMonth'   => $newThisMonth,
+            'externalOrders' => $externalOrders,
+            'internalOrders' => $internalOrders,
+            'recentOrders'   => $recentOrders,
+            'chartLabels'    => $monthlyData->pluck('label')->toJson(),
+            'chartCounts'    => $monthlyData->pluck('count')->toJson(),
+            'chartExternal'  => $monthlyExternal->pluck('count')->toJson(),
+            'chartInternal'  => $monthlyInternal->pluck('count')->toJson(),
+            'statusLabels'   => collect($statuses)->pluck('label')->values()->toJson(),
+            'statusColors'   => collect($statuses)->pluck('color')->values()->toJson(),
+            'statusCounts'   => collect($statuses)->keys()
                                     ->map(fn($s) => $countByStatus[$s] ?? 0)
                                     ->values()->toJson(),
         ]);
@@ -61,17 +72,22 @@ class DashboardController extends Controller
      */
     public function filterData(Request $request)
     {
-        $type = $request->input('filter_type', 'default');
+        $type      = $request->input('filter_type', 'default');
+        $orderType = $request->input('order_type');
 
         [$startDate, $endDate, $chartData] = match ($type) {
-            'month' => $this->resolveMonthFilter($request),
-            'week'  => $this->resolveWeekFilter($request),
-            'range' => $this->resolveRangeFilter($request),
-            default => [null, null, $this->buildMonthlyData()],
+            'month' => $this->resolveMonthFilter($request, $orderType),
+            'week'  => $this->resolveWeekFilter($request, $orderType),
+            'range' => $this->resolveRangeFilter($request, $orderType),
+            default => [null, null, $this->buildMonthlyData($orderType)],
         };
 
+        // Chart breakdown per type (selalu hitung keduanya, ignore $orderType filter untuk comparison)
+        $chartExternal = $this->buildChartData($type, $request, 'external');
+        $chartInternal = $this->buildChartData($type, $request, 'internal');
+
         $statuses      = $this->getStatuses();
-        $countByStatus = $this->countByStatusInRange($startDate, $endDate);
+        $countByStatus = $this->countByStatusInRange($startDate, $endDate, $orderType);
 
         $statusData = collect($statuses)->map(function ($s, $key) use ($countByStatus) {
             return [
@@ -82,12 +98,16 @@ class DashboardController extends Controller
             ];
         })->values();
 
-        $total = Order::when($startDate, fn($q) => $q->whereBetween('created_at', [$startDate, $endDate]))->count();
+        $total = Order::when($orderType, fn($q) => $q->where('type', $orderType))
+                    ->when($startDate, fn($q) => $q->whereBetween('created_at', [$startDate, $endDate]))
+                    ->count();
 
         return response()->json([
             'chart' => [
-                'labels' => $chartData->pluck('label'),
-                'counts' => $chartData->pluck('count'),
+                'labels'   => $chartData->pluck('label'),
+                'counts'   => $chartData->pluck('count'),
+                'external' => $chartExternal->pluck('count'),
+                'internal' => $chartInternal->pluck('count'),
             ],
             'statuses'    => $statusData,
             'totalOrders' => $total,
@@ -110,19 +130,19 @@ class DashboardController extends Controller
     }
 
     /** Default: 6 bulan terakhir, tiap titik = 1 bulan */
-    private function buildMonthlyData()
+    private function buildMonthlyData(?string $orderType = null)
     {
-        return collect(range(5, 0))->map(function ($i) {
+        return collect(range(5, 0))->map(function ($i) use ($orderType) {
             $date  = now()->subMonths($i);
-            $count = Order::whereYear('created_at',  $date->year)
-                          ->whereMonth('created_at', $date->month)
-                          ->count();
+            $count = Order::when($orderType, fn($q) => $q->where('type', $orderType))
+                        ->whereYear('created_at',  $date->year)
+                        ->whereMonth('created_at', $date->month)
+                        ->count();
             return ['label' => $date->format('M Y'), 'count' => $count];
         });
     }
 
-    /** Filter: bulan tertentu → tiap titik = 1 hari */
-    private function resolveMonthFilter(Request $request): array
+    private function resolveMonthFilter(Request $request, ?string $orderType = null): array
     {
         $month     = $request->input('month', now()->format('Y-m'));
         $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
@@ -132,18 +152,17 @@ class DashboardController extends Controller
         $cursor    = $startDate->copy();
         while ($cursor->lte($endDate)) {
             $day   = $cursor->copy();
-            $count = Order::whereDate('created_at', $day)->count();
+            $count = Order::when($orderType, fn($q) => $q->where('type', $orderType))
+                        ->whereDate('created_at', $day)->count();
             $chartData->push(['label' => $day->format('d'), 'count' => $count]);
             $cursor->addDay();
         }
-
         return [$startDate, $endDate, $chartData];
     }
 
-    /** Filter: minggu tertentu → tiap titik = 1 hari (Sen–Min) */
-    private function resolveWeekFilter(Request $request): array
+    private function resolveWeekFilter(Request $request, ?string $orderType = null): array
     {
-        $week  = $request->input('week'); // format: YYYY-WW
+        $week  = $request->input('week');
         if ($week && preg_match('/^(\d{4})-(\d{2})$/', $week, $m)) {
             $startDate = Carbon::now()->setISODate((int)$m[1], (int)$m[2])->startOfWeek();
         } else {
@@ -155,63 +174,70 @@ class DashboardController extends Controller
         $cursor    = $startDate->copy();
         while ($cursor->lte($endDate)) {
             $day   = $cursor->copy();
-            $count = Order::whereDate('created_at', $day)->count();
+            $count = Order::when($orderType, fn($q) => $q->where('type', $orderType))
+                        ->whereDate('created_at', $day)->count();
             $chartData->push(['label' => $day->format('D, d M'), 'count' => $count]);
             $cursor->addDay();
         }
-
         return [$startDate, $endDate, $chartData];
     }
 
-    /** Filter: range tanggal bebas → tiap titik = 1 hari (jika ≤31 hari) atau 1 minggu */
-    private function resolveRangeFilter(Request $request): array
+    private function resolveRangeFilter(Request $request, ?string $orderType = null): array
     {
         $startDate = Carbon::parse($request->input('date_from', now()->subDays(29)->format('Y-m-d')))->startOfDay();
         $endDate   = Carbon::parse($request->input('date_to',   now()->format('Y-m-d')))->endOfDay();
-
         $diffDays  = $startDate->diffInDays($endDate);
 
         $chartData = collect();
-
         if ($diffDays <= 31) {
-            // Harian
             $cursor = $startDate->copy();
             while ($cursor->lte($endDate)) {
                 $day   = $cursor->copy();
-                $count = Order::whereDate('created_at', $day)->count();
+                $count = Order::when($orderType, fn($q) => $q->where('type', $orderType))
+                            ->whereDate('created_at', $day)->count();
                 $chartData->push(['label' => $day->format('d M'), 'count' => $count]);
                 $cursor->addDay();
             }
         } elseif ($diffDays <= 90) {
-            // Mingguan
             $cursor = $startDate->copy()->startOfWeek();
             while ($cursor->lte($endDate)) {
                 $weekStart = $cursor->copy();
                 $weekEnd   = $cursor->copy()->endOfWeek()->min($endDate);
-                $count     = Order::whereBetween('created_at', [$weekStart, $weekEnd])->count();
+                $count     = Order::when($orderType, fn($q) => $q->where('type', $orderType))
+                                ->whereBetween('created_at', [$weekStart, $weekEnd])->count();
                 $chartData->push(['label' => $weekStart->format('d M'), 'count' => $count]);
                 $cursor->addWeek();
             }
         } else {
-            // Bulanan
             $cursor = $startDate->copy()->startOfMonth();
             while ($cursor->lte($endDate)) {
                 $monthStart = $cursor->copy()->startOfMonth()->max($startDate);
                 $monthEnd   = $cursor->copy()->endOfMonth()->min($endDate);
-                $count      = Order::whereBetween('created_at', [$monthStart, $monthEnd])->count();
+                $count      = Order::when($orderType, fn($q) => $q->where('type', $orderType))
+                                ->whereBetween('created_at', [$monthStart, $monthEnd])->count();
                 $chartData->push(['label' => $cursor->format('M Y'), 'count' => $count]);
                 $cursor->addMonth();
             }
         }
-
         return [$startDate, $endDate, $chartData];
     }
 
-    private function countByStatusInRange(?Carbon $from, ?Carbon $to): \Illuminate\Support\Collection
+    private function countByStatusInRange(?Carbon $from, ?Carbon $to, ?string $orderType = null): \Illuminate\Support\Collection
     {
         return Order::selectRaw('status, count(*) as total')
+            ->when($orderType, fn($q) => $q->where('type', $orderType))
             ->when($from, fn($q) => $q->whereBetween('created_at', [$from, $to]))
             ->groupBy('status')
             ->pluck('total', 'status');
+    }
+
+    private function buildChartData(string $type, Request $request, string $orderType): \Illuminate\Support\Collection
+    {
+        return match ($type) {
+            'month' => $this->resolveMonthFilter($request, $orderType)[2],
+            'week'  => $this->resolveWeekFilter($request, $orderType)[2],
+            'range' => $this->resolveRangeFilter($request, $orderType)[2],
+            default => $this->buildMonthlyData($orderType),
+        };
     }
 }

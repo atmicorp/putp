@@ -18,6 +18,7 @@ class Order extends Model
     protected $fillable = [
         'order_code',
         'access_token',
+        'type',
         'company_id',
         'contact_id',
         'status',
@@ -54,6 +55,8 @@ class Order extends Model
     public const STATUS_APPROVED     = 'approved';
     public const STATUS_PROCESSING   = 'processing';
     public const STATUS_DONE         = 'done';
+    public const TYPE_INTERNAL = 'internal';
+    public const TYPE_EXTERNAL = 'external';
 
     /*
     |--------------------------------------------------------------------------
@@ -70,9 +73,15 @@ class Order extends Model
             }
 
             if (blank($order->order_code)) {
+                $prefix = match($order->type) {
+                    self::TYPE_INTERNAL => 'INT',
+                    self::TYPE_EXTERNAL => 'EXT',
+                    default             => 'ORD',
+                };
+
                 do {
                     $order->order_code =
-                        'ORD-' . now()->format('Ymd') . '-' . Str::upper(Str::random(6));
+                        'ORD-' . now()->format('Ymd') . '-' . $prefix . rand(100, 999);
                 } while (self::where('order_code', $order->order_code)->exists());
             }
 
@@ -143,17 +152,21 @@ class Order extends Model
 
     public function canOpenMouKesanggupanPdf(): bool
     {
-        // Kondisi 0: status harus approved
-        if ($this->status !== self::STATUS_APPROVED) {
+        // Status harus approved atau setelahnya
+        if (!in_array($this->status, [
+            self::STATUS_APPROVED,
+            self::STATUS_PROCESSING,
+            self::STATUS_DONE,
+        ])) {
             return false;
         }
 
-        // Kondisi tambahan: waktu & lokasi harus ada
+        // Waktu & lokasi harus ada
         if (blank($this->waktu_pelaksanaan) || blank($this->lokasi_pelaksanaan)) {
             return false;
         }
 
-        // Kondisi 1: order offer harus sudah ada
+        // Order offer harus ada
         if (!$this->relationLoaded('offer')) {
             $this->load('offer.details');
         }
@@ -162,11 +175,11 @@ class Order extends Model
             return false;
         }
 
-        // Kondisi 2: offer harus punya minimal 1 detail
+        // Offer minimal punya 1 detail
         if ($this->offer->details->isEmpty()) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -179,4 +192,5 @@ class Order extends Model
     {
         return $this->status === self::STATUS_DONE;
     }
+
 }

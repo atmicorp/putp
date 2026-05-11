@@ -20,13 +20,30 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Modules\Order\Mail\CustomerSubmittedItemsMail;
 use Modules\Order\Mail\OfferLinkMail;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::latest()->paginate(10);
-        return view('order::admin.orders.index', compact('orders'));
+        $type = $request->query('type'); // null | 'external' | 'internal'
+
+        $orders = Order::query()
+            ->when($type, fn($q) => $q->where('type', $type))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        $stats = [
+            'total'    => Order::count(),
+            'external' => Order::where('type', 'external')->count(),
+            'internal' => Order::where('type', 'internal')->count(),
+            'draft'    => Order::where('status', 'draft')->count(),
+            'offered'  => Order::where('status', 'offered')->count(),
+            'done'     => Order::where('status', 'done')->count(),
+        ];
+
+        return view('order::admin.orders.index', compact('orders', 'stats', 'type'));
     }
 
     public function create()
@@ -109,6 +126,11 @@ class OrderController extends Controller
             'pic_id'                 => ['required', 'integer', 'exists:users,id'],
             'filled_by'              => ['required', 'in:customer,admin'],
 
+            // Field tambahan — wajib hanya jika mode admin
+            'tujuan_pengujian'       => ['required_if:filled_by,admin', 'nullable', 'string', 'max:1000'],
+            'waktu_diharapkan'       => ['required_if:filled_by,admin', 'nullable', 'date', 'after_or_equal:today'],
+            'keterangan_tambahan'    => ['nullable', 'string', 'max:2000'],
+
             // Validasi items hanya jika mode admin
             'items'                  => ['required_if:filled_by,admin', 'array', 'min:1'],
             'items.*.package_id'     => ['required_if:filled_by,admin', 'integer', 'exists:packages,id'],
@@ -119,17 +141,26 @@ class OrderController extends Controller
         $contact = Contact::findOrFail($data['contact_id']);
 
         $order = Order::create([
-            'company_id'     => $data['company_id'],
-            'contact_id'     => $data['contact_id'],
-            'pic_id'         => $data['pic_id'], 
-            'customer_name'  => $contact->name,
-            'customer_slug'  => Str::slug($contact->name) . '-' . Str::random(6),
-            'customer_email' => $contact->email ?? '',
-            'created_by'     => auth()->id(),
-            'status'         => Order::STATUS_DRAFT,
+            'company_id'          => $data['company_id'],
+            'contact_id'          => $data['contact_id'],
+            'pic_id'              => $data['pic_id'],
+            'customer_name'       => $contact->name,
+            'customer_slug'       => Str::slug($contact->name) . '-' . Str::random(6),
+            'customer_email'      => $contact->email ?? '',
+            'created_by'          => auth()->id(),
+            'status'              => $data['filled_by'] === 'admin' ? Order::STATUS_SUBMIT : Order::STATUS_DRAFT,
+            'type'                => $data['filled_by'] === 'admin' ? Order::TYPE_INTERNAL : Order::TYPE_EXTERNAL,
+            'tujuan_pengujian'    => $data['tujuan_pengujian']    ?? null,
+            'waktu_diharapkan'    => $data['waktu_diharapkan']    ?? null,
+            'keterangan_tambahan' => $data['keterangan_tambahan'] ?? null,
         ]);
 
         if ($data['filled_by'] === 'admin' && !empty($data['items'])) {
+            $offer = $order->offer()->create([
+                'notes' => null,
+                'terms' => null,
+            ]);
+
             foreach ($data['items'] as $item) {
                 $package = Package::findOrFail($item['package_id']);
 
@@ -137,11 +168,10 @@ class OrderController extends Controller
                     ? (float) $item['custom_price']
                     : (float) $package->base_price;
 
-                $order->offerDetails()->create([
+                $offer->details()->create([
                     'package_id' => $package->id,
                     'qty'        => $item['qty'],
-                    'unit_price' => $unitPrice,
-                    'subtotal'   => $unitPrice * $item['qty'],
+                    'price'      => $unitPrice,
                 ]);
             }
         }
@@ -197,91 +227,190 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order)
     {
-        // Strip thousand separator dari price sebelum validasi
+        Log::info('Mulai update order', [
+            'order_id'   => $order->id,
+            'order_code' => $order->order_code,
+            'user_id'    => auth()->id(),
+        ]);
+
+        // =========================
+        // FORMAT PRICE
+        // =========================
         $items = $request->input('items', []);
+
         foreach ($items as $i => $item) {
+
             if (isset($item['price'])) {
                 $items[$i]['price'] = str_replace('.', '', $item['price']);
             }
         }
-        $request->merge(['items' => $items]);
 
+        $request->merge([
+            'items' => $items
+        ]);
+
+        Log::info('Items setelah formatting', [
+            'items' => $items
+        ]);
+
+        // =========================
+        // VALIDATION
+        // =========================
         $data = $request->validate([
-            'company'  => ['required', 'string', 'max:255'],
-            'contact'  => ['nullable', 'string', 'max:255'],
-            'email'    => ['nullable', 'email', 'max:255'],
 
             'notes' => ['nullable', 'string'],
             'terms' => ['nullable', 'string'],
 
-            'items'          => ['required', 'array', 'min:1'],
-            'items.*.id'     => ['required', 'integer', 'exists:order_offer_details,id'],
-            'items.*.qty'    => ['required', 'integer', 'min:1'],
-            'items.*.price'  => ['required', 'numeric', 'min:0'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.id' => ['required', 'integer', 'exists:order_offer_details,id'],
+            'items.*.qty' => ['required', 'integer', 'min:1'],
+            'items.*.price' => ['required', 'numeric', 'min:0'],
             'items.*.nama_mahasiswa' => ['nullable', 'string', 'max:255'],
 
-            'offer_file'   => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'offer_file' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
             'invoice_file' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
-        // Update atau buat Company
-        $company = $order->company
-            ? tap($order->company)->update(['name' => $data['company']])
-            : Company::create(['name' => $data['company']]);
+        Log::info('Validasi berhasil');
 
-        // Update atau buat Contact
-        $contact = $order->contact
-            ? tap($order->contact)->update([
-                'name'  => $data['contact'] ?? $order->contact->name,
-                'email' => $data['email']   ?? $order->contact->email,
-            ])
-            : ($data['contact']
-                ? $company->contacts()->create([
-                    'name'  => $data['contact'],
-                    'email' => $data['email'] ?? null,
-                ])
-                : null);
+        // =========================
+        // OFFER
+        // =========================
+        $order->load('offer.details');
 
-        $order->update([
-            'company_id' => $company->id,
-            'contact_id' => $contact?->id,
+        $offer = $order->offer;
+
+        if (! $offer) {
+
+            $offer = $order->offer()->create([]);
+
+            Log::info('Offer dibuat', [
+                'offer_id' => $offer->id
+            ]);
+        }
+
+        Log::info('Offer sebelum update', [
+            'offer_id' => $offer->id,
+            'old_notes' => $offer->notes,
+            'old_terms' => $offer->terms,
         ]);
 
-        // Offer
-        $order->load('offer.details');
-        $offer = $order->offer ?? $order->offer()->create([]);
         $offer->update([
             'notes' => $data['notes'] ?? null,
             'terms' => $data['terms'] ?? null,
         ]);
 
-        // Update items
+        $offer->refresh();
+
+        Log::info('Offer sesudah update', [
+            'offer_id' => $offer->id,
+            'new_notes' => $offer->notes,
+            'new_terms' => $offer->terms,
+        ]);
+
+        // =========================
+        // UPDATE ITEMS
+        // =========================
         $allowedDetailIds = $offer->details()->pluck('id')->all();
 
+        Log::info('Allowed detail ids', [
+            'allowed_ids' => $allowedDetailIds
+        ]);
+
         foreach ($data['items'] as $item) {
+
+            Log::info('Memproses item', [
+                'item' => $item
+            ]);
+
             if (! in_array((int) $item['id'], $allowedDetailIds, true)) {
+
+                Log::warning('Item tidak termasuk dalam offer', [
+                    'detail_id' => $item['id']
+                ]);
+
                 continue;
             }
 
-            OrderOfferDetail::where('id', $item['id'])->update([
-                'qty'   => (int) $item['qty'],
+            $detail = OrderOfferDetail::find($item['id']);
+
+            if (! $detail) {
+
+                Log::warning('Detail tidak ditemukan', [
+                    'detail_id' => $item['id']
+                ]);
+
+                continue;
+            }
+
+            Log::info('Detail sebelum update', [
+                'detail_id' => $detail->id,
+                'old_qty' => $detail->qty,
+                'old_price' => $detail->price,
+                'old_nama_mahasiswa' => $detail->nama_mahasiswa,
+            ]);
+
+            $updated = $detail->update([
+                'qty' => (int) $item['qty'],
                 'price' => (float) $item['price'],
                 'nama_mahasiswa' => $item['nama_mahasiswa'] ?? null,
             ]);
+
+            Log::info('Hasil update detail', [
+                'detail_id' => $detail->id,
+                'updated' => $updated,
+            ]);
+
+            $detail->refresh();
+
+            Log::info('Detail sesudah update', [
+                'detail_id' => $detail->id,
+                'new_qty' => $detail->qty,
+                'new_price' => $detail->price,
+                'new_nama_mahasiswa' => $detail->nama_mahasiswa,
+            ]);
         }
 
-        // Upload file
+        // =========================
+        // FILE UPLOAD
+        // =========================
         $dir = 'orders/' . $order->order_code;
+
         if ($request->hasFile('offer_file')) {
-            $path = $request->file('offer_file')->storeAs($dir, 'penawaran.pdf', 'public');
-            $offer->update(['offer_file_path' => $path]);
-        }
-        if ($request->hasFile('invoice_file')) {
-            $path = $request->file('invoice_file')->storeAs($dir, 'invoice.pdf', 'public');
-            $offer->update(['invoice_file_path' => $path]);
+
+            $path = $request->file('offer_file')
+                ->storeAs($dir, 'penawaran.pdf', 'public');
+
+            $offer->update([
+                'offer_file_path' => $path
+            ]);
+
+            Log::info('Offer file berhasil diupload', [
+                'path' => $path
+            ]);
         }
 
-        return redirect()->route('admin.orders.show', $order)
+        if ($request->hasFile('invoice_file')) {
+
+            $path = $request->file('invoice_file')
+                ->storeAs($dir, 'invoice.pdf', 'public');
+
+            $offer->update([
+                'invoice_file_path' => $path
+            ]);
+
+            Log::info('Invoice file berhasil diupload', [
+                'path' => $path
+            ]);
+        }
+
+        Log::info('Selesai update order', [
+            'order_id' => $order->id,
+            'order_code' => $order->order_code,
+        ]);
+
+        return redirect()
+            ->route('admin.orders.show', $order)
             ->with('success', 'Order berhasil diperbarui.');
     }
 

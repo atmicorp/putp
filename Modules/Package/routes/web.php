@@ -8,5 +8,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::get('packages/{package}/image', [PackageController::class, 'serveImage'])
-    ->name('package.image')
-    ->middleware('auth');
+    ->name('package.image');
