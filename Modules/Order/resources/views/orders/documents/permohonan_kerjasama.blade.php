@@ -68,7 +68,7 @@
     {{-- JUDUL --}}
     <div class="judul">
         <h1>Surat Permohonan Kerjasama (PKS)</h1>
-        <p>Nomor : </p>
+        <p>Nomor : {{ $suratPks->nomor_surat }}</p>
     </div>
 
     {{-- KEPADA --}}

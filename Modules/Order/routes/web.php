@@ -15,29 +15,16 @@ Route::middleware(['web', 'auth'])->prefix('admin')->group(function () {
     Route::post('/orders/{order}/send-offer', [AdminOrderController::class, 'sendOffer'])->name('admin.orders.sendOffer');
     Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
      ->name('admin.orders.updateStatus');
-    
-    // Permohonan Kerjasama
-    Route::get('orders/{order}/permohonan-kerjasama', [AdminOrderController::class, 'PermohonanKerjasama'])
-    ->name('admin.orders.permohonan_kerjasama');
-
-    //Perjanjian Kerjasama
-    Route::get('orders/{order}/perjanjian-kerjasama', [AdminOrderController::class, 'PerjanjianKerjasama'])
-    ->name('admin.orders.perjanjian_kerjasama');
-
-    //Surat Kesanggupan Kerjasama
-    Route::get('orders/{order}/kesanggupan-kerjasama', [AdminOrderController::class, 'KesanggupanKerjasama'])
-    ->name('admin.orders.kesanggupan_kerjasama');
-
-    //Berita Acara Penyelesaian Kerjasama
-    Route::get('orders/{order}/bap', [AdminOrderController::class, 'bap'])
-    ->name('admin.orders.bap');
-
-    //Laporan Kegiatan Kerjasama
-    Route::get('orders/{order}/laporan-kegiatan-kerjasama', [AdminOrderController::class, 'LaporanKegiatanKerjasama'])
-    ->name('admin.orders.laporan_kegiatan_kerjasama');
 
     Route::patch('orders/{order}/execution', [AdminOrderController::class, 'updateExecution'])
     ->name('orders.update-execution');
+
+    // Hasil Uji Files
+    Route::post('/orders/{order}/hasil-uji',                    [AdminOrderController::class, 'storeHasilUji'])    ->name('admin.orders.hasil-uji.store');
+    Route::get('/orders/{order}/hasil-uji/{file}',              [AdminOrderController::class, 'showHasilUji'])     ->name('admin.orders.hasil-uji.show');
+    Route::get('/orders/{order}/hasil-uji/{file}/download',     [AdminOrderController::class, 'downloadHasilUji']) ->name('admin.orders.hasil-uji.download');
+    Route::delete('/orders/{order}/hasil-uji/{file}',           [AdminOrderController::class, 'destroyHasilUji'])  ->name('admin.orders.hasil-uji.destroy');
+
 });
 
 // Guest route (tanpa login)
@@ -47,6 +34,8 @@ Route::middleware(['web', 'throttle:30,1'])->group(function () {
     Route::get('/orders/{slug}/{token}/kesanggupan-kerjasama', [GuestOrderController::class, 'KesanggupanKerjasama'])->name('orders.guest.kesanggupan_kerjasama');
     Route::get('/orders/{slug}/{token}/bap', [GuestOrderController::class, 'bap'])->name('orders.guest.bap');
     Route::get('/orders/{slug}/{token}/laporan-kegiatan', [GuestOrderController::class, 'LaporanKegiatanKerjasama'])->name('orders.guest.laporan_kegiatan');
+    Route::get('/orders/{slug}/{token}/hasil-uji/{file}/download', [GuestOrderController::class, 'downloadHasilUji'])
+    ->name('orders.guest.hasil-uji.download');
 
     // Taruh show SETELAH route dokumen
     Route::get('/orders/{slug}/{token}', [GuestOrderController::class, 'show'])->name('orders.guest.show');

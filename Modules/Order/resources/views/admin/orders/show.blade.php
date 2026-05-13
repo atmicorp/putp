@@ -392,6 +392,338 @@
             padding: 4px 16px 0; align-items: center; gap: 4px; justify-content: flex-end;
         }
         @media (max-width: 640px) { .scroll-hint { display: flex; } }
+
+        .custom-modal{
+            position:fixed;
+            inset:0;
+            background:rgba(15,23,42,.45);
+            z-index:9999;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            padding:20px;
+        }
+
+        .custom-modal-content{
+            width:100%;
+            max-width:850px;
+            background:#fff;
+            border-radius:18px;
+            overflow:hidden;
+            box-shadow:0 20px 50px rgba(0,0,0,.15);
+            animation:fadeUp .2s ease;
+        }
+
+        @keyframes fadeUp{
+            from{
+                transform:translateY(10px);
+                opacity:0;
+            }
+            to{
+                transform:translateY(0);
+                opacity:1;
+            }
+        }
+
+        /* ── Modal Overlay ─────────────────────────────────────────── */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1050;
+            background: rgba(15, 23, 42, 0.5);
+            align-items: flex-end;        /* mobile: sheet dari bawah */
+            justify-content: center;
+            padding: 0;
+        }
+
+        @media (min-width: 640px) {
+            .custom-modal {
+                align-items: center;      /* desktop: tengah layar */
+                padding: 24px;
+            }
+        }
+
+        /* ── Modal Box ──────────────────────────────────────────────── */
+        .custom-modal-content {
+            background: #fff;
+            width: 100%;
+            max-width: 580px;
+            max-height: 92dvh;
+            overflow-y: auto;
+            border-radius: 20px 20px 0 0;  /* mobile: bottom sheet */
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 640px) {
+            .custom-modal-content {
+                border-radius: 20px;        /* desktop: rounded semua sisi */
+                max-height: 88dvh;
+            }
+        }
+
+        /* ── Drag handle (mobile only) ──────────────────────────────── */
+        .modal-drag-handle {
+            display: flex;
+            justify-content: center;
+            padding: 10px 0 2px;
+        }
+
+        .modal-drag-handle span {
+            width: 36px;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 99px;
+        }
+
+        @media (min-width: 640px) {
+            .modal-drag-handle { display: none; }
+        }
+
+        /* ── Header ─────────────────────────────────────────────────── */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 1;
+        }
+
+        @media (min-width: 640px) {
+            .modal-header { padding: 22px 24px; }
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        @media (min-width: 640px) {
+            .modal-title { font-size: 18px; }
+        }
+
+        .modal-subtitle {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        .modal-close {
+            border: none;
+            background: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #64748b;
+            line-height: 1;
+            padding: 4px;
+            /* area sentuh lebih besar di mobile */
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── Upload Area ─────────────────────────────────────────────── */
+        .upload-box {
+            padding: 16px;
+        }
+
+        @media (min-width: 640px) {
+            .upload-box { padding: 24px; }
+        }
+
+        .upload-label {
+            display: block;
+            cursor: pointer;
+        }
+
+        .upload-inner {
+            border: 2px dashed #99f6e4;
+            background: #f0fdfa;
+            border-radius: 16px;
+            padding: 24px 16px;
+            text-align: center;
+        }
+
+        @media (min-width: 640px) {
+            .upload-inner { padding: 35px; }
+        }
+
+        .upload-title {
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        @media (min-width: 640px) {
+            .upload-title { font-size: 15px; }
+        }
+
+        .upload-desc {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .selected-files {
+            margin-top: 14px;
+            font-size: 13px;
+            color: #0f766e;
+        }
+
+        /* ── Submit Button ───────────────────────────────────────────── */
+        .btn-upload-submit {
+            display: block;
+            width: calc(100% - 32px);
+            margin: 0 16px 16px;
+            border: none;
+            background: #0f766e;
+            color: #fff;
+            padding: 13px 18px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        @media (min-width: 640px) {
+            .btn-upload-submit {
+                width: auto;
+                display: inline-block;
+                margin: 0 24px 24px;
+                padding: 11px 18px;
+            }
+        }
+
+        /* ── File List ───────────────────────────────────────────────── */
+        .file-list-wrapper {
+            border-top: 1px solid #e5e7eb;
+            padding: 16px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        @media (min-width: 640px) {
+            .file-list-wrapper {
+                padding: 24px;
+                max-height: 350px;
+            }
+        }
+
+        .file-list-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: #0f172a;
+        }
+
+        /* ── File Item ───────────────────────────────────────────────── */
+        .file-item {
+            display: flex;
+            flex-direction: column;   /* susun vertikal */
+            gap: 10px;
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        @media (min-width: 640px) {
+            .file-item {
+                align-items: center;
+                flex-wrap: nowrap;
+                padding: 14px 16px;
+                margin-bottom: 12px;
+            }
+        }
+
+        .file-left {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-icon { font-size: 20px; flex-shrink: 0; }
+
+        .file-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+            word-break: break-all;   /* nama file panjang turun ke baris baru */
+            line-height: 1.4;
+        }
+
+        @media (min-width: 640px) {
+            .file-name {
+                font-size: 14px;
+                max-width: 260px;
+            }
+        }
+
+        .file-date {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 6px;
+            padding-left: 30px;      /* sejajar dengan nama (offset icon) */
+            flex-wrap: wrap;
+        }
+
+        .btn-file-action {
+            text-decoration: none;
+            padding: 7px 11px;
+            border-radius: 8px;
+            background: #ecfeff;
+            color: #0f766e;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            /* area sentuh minimal 44px tinggi di mobile */
+            min-height: 34px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-download {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .btn-danger {
+            background: #fff1f2;
+            color: #be123c;
+        }
+
+        .empty-file {
+            text-align: center;
+            padding: 30px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        @keyframes huiSpin {
+                from { transform: rotate(0deg); }
+                to   { transform: rotate(360deg); }
+            }
     </style>
 
     {{-- Back --}}
@@ -412,6 +744,12 @@
         <div class="alert alert-danger">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             {{ session('error') }}
+        </div>
+    @endif
+    {{-- Flash message --}}
+    @if (session('success_hasil_uji'))
+        <div class="alert-success" style="margin:12px 0;padding:10px 14px;background:#d1fae5;color:#065f46;border-radius:6px;font-size:13px;">
+            {{ session('success_hasil_uji') }}
         </div>
     @endif
 
@@ -697,6 +1035,12 @@
                         </svg>
                         Laporan
                     </button>
+                    <button type="button" class="doc-tab" onclick="switchDocTab('hasil_uji')">
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M15 11l-3 3-1.5-1.5"/>
+                        </svg>
+                        Hasil Uji
+                    </button>
                 </div>
 
                 {{-- Panel: PKS --}}
@@ -901,6 +1245,40 @@
                         @endif
                     </div>
                 </div>
+                
+                {{-- Panel: Hasil Uji --}}
+                <div id="docPanelHasilUji" class="doc-panel" style="display:none;">
+                    <div class="doc-panel-inner">
+                        
+                        <div class="doc-icon-wrap doc-icon-teal">
+                            <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#0d9488" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
+                            </svg>
+                        </div>
+
+                        <div class="doc-panel-text">
+                            <div class="doc-panel-title">Folder Hasil Uji</div>
+                            <div class="doc-panel-desc">
+                                Kelola file hasil uji untuk order
+                                <strong>{{ $order->order_code }}</strong>
+                            </div>
+                        </div>
+
+                        <button type="button"
+                                class="btn-open-pdf"
+                                onclick="openHasilUjiModal()">
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
+                            </svg>
+                            Buka Folder
+                        </button>
+
+                    </div>
+                </div>
+                
             </div>
 
             {{-- ── Notes & Terms ── --}}
@@ -1095,6 +1473,143 @@
             </div>{{-- end .sidebar-grid --}}
         </div>{{-- end .detail-sidebar --}}
 
+        {{-- MODAL --}}
+        <div id="hasilUjiModal" class="custom-modal">
+            <div class="custom-modal-content">
+
+                <div class="modal-drag-handle">
+                    <span></span>
+                </div>
+
+                {{-- Header --}}
+                <div class="modal-header">
+                    <div>
+                        <div class="modal-title">Folder Hasil Uji</div>
+                        <div class="modal-subtitle">{{ $order->order_code }}</div>
+                    </div>
+                    <button type="button" class="modal-close" onclick="closeHasilUjiModal()">
+                        &times;
+                    </button>
+                </div>
+
+                {{-- Upload --}}
+                <form action="{{ route('admin.orders.hasil-uji.store', $order) }}"
+                    method="POST"
+                    enctype="multipart/form-data">
+                    @csrf
+
+                    <div class="upload-box">
+                        <label class="upload-label">
+
+                            <input type="file"
+                                name="hasil_uji_files[]"
+                                multiple
+                                hidden
+                                onchange="updateFileNames(this)">
+
+                            <div class="upload-inner">
+                                <svg width="34" height="34" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                                <div class="upload-title">Upload File Hasil Uji</div>
+                                <div class="upload-desc">Bisa upload banyak file sekaligus</div>
+                                <div id="selectedFiles" class="selected-files"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    @error('hasil_uji_files.*')
+                        <div style="color:#dc2626;font-size:12px;margin-top:6px;">{{ $message }}</div>
+                    @enderror
+
+                    <button type="submit" class="btn-upload-submit">
+                        Upload File
+                    </button>
+
+                </form>
+
+                {{-- File List --}}
+                <div class="file-list-wrapper">
+
+                    <div class="file-list-title">File Tersimpan</div>
+
+                    @forelse ($order->hasilUjiFiles as $file)
+
+                        <div class="file-item">
+
+                            <div class="file-left">
+                                <div class="file-icon">📄</div>
+
+                                <div class="file-info">   {{-- ← wrapper baru --}}
+                                    <div class="file-name">
+                                        {{ $file->file_name ?? basename($file->hasil_uji_file) }}
+                                    </div>
+                                    <div class="file-date">
+                                        {{ $file->created_at->format('d M Y H:i') }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="file-actions">
+                                <a href="{{ route('admin.orders.hasil-uji.show', [$order, $file]) }}"
+                                target="_blank" class="btn-file-action">Lihat</a>
+
+                                <a href="{{ route('admin.orders.hasil-uji.download', [$order, $file]) }}"
+                                class="btn-file-action btn-download">Download</a>
+
+                                <form action="{{ route('admin.orders.hasil-uji.destroy', [$order, $file]) }}"
+                                    method="POST"
+                                    onsubmit="return confirm('Hapus file ini?')"
+                                    style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-file-action btn-danger">Hapus</button>
+                                </form>
+                            </div>
+
+                        </div>
+
+                    @empty
+                        <div class="empty-file">Belum ada file hasil uji.</div>
+                    @endforelse
+
+                </div>
+
+            </div>
+        </div>
+
+        {{-- Loading Overlay --}}
+        <div id="hasilUjiLoadingOverlay" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(15,23,42,0.55); backdrop-filter:blur(3px); align-items:center; justify-content:center; flex-direction:column; gap:16px;">
+            <div style="background:#fff; border-radius:16px; padding:32px 40px; display:flex; flex-direction:column; align-items:center; gap:16px; box-shadow:0 25px 60px rgba(0,0,0,0.25);">
+
+                {{-- Spinner --}}
+                <div style="position:relative; width:52px; height:52px;">
+                    <svg style="animation: huiSpin 1s linear infinite; width:52px; height:52px;" viewBox="0 0 52 52" fill="none">
+                        <circle cx="26" cy="26" r="22" stroke="#e2e8f0" stroke-width="4"/>
+                        <path d="M26 4a22 22 0 0 1 22 22" stroke="#0d9488" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                </div>
+
+                {{-- Text --}}
+                <div style="text-align:center;">
+                    <div id="huiLoadingTitle" style="font-size:15px; font-weight:600; color:#0f172a; margin-bottom:4px;">
+                        Mengupload file...
+                    </div>
+                    <div id="huiLoadingDesc" style="font-size:13px; color:#64748b;">
+                        Mohon tunggu, jangan tutup halaman ini
+                    </div>
+                </div>
+
+                {{-- Progress bar --}}
+                <div style="width:220px; height:4px; background:#e2e8f0; border-radius:99px; overflow:hidden;">
+                    <div id="huiProgressBar" style="height:100%; width:0%; background:#0d9488; border-radius:99px; transition: width 0.3s ease;"></div>
+                </div>
+
+            </div>
+        </div>
+
     </div>{{-- end .detail-layout --}}
 
 
@@ -1152,6 +1667,97 @@
         }
     </script>
 
+    {{-- modal hasil uji --}}
+    <script>
+        function openHasilUjiModal() {
+            document.getElementById('hasilUjiModal').style.display = 'flex';
+        }
+
+        function closeHasilUjiModal() {
+            document.getElementById('hasilUjiModal').style.display = 'none';
+        }
+
+        function updateFileNames(input) {
+
+            let files = Array.from(input.files);
+
+            let html = files.map(file =>
+                `<div>${file.name}</div>`
+            ).join('');
+
+            document.getElementById('selectedFiles').innerHTML = html;
+        }
+
+        window.onclick = function(e) {
+
+            let modal = document.getElementById('hasilUjiModal');
+
+            if (e.target === modal) {
+                closeHasilUjiModal();
+            }
+        }
+    </script>
+
+    <script>
+        // ── Intercept form submit → tampilkan loading ──────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const form    = document.querySelector('#hasilUjiModal form[action*="hasil-uji"]');
+            const overlay = document.getElementById('hasilUjiLoadingOverlay');
+            const bar     = document.getElementById('huiProgressBar');
+            const title   = document.getElementById('huiLoadingTitle');
+            const desc    = document.getElementById('huiLoadingDesc');
+
+            if (!form || !overlay) return;
+
+            form.addEventListener('submit', function (e) {
+
+                const files = form.querySelector('input[type="file"]').files;
+
+                // Jangan tampilkan jika tidak ada file dipilih
+                if (!files || files.length === 0) return;
+
+                // Tampilkan overlay
+                overlay.style.display = 'flex';
+
+                // Update label jumlah file
+                const jumlah = files.length;
+                title.textContent = `Mengupload ${jumlah} file...`;
+
+                // Animasi progress bar palsu (indeterminate feel)
+                let progress  = 0;
+                let speed     = 1.2;
+                let slowedAt  = 75;   // melambat di 75% supaya terasa "menunggu server"
+
+                const interval = setInterval(function () {
+
+                    if (progress >= 95) {
+                        clearInterval(interval);
+                        return;
+                    }
+
+                    // Setelah 75% jauh lebih lambat
+                    speed = progress >= slowedAt ? 0.15 : 1.2;
+
+                    progress = Math.min(progress + speed, 95);
+                    bar.style.width = progress + '%';
+
+                    // Ubah teks di tengah proses
+                    if (progress > 60 && progress < 61) {
+                        desc.textContent = 'Menyimpan ke server...';
+                    }
+
+                }, 60);
+
+                // Saat response balik (navigate / reload), isi penuh bar
+                window.addEventListener('pagehide', function () {
+                    bar.style.width = '100%';
+                    clearInterval(interval);
+                });
+            });
+        });
+    </script>
+
     <script>
         function copyLink() {
             const link = document.getElementById('guestLinkBox').textContent.trim();
@@ -1182,6 +1788,7 @@
                 kesanggupan: 'docPanelKesanggupan',
                 bap: 'docPanelBap',
                 laporan: 'docPanelLaporan',
+                hasil_uji: 'docPanelHasilUji',
             };
 
             Object.values(panels).forEach(id => {

@@ -945,6 +945,123 @@
     </div>
     @endif
 
+    {{-- Hasil Uji --}}
+    @if($order->hasilUjiFiles->count())
+    <div class="timeline-card" style="margin-top:20px;">
+        <div class="timeline-card-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
+            </svg>
+            <span class="timeline-card-title">Hasil Uji</span>
+        </div>
+
+        <div class="timeline-card-body" style="padding:16px 22px;">
+
+            {{-- Panel Folder --}}
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border:1.5px solid var(--border);border-radius:12px;background:#fafafa;">
+
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:36px;height:36px;border-radius:8px;background:#0d948818;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div style="font-size:13px;font-weight:600;color:var(--dark);">
+                            Folder Hasil Uji
+                        </div>
+                        <div style="font-size:11px;color:#94a3b8;margin-top:2px;">
+                            {{ $order->hasilUjiFiles->count() }} file tersedia
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button"
+                        onclick="openGuestHasilUjiModal()"
+                        style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#0d9488;color:white;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
+                    </svg>
+                    Buka Folder
+                </button>
+
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- MODAL GUEST HASIL UJI --}}
+    <div id="guestHasilUjiModal" style="display:none;position:fixed;inset:0;z-index:1050;background:rgba(15,23,42,0.5);align-items:flex-end;justify-content:center;">
+        <div style="background:#fff;width:100%;max-width:580px;max-height:92dvh;overflow-y:auto;border-radius:20px 20px 0 0;display:flex;flex-direction:column;">
+
+            {{-- Drag handle --}}
+            <div style="display:flex;justify-content:center;padding:10px 0 2px;">
+                <span style="width:36px;height:4px;background:#e2e8f0;border-radius:99px;display:block;"></span>
+            </div>
+
+            {{-- Header --}}
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #e5e7eb;position:sticky;top:0;background:#fff;z-index:1;">
+                <div>
+                    <div style="font-size:16px;font-weight:700;color:#0f172a;">Folder Hasil Uji</div>
+                    <div style="font-size:12px;color:#64748b;margin-top:3px;">{{ $order->order_code }}</div>
+                </div>
+                <button type="button"
+                        onclick="closeGuestHasilUjiModal()"
+                        style="border:none;background:none;font-size:28px;cursor:pointer;color:#64748b;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;">
+                    &times;
+                </button>
+            </div>
+
+            {{-- File List --}}
+            <div style="padding:20px;display:flex;flex-direction:column;gap:10px;">
+
+                <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:4px;">
+                    File Tersimpan
+                </div>
+
+                @foreach($order->hasilUjiFiles as $file)
+                <div style="display:flex;flex-direction:column;gap:10px;padding:12px 14px;border:1px solid #e2e8f0;border-radius:12px;">
+
+                    {{-- Info --}}
+                    <div style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="font-size:20px;flex-shrink:0;">📄</span>
+                        <div>
+                            <div style="font-size:13px;font-weight:600;color:#0f172a;word-break:break-all;line-height:1.4;">
+                                {{ $file->file_name ?? basename($file->hasil_uji_file) }}
+                            </div>
+                            <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                                {{ $file->created_at->format('d M Y H:i') }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Tombol --}}
+                    <div style="padding-left:30px;">
+                        <a href="{{ route('orders.guest.hasil-uji.download', [
+                                        'slug'  => $order->company->slug,
+                                        'token' => $token,
+                                        'file'  => $file->id,
+                                    ]) }}"
+                        style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#0d9488;color:white;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Download
+                        </a>
+                    </div>
+
+                </div>
+                @endforeach
+
+            </div>
+        </div>
+    </div>
+
+
     {{-- CTA Hubungi --}}
     <div style="text-align:center;margin-top:8px;padding:24px;background:white;border:1.5px solid var(--border);border-radius:16px;">
         <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">Ada pertanyaan mengenai order Anda? Tim kami siap membantu.</p>
@@ -967,4 +1084,22 @@
 </div>
 
 </body>
+<script>
+    function openGuestHasilUjiModal() {
+        const modal = document.getElementById('guestHasilUjiModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeGuestHasilUjiModal() {
+        const modal = document.getElementById('guestHasilUjiModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    // Tutup modal kalau klik backdrop
+    document.getElementById('guestHasilUjiModal').addEventListener('click', function(e) {
+        if (e.target === this) closeGuestHasilUjiModal();
+    });
+</script>
 </html>

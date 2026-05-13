@@ -193,4 +193,29 @@ class Order extends Model
         return $this->status === self::STATUS_DONE;
     }
 
+    public function suratpks(): HasOne
+    {
+        return $this->hasOne(SuratPks::class);
+    }
+
+    public function suratmou(): HasOne
+    {
+        return $this->hasOne(SuratMou::class);
+    }
+
+    public function suratkesanggupan(): HasOne
+    {
+        return $this->hasOne(SuratKesanggupan::class);
+    }
+
+    public function suratbap(): HasOne
+    {
+        return $this->hasOne(SuratBap::class);
+    }
+
+    public function hasilUjiFiles()
+    {
+        return $this->hasMany(OrderFile::class);
+    }
+
 }

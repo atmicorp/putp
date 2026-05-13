@@ -1931,7 +1931,6 @@
                         <div class="pkg-list-info">
                             <div class="pkg-list-num">Paket ${String(i + 1).padStart(2, '0')}</div>
                             <div class="pkg-list-name">${pkg.nama}</div>
-                            <div class="pkg-list-price">${rupiah(pkg.harga)}</div>
                         </div>
                         ${inCart
                             ? `<svg class="pkg-list-incart-icon" width="18" height="18"

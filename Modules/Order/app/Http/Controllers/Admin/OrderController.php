@@ -66,8 +66,7 @@ class OrderController extends Controller
         ])->values();
 
         // Ambil semua user dengan role pic
-        $pics = User::where('role', User::ROLE_PIC)
-            ->orderBy('name')
+        $pics = User::orderBy('name')
             ->get(['id', 'name', 'email']);
 
         return view('order::admin.orders.create', compact('categories', 'companies', 'companiesData', 'pics'));
@@ -148,7 +147,7 @@ class OrderController extends Controller
             'customer_slug'       => Str::slug($contact->name) . '-' . Str::random(6),
             'customer_email'      => $contact->email ?? '',
             'created_by'          => auth()->id(),
-            'status'              => $data['filled_by'] === 'admin' ? Order::STATUS_SUBMIT : Order::STATUS_DRAFT,
+            'status'              => $data['filled_by'] === 'admin' ? Order::STATUS_APPROVED : Order::STATUS_DRAFT,
             'type'                => $data['filled_by'] === 'admin' ? Order::TYPE_INTERNAL : Order::TYPE_EXTERNAL,
             'tujuan_pengujian'    => $data['tujuan_pengujian']    ?? null,
             'waktu_diharapkan'    => $data['waktu_diharapkan']    ?? null,
@@ -186,7 +185,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load(['offer.details.package', 'creator', 'company']);
+        $order->load(['offer.details.package', 'creator', 'company','hasilUjiFiles']);
 
         $guestLink = route('orders.guest.show', [
             'slug'  => $order->company->slug,
@@ -379,7 +378,7 @@ class OrderController extends Controller
         if ($request->hasFile('offer_file')) {
 
             $path = $request->file('offer_file')
-                ->storeAs($dir, 'penawaran.pdf', 'public');
+                ->storeAs($dir, 'penawaran.pdf');
 
             $offer->update([
                 'offer_file_path' => $path
@@ -393,7 +392,7 @@ class OrderController extends Controller
         if ($request->hasFile('invoice_file')) {
 
             $path = $request->file('invoice_file')
-                ->storeAs($dir, 'invoice.pdf', 'public');
+                ->storeAs($dir, 'invoice.pdf');
 
             $offer->update([
                 'invoice_file_path' => $path
@@ -456,27 +455,150 @@ class OrderController extends Controller
             return back()->with('error', 'Email customer masih kosong. Lengkapi email terlebih dahulu sebelum mengirim penawaran.');
         }
 
-        if (!$order->offer || $order->offer->details->isEmpty()) {
+        if (! $order->offer || $order->offer->details->isEmpty()) {
             return back()->with('error', 'Penawaran belum ada / item masih kosong.');
         }
 
         $mail = new OfferLinkMail($order);
 
-        // Attach PDF files if available (public disk)
-        if (filled($order->offer->offer_file_path) && Storage::disk('public')->exists($order->offer->offer_file_path)) {
-            $mail->attach(Storage::disk('public')->path($order->offer->offer_file_path));
-        }
-        if (filled($order->offer->invoice_file_path) && Storage::disk('public')->exists($order->offer->invoice_file_path)) {
-            $mail->attach(Storage::disk('public')->path($order->offer->invoice_file_path));
+        // =========================
+        // ATTACH OFFER PDF
+        // =========================
+        if (
+            filled($order->offer->offer_file_path) &&
+            Storage::exists($order->offer->offer_file_path)
+        ) {
+
+            $mail->attach(
+                Storage::path($order->offer->offer_file_path)
+            );
         }
 
+        // =========================
+        // ATTACH INVOICE PDF
+        // =========================
+        if (
+            filled($order->offer->invoice_file_path) &&
+            Storage::exists($order->offer->invoice_file_path)
+        ) {
+
+            $mail->attach(
+                Storage::path($order->offer->invoice_file_path)
+            );
+        }
+
+        // =========================
+        // SEND MAIL
+        // =========================
         Mail::to($order->contact->email)->send($mail);
 
+        // =========================
+        // UPDATE STATUS
+        // =========================
         $order->update([
             'status'  => Order::STATUS_OFFERED,
             'sent_at' => now(),
         ]);
 
         return back()->with('success', 'Email penawaran berhasil dikirim ke customer.');
+    }
+
+    // =====================================================================
+    // HASIL UJI FILES
+    // =====================================================================
+
+    public function storeHasilUji(Request $request, Order $order)
+    {
+        $request->validate([
+            'hasil_uji_files'   => ['required', 'array', 'min:1'],
+            'hasil_uji_files.*' => [
+                'required',
+                'file',
+                'max:20480',
+                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,
+                        jpg,jpeg,png,gif,webp,bmp,tiff,
+                        mp4,mov,avi,mkv,
+                        mp3,wav,
+                        zip,rar,7z,
+                        txt,csv,json,xml',
+            ],
+        ]);
+
+        foreach ($request->file('hasil_uji_files') as $file) {
+
+            // Double-check MIME type dari konten file, bukan hanya ekstensi
+            $realMime = $file->getMimeType(); // dibaca dari magic bytes file
+
+            $allowedMimes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.ms-powerpoint',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff',
+                'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska',
+                'audio/mpeg', 'audio/wav',
+                'application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed',
+                'text/plain', 'text/csv',
+                'application/json', 'application/xml', 'text/xml',
+                'application/vnd.oasis.opendocument.text',
+                'application/vnd.oasis.opendocument.spreadsheet',
+                'application/vnd.oasis.opendocument.presentation',
+            ];
+
+            if (!in_array($realMime, $allowedMimes)) {
+                return back()
+                    ->withErrors(['hasil_uji_files' => "File \"{$file->getClientOriginalName()}\" tidak diizinkan (tipe: {$realMime})."])
+                    ->withInput();
+            }
+
+            $path = $file->storeAs(
+                'hasil-uji/' . $order->id,
+                $file->getClientOriginalName(),
+                'private'
+            );
+
+            \App\Models\OrderFile::create([
+                'order_id'       => $order->id,
+                'hasil_uji_file' => $path,
+                'file_name'      => $file->getClientOriginalName(),
+            ]);
+        }
+
+        return back()->with('success_hasil_uji', count($request->file('hasil_uji_files')) . ' file berhasil diupload.');
+    }
+
+    public function showHasilUji(Order $order, \App\Models\OrderFile $file)
+    {
+        abort_if($file->order_id !== $order->id, 403);
+        abort_unless(Storage::disk('private')->exists($file->hasil_uji_file), 404);
+
+        return Storage::disk('private')->response(
+            $file->hasil_uji_file,
+            $file->file_name
+        );
+    }
+
+    public function downloadHasilUji(Order $order, \App\Models\OrderFile $file)
+    {
+        abort_if($file->order_id !== $order->id, 403);
+        abort_unless(Storage::disk('private')->exists($file->hasil_uji_file), 404);
+
+        return Storage::disk('private')->download(
+            $file->hasil_uji_file,
+            $file->file_name
+        );
+    }
+
+    public function destroyHasilUji(Order $order, \App\Models\OrderFile $file)
+    {
+        abort_if($file->order_id !== $order->id, 403);
+
+        Storage::disk('private')->delete($file->hasil_uji_file);
+        $file->delete();
+
+        return back()->with('success_hasil_uji', 'File berhasil dihapus.');
     }
 }

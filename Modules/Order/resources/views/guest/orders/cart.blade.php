@@ -709,6 +709,23 @@
             font-weight: 600 !important;
             padding: 11px 20px !important;
         }
+
+        .pkg-row-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+        .qty-ctrl { display: flex; align-items: center; gap: 4px; }
+
+        .qty-btn {
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            border: 0.5px solid var(--color-border-secondary);
+            background: var(--color-background-secondary);
+            cursor: pointer; font-size: 16px; font-weight: 500;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--color-text-primary);
+        }
+        .qty-btn:hover { background: var(--color-background-tertiary); }
+
+        .qty-num { min-width: 24px; text-align: center; font-size: 14px; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -1112,30 +1129,51 @@
         });
 
         if (filtered.length === 0) {
-            list.innerHTML = `<div class="empty-state">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                <div>Tidak ada layanan ditemukan.</div>
-            </div>`;
+            list.innerHTML = `<div class="empty-state">...</div>`;
             return;
         }
 
         list.innerHTML = filtered.map(p => {
-            const inCart = isInCart(p.id);
-            const showPrice = false;
+            const cartItem = cart.find(c => c.package_id === p.id);
+            const inCart = !!cartItem;
+            const qty = cartItem ? cartItem.qty : 1;
 
             return `<div class="pkg-row ${inCart ? 'in-cart' : ''}" id="pkgrow-${p.id}">
                 <div class="pkg-row-left">
                     <div class="pkg-row-name">${p.name}</div>
                     <div class="pkg-row-cat">${p.description ? p.description.substring(0,60) + (p.description.length > 60 ? '…' : '') : '—'}</div>
                 </div>
-                ${showPrice ? `<div class="pkg-row-price">${fmtPrice(p.base_price)}</div>` : ''}
-                <button class="add-btn ${inCart ? 'remove' : ''}"
-                        onclick="toggleCart(${p.id})"
-                        title="${inCart ? 'Hapus dari keranjang' : 'Tambah ke keranjang'}">
-                    ${inCart ? '✓' : '+'}
-                </button>
+                <div class="pkg-row-right" id="pkgctrl-${p.id}">
+                    ${inCart ? `
+                        <div class="qty-ctrl">
+                            <button class="qty-btn" onclick="changeQty(${p.id}, -1)">−</button>
+                            <span class="qty-num" id="pkgqty-${p.id}">${qty}</span>
+                            <button class="qty-btn" onclick="changeQty(${p.id}, 1)">+</button>
+                        </div>
+                        <button class="add-btn remove" onclick="toggleCart(${p.id})" title="Hapus dari keranjang">✓</button>
+                    ` : `
+                        <button class="add-btn" onclick="toggleCart(${p.id})" title="Tambah ke keranjang">+</button>
+                    `}
+                </div>
             </div>`;
         }).join('');
+    }
+
+    function changeQty(pkgId, delta) {
+        const item = cart.find(c => c.package_id === pkgId);
+        if (!item) return;
+
+        const newQty = item.qty + delta;
+        if (newQty < 1) return; // minimal 1, bisa diganti removeFromCart jika mau
+
+        item.qty = newQty;
+        saveCart();
+
+        // Update tampilan di package list tanpa re-render semua
+        const qtyEl = document.getElementById('pkgqty-' + pkgId);
+        if (qtyEl) qtyEl.textContent = newQty;
+
+        renderCart(); // update cart sidebar
     }
 
     // ── CART ACTIONS
@@ -1222,6 +1260,11 @@
                 <div class="ci-num">${String(i + 1).padStart(2, '0')}</div>
                 <div class="ci-info">
                     <div class="ci-name">${c.name}</div>
+                </div>
+                <div class="qty-ctrl">
+                    <button class="qty-btn" onclick="changeQty(${c.package_id}, -1)">−</button>
+                    <span class="qty-num">${c.qty}</span>
+                    <button class="qty-btn" onclick="changeQty(${c.package_id}, 1)">+</button>
                 </div>
                 <button class="ci-remove" onclick="removeFromCart(${c.package_id})" title="Hapus">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>

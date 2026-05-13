@@ -4,6 +4,7 @@ namespace Modules\Order\Http\Controllers\Guest;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Package;
+use App\Models\SuratPks;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -165,6 +166,19 @@ class OrderController extends Controller
             'keterangan_tambahan' => $data['keterangan_tambahan'] ?? null,
         ]);
 
+        $bulan = now()->month;
+        $tahun = now()->year;
+
+        $order->suratpks()->firstOrCreate(
+            ['order_id' => $order->id],
+            [
+                'bulan' => $bulan,
+                'tahun' => $tahun,
+                'type'  => 'PKS',
+                'nomor' => SuratPks::generateNomor($bulan, $tahun),
+            ]
+        );
+
         return response()->json([
             'success'    => true,
             'order_code' => $order->order_code,
@@ -176,7 +190,7 @@ class OrderController extends Controller
     public function show(string $slug, string $token)
     {
         $order = Order::where('access_token', $token)
-            ->with(['offer.details.package', 'contact', 'company'])
+            ->with(['offer.details.package', 'contact', 'company','suratpks','suratmou','suratkesanggupan','suratbap'])
             ->firstOrFail();
 
         if ($slug !== $order->company->slug) {
@@ -269,7 +283,7 @@ class OrderController extends Controller
         ]);
 
         $order = Order::where('access_token', $data['token'])
-            ->with(['offer.details.package.category', 'company', 'contact', 'creator'])
+            ->with(['offer.details.package.category', 'company', 'contact', 'creator','hasilUjiFiles'])
             ->first();
 
         if (! $order) {
@@ -289,7 +303,7 @@ class OrderController extends Controller
     private function resolveOrder(string $slug, string $token): Order
     {
         $order = Order::where('access_token', $token)
-            ->with(['company', 'contact', 'creator', 'offer.details.package.category'])
+            ->with(['company', 'contact', 'creator', 'offer.details.package.category', 'suratpks','suratmou','suratkesanggupan','suratbap'])
             ->firstOrFail();
 
         if ($slug !== $order->company->slug) {
@@ -315,11 +329,14 @@ class OrderController extends Controller
 
     public function PermohonanKerjasama(string $slug, string $token)
     {
+        
         $order         = $this->resolveOrder($slug, $token);
         $categoryLabel = $this->categoryLabel($order);
         $totalQty      = $order->offer->details->sum('qty');
+        $suratPks      = $order->suratpks; 
+        
 
-        return Pdf::loadView('order::orders.documents.permohonan_kerjasama', compact('order', 'categoryLabel', 'totalQty'))
+        return Pdf::loadView('order::orders.documents.permohonan_kerjasama', compact('order', 'categoryLabel', 'totalQty', 'suratPks'))
             ->setPaper('a4', 'portrait')
             ->stream("PermohonanKerjasama-{$order->order_code}.pdf");
     }
@@ -372,5 +389,26 @@ class OrderController extends Controller
         return Pdf::loadView('order::orders.documents.laporan_kegiatan_kerjasama', compact('order', 'categoryLabel', 'totalQty','manager'))
             ->setPaper('a4', 'portrait')
             ->stream("LaporanKegiatanKerjasama-{$order->order_code}.pdf");
+    }
+
+    public function downloadHasilUji(string $slug, string $token, int $file)
+    {
+        $order = Order::where('access_token', $token)
+            ->whereHas('company', fn($q) => $q->where('slug', $slug))
+            ->firstOrFail();
+
+        $fileModel = \App\Models\OrderFile::findOrFail($file);
+
+        abort_if($fileModel->order_id !== $order->id, 403);
+
+        abort_unless(
+            \Illuminate\Support\Facades\Storage::disk('private')->exists($fileModel->hasil_uji_file),
+            404
+        );
+
+        return \Illuminate\Support\Facades\Storage::disk('private')->download(
+            $fileModel->hasil_uji_file,
+            $fileModel->file_name
+        );
     }
 }
